@@ -1,4 +1,8 @@
 *.aux
 *.log
 *.out
-.auctex-auto/
+*.nav
+*.snm
+*.toc
+*.nav
+auctex-auto/
