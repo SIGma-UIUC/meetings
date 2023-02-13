@@ -1,0 +1,97 @@
+\documentclass[letterpaper]{article}
+
+\usepackage{style}  % If you feel like procrastinating, mess with this file
+\usepackage{algo}   % Thank you Jeff, very cool!
+\usepackage{quiver} % https://q.uiver.app/
+
+\addbibresource{refs.bib}
+
+% Required reading
+% https://jmlr.csail.mit.edu/reviewing-papers/knuth_mathematical_writing.pdf
+% https://faculty.math.illinois.edu/~west/grammar.html
+
+% % % % % % % % % %
+%     Cursor      %
+%     Parking     %
+%     Lot         %
+% % % % % % % % % %
+
+\title{Langford Pairings Exercise Answers}
+\author{Anakin Dey}
+
+\begin{document}
+\maketitle
+
+\section*{Langford Pairing for $n = 4$}
+
+$\bqty{4, 1, 3, 1, 2, 4, 3, 2}$ or $\bqty{2, 3, 4, 2, 1, 3, 1, 4}$
+
+\section*{Non-existence of Langford Pairings for $n = 1$ or $n = 2$}
+
+If $n = 1$, then we have no other numbers to put between the two $1$'s and so no pairing can exist.
+If $n = 2$, then the two $2$'s must be at the ends of the list: $\bqty{2, \_, \_, 2}$.
+
+\section*{Program for Generating a Single Langford Pairing}
+
+See the function \texttt{generate\_single\_pairing} on \href{}{GitHub}
+
+\section*{Exercise 6 of \cite[Chapter~7]{TAOCP4A}}
+
+\underline{Note to the reader:} I recommend you implement these formulas using Sympy (ask in the Discord for how to use it) and compute the polynomials for small $n$ to gain intuition.
+These formulas are not intuitive, especially how everything cancels out.
+This is common in combinatorics when trying to deal with polynomials to count objects.
+
+Let $L_{n}$ be the number of Langford pairings for $n$, not counting reversals as distinct pairings, and let
+\[
+    f(x_{1}, \ldots, x_{2n}) = \prod_{k = 1}^{n} \pqty{x_{k} x_{n+k} \sum_{j = 1}^{2n - k - 1} x_{j} x_{j+k+1}}.
+\]
+We want to show that
+\[
+    \sum_{x_{1}, \ldots, x_{2n} \in \set{-1, 1}} f(x_{1}, \ldots, x_{2n}) = 2^{2n + 1} L_{n}.
+\]
+Think of each $x_{i}$ as a location variable for the resulting list. For $n = 3$, $f(x_{1}, \ldots, x_{6})$ is equal to
+\[
+    x_{1} x_{4} \pqty{x_{1} x_{3} + x_{2} x_{4} + x_{3} x_{5} x_{4} x_{6}} \cdot x_{2} x_{5} \pqty{x_{1} x_{4} + x_{2} x_{5} + x_{3} x_{6}} \cdot x_{3} x_{6} \pqty{x_{1} x_{5} + x_{2} x_{6}}
+\]
+So each of the terms in the parentheses correspond to possible positions for various numbers.
+For example $\pqty{x_{1} x_{3} + x_{2} x_{4} + x_{3} x_{5} x_{4} x_{6}}$ lists out the valid positions for the two $1$'s.
+Expanding this sum out yields terms such that $x_{2}^{2} x_{4}^{2} x_{3}^{2} x_{6}^{2} x_{1}^{2} x_{5}^{2}$ corresponding to the pairing $\bqty{3, 1, 2, 1, 3, 2}$.
+In general, terms containing all of the $x_{i}$'s as powers of two will correspond to Langford pairings.
+Since all the $x_{i}$'s in these terms have even degree, plugging in $1$ or $-1$ will always yield $1$ at the end.
+Every other term not corresponding to a Langford pairing will have at least one term of degree $1$.
+Iterating over every possible $x_{1}, \ldots, x_{2n}$ will lead to the cancelling of all these other terms.
+Thus, all we are left with is the sum of $1$'s, each $1$ corresponding to a valid pairing.
+
+There are $2^{2n}$ possible values for the tuple $\pqty{x_{1}, \ldots, x_{2n}}$ where each $x_{i}$ takes on one of two values, leading to an overcount by a factor of $2^{2n}$.
+Then we also consider reversals of a Langford pairing to be the same, leading to an overcount of a factor of $2$.
+This explains the $2^{2n + 1}$ coefficient on $L_{n}$.
+
+
+\section*{Exercise 15 of \cite[Chapter~7.2.2.1]{TAOCP4B}}
+
+There are two ways we can modify our formulation of Langford pairing as an exact cover problem to exclude finding both a pairing and it's reverse, leading to a significant speedup.
+Recall that each option takes the form $i\colon \bqty{l_{j}, l_{k}}$, $k = j + i + 1$, meaning $i$ appears in slot $j$ and $k$ in the list.
+Our two options study where the smallest or one of the largest elements must appear in the resulting pairing.
+
+\textbf{Option 1:}
+Let $\bqty{n \text{ even}}$ be a quantity equal to $1$ if $n$ is even and $0$ otherwise.
+We can exclude an option $i\colon \bqty{l_{j}, l_{k}}$ if both $i = n - \bqty{n \text{ even}}$ and $j > \frac{n}{2}$.
+This corresponds to pairings where the first time $i$ appears is after the first quarter of the list and where the second time $i$ appears in in the last quarter of the list.
+In the reversal of these pairings, $i$ would appear in the first quarter, and thus this excludes reversals.
+
+This excludes $\floor{\frac{n}{2}}$ options.
+
+\textbf{Option 2:}
+We could more simply omit pairings where $i = 1$ and $j \geq n$.
+Thus, the second $1$ must appear strictly in the second half.
+Thus in the reversal, the first $i$ must appear at a slot $j < n$.
+This also omits the reversals.
+
+This excludes $n - 1$ options.
+
+\section*{Program for Generating all Langford Pairings}
+
+See the function \texttt{find\_pairings} on \href{}{GitHub}
+
+\printbibliography
+\end{document}

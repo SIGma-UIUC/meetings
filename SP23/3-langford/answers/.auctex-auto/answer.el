@@ -1,5 +1,5 @@
 (TeX-add-style-hook
- "answers"
+ "answer"
  (lambda ()
    (TeX-add-to-alist 'LaTeX-provided-class-options
                      '(("article" "letterpaper")))
