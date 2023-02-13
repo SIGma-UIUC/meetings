@@ -35,7 +35,7 @@ If $n = 2$, then the two $2$'s must be at the ends of the list: $\bqty{2, \_, \_
 
 See the function \texttt{generate\_single\_pairing} on \href{https://github.com/SIGma-UIUC/meetings/blob/main/SP23/3-langford/langford_pairing.py}{GitHub}
 
-\section*{Exercise 6 of \cite[Chapter~7]{TAOCP4A}}
+\section*{Exercise 6a of \cite[Chapter~7]{TAOCP4A}}
 
 \underline{Note to the reader:} I recommend you implement these formulas using Sympy (ask in the Discord for how to use it) and compute the polynomials for small $n$ to gain intuition.
 These formulas are not intuitive, especially how everything cancels out.
@@ -65,6 +65,9 @@ Thus, all we are left with is the sum of $1$'s, each $1$ corresponding to a vali
 There are $2^{2n}$ possible values for the tuple $\pqty{x_{1}, \ldots, x_{2n}}$ where each $x_{i}$ takes on one of two values, leading to an overcount by a factor of $2^{2n}$.
 Then we also consider reversals of a Langford pairing to be the same, leading to an overcount of a factor of $2$.
 This explains the $2^{2n + 1}$ coefficient on $L_{n}$.
+
+For those interested, part (b) of the question utilizes the Gray Code from \href{https://www.cstheory.org/meetings/sp23/binary/slides.pdf}{last week's meeting} to speed up the computation and part (c) uses some clever math to further speed it up.
+Knuth has some good writing on this in his solutions in \cite{TAOCP4A}.
 
 \clearpage
 
