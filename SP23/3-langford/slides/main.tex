@@ -1,0 +1,364 @@
+% Mirror: https://github.com/SIGma-UIUC/presentation-format
+% --------------------------------------------------------------------
+% This is a simple Beamer document that uses beamerthemesigma.sty
+% Reading the comments should help you create a presentation even if
+% you've never used Beamer before.
+% --------------------------------------------------------------------
+
+% Set our document class to Beamer
+\documentclass[aspectratio=169]{beamer}
+
+% Some packages for nice font encodings in the final PDF
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+% From Jeff E
+\usepackage{algo}
+
+% Some more macros
+\usepackage{sigmastyle}
+
+% Citations
+\usepackage{cite}
+
+% To insert images
+\usepackage{graphicx}
+
+% Useful packages from the AMS
+\usepackage{amsmath,amssymb,amsthm}
+
+% Package for code highlighting
+\usepackage{minted}
+\setminted{linenos=true, breaklines=true, breakanywhere=true, style=default}
+\usemintedstyle{monokai}
+
+% Set a title
+\title{Langford Pairings and Exact Covers}
+
+% Set a subtitle if you desire
+\subtitle{\cite[Chapter~7]{TAOCP4A} and \cite[Chapter~7.2.2.1]{TAOCP4B}}
+
+% Whoever worked on the presentation:
+\author{Anakin}
+
+% A date, if you'd like.
+\date{}
+
+% An institute name, if you're so inclined
+% \institute{University of Illinois Urbana-Champaign}
+
+% Use the SIGma theme for this Beamer presentation
+\usetheme{sigma}
+% --------------------------------------------------------------------
+
+% Begin document
+\begin{document}
+
+% Beamer calls each slide a "frame", defined within the environment:
+% \begin{frame}
+%   <frame content here>
+% \end{frame}
+
+% This frame is just the title.
+\begin{frame}
+\titlepage
+\end{frame}
+
+% A frame with the table of contents.
+% This frame's title is "Outline".
+\begin{frame}{Outline}
+  \tableofcontents
+\end{frame}
+
+\begin{frame}{Updates!}
+  % Let's put some real content in this frame:
+  Weekly updates:
+    \begin{itemize}
+        \item \textbf{TODO}
+    \end{itemize}
+\end{frame}
+
+\section{Langford Pairings}
+\frame{\sectionpage}
+
+\begin{frame}{Langford Pairings}
+    Consider the following list, called a ``Langford pairing''
+    \begin{equation}\label{Langford3}
+        \bqty{2, 3, 1, 2, 1, 3}
+    \end{equation}
+    It has a very peculiar property. Each pair of the same digits $k$ has exactly $k$ numbers between them \pause
+    \begin{itemize}
+        \item There is exactly \textbf{1} number between both \textbf{1}'s
+        \item There is exactly \textbf{2} numbers between both \textbf{2}'s
+        \item There is exactly \textbf{3} numbers between both \textbf{3}'s
+    \end{itemize} \pause
+    \textcolor{sigma@alertred}{\textbf{Exercise:}} Consider the list of digits $\bqty{1, 1, \ldots, n, n}$. Creating such a number as in Equation~\ref{Langford3} is impossible for $n = 1$ or $2$. We just saw it's possible for $n = 3$. Come up with a pairing for $n = 4$.\pause 
+    
+    \textcolor{sigma@mainblue}{\textbf{Answer:}} $\bqty{4, 1, 3, 1, 2, 4, 3, 2}$ or $\bqty{2, 3, 4, 2, 1, 3, 1, 4}$.
+\end{frame}
+
+\begin{frame}{Existence of Langford Pairs}
+    \begin{itemize}
+        \item So these Langford pairs for $\bqty{1, 1, \ldots, n, n}$ exist sometimes
+        \begin{itemize}
+            \item Trivially\footnote{or perhaps stupidly, depending on your perspective}, it exists for $n = 0$ \pause
+            \item No such pairing exists for $n = 1$ or $n = 2$ \textcolor{sigma@alertred}{(try it yourself)} \pause
+            \item We just saw pairings exist for $n = 3$ and $n = 4$ \pause
+            \item Can we characterize for exactly which $n$ we can find pairings?
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\section{Characterization and Existance}
+\frame{\sectionpage}
+
+\begin{frame}{A characterization of $n$}
+    We are going to characterize the set of $n$ that have at least one Langford pairing. In doing so, we will find a formula to \textcolor{sigma@mainblue}{construct} these pairings. \pause
+    
+    \vspace{30pt}
+    
+    \textbf{Theorem \cite{Langford4m}: }{\itshape The numbers $\bqty{1, 1, \ldots, n, n}$ can be arranged in a Langford pairing if and only if $n$ is a multiple of $4$ or one less than a multiple of $4$}
+\end{frame}
+
+\begin{frame}{Proof of the Theorem}
+    \begin{itemize}
+        \item Suppose $\bqty{1, 1, \ldots, n, n}$ can be arranged into some sort of Langford pairing. \pause
+        \item Consider the numbers in such a pairing. Let $a_r$ be equal to the index of the first time $r$ appears in the sequence
+        \begin{itemize}
+            \item Then note that $a_r + r + 1$ is the index of the second time $r$ appears
+        \end{itemize} \pause
+        \item These $a_r$ and $a_r + r + 1$ are just some arrangement of the indices $1$ through $2n$
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Proof of the Theorem}
+    Since the $a_r$ and $a_r + r + 1$ are just some arrangement of the indices $1$ through $2n$
+    \begin{align*}
+        \sum_{r = 1}^n a_r + \sum_{r = 1}^n (a_r + r + 1) &= 2 \sum_{r = 1}^n a_r + \sum_{r = 1}^n r + \sum_{r = 1}^n 1 \\
+        &= 2 \sum_{r = 1}^n a_r + \frac{n(n + 1)}{2} + n
+    \end{align*}
+\end{frame}
+
+\begin{frame}{Proof of the Theorem}
+    But the indices in total must sum to
+    \[
+        \sum_{i = 1}^{2n} i = \frac{2n(2n + 1)}{2} = 2n^2 + n
+    \] \pause
+    This implies that
+    \[
+        2 \sum_{r = 1}^n a_r + \frac{n(n + 1)}{2} + n = 2n^2 + n
+    \] \pause
+    which in turn implies that
+    \[
+        \sum_{r = 1}^n a_r = \frac{3n^2 - n}{4}
+    \]
+\end{frame}
+
+\begin{frame}{Proof of the Theorem}
+    All the $a_r$ are integers which means that $\sum_{r = 1}^n a_r$ is an integer. Thus $\frac{3n^2 - n}{4}$ must be an integer
+    \vspace{20pt}
+    \pause
+    
+    If $n$ is an integer, than $n$ is either $4m$, $4m + 1$, $4m + 2$, or $4m + 3$
+    \vspace{20pt}
+    \pause
+    
+    Plugging in all possible options into $\frac{3n^2 - n}{4}$ yields that $n = 4m$ or $4m + 3 = 4(m + 1) - 1$. Thus $n$ is a multiple of 4 or one less than a multiple of 4
+\end{frame}
+
+\begin{frame}{Formula for general $n$}
+    These formulas are from \cite{Langford4m}. The terms hidden by $\ldots$'s are consecutive even / odd terms. Ex: $(2, 4, 8, \ldots),~ (1, 3, 5, \ldots)$ \pause
+    \begin{equation*}
+    \begin{split}
+        & \textbf{The case }{\boldsymbol n \boldsymbol = \boldsymbol 4 \boldsymbol m \boldsymbol \colon } 4m - 4, \ldots, 2m, 4m - 2, 2m - 3, \ldots, 1, 4m - 1, \\
+        & 1, \ldots, 2m - 3, 2m, \ldots, 4m - 4, 4m, 4m - 3, \ldots, 2m + 1, 4m - 2, \\
+        & 2m - 2, \ldots, 2, 2m - 1, 4m - 1, 2, \ldots, 2m - 2, 2m + 1, \ldots, 4m - 3, 2m - 1, 4m
+    \end{split}    
+    \end{equation*} \pause
+    \begin{equation*}
+    \begin{split}
+        & \textbf{The case }{\boldsymbol n \boldsymbol = \boldsymbol 4 \boldsymbol m \boldsymbol - \boldsymbol 1 \boldsymbol \colon } 4m - 4, \ldots, 2m, 4m - 2, 2m - 3, \ldots, 1, 4m - 1, \\
+        & 1, \ldots, 2m - 3, 2m, \ldots, 4m - 4, 2m - 1, 4m - 3, \ldots, 2m + 1, 4m - 2, \\
+        & 2m - 2, \ldots, 2, 2m - 1, 4m - 1, 2, \ldots, 2m - 2, 2m + 1, \ldots, 4m - 3
+    \end{split}
+    \end{equation*} \pause
+    
+    \textcolor{sigma@alertred}{\textbf{Exercise:}} Convince yourself these formulas work by writing a program that generates Langford pairings using these formulas
+\end{frame}
+
+\section{Enumeration}
+\frame{\sectionpage}
+
+\begin{frame}{Enumeration}
+    \begin{itemize}
+        \item For $n = 4m$ or $n = 4m - 1$, Langford pairings exist
+        \item For $n = 0, 3, 4$ the solution is unique. What about larger $n$? \pause
+        \item There are many pairings for larger $n$
+        \begin{itemize}
+            \item Can we \textcolor{sigma@mainblue}{enumerate} them?
+        \end{itemize} \pause
+        \item Let $L_n$ denote the number of Langford pairings. We will count a pairing and it's reverse as the same. 
+        \item The state of the matter is that it is quite hard to compute $L_n$ \pause
+                \item \href{http://dialectrix.com/langford.html}{\textcolor{sigma@mainblue}{John Miller}} has a wonderful online history on enumerating Langford pairings for various $n$
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Some Formulas}
+    \href{http://dialectrix.com/langford/godfrey/method.html}{\textcolor{sigma@mainblue}{Mike Godfrey}}\footnote{\href{http://dialectrix.com/langford/godfrey/method.html}{\textcolor{sigma@mainblue}{http://dialectrix.com/langford/godfrey/method.html}}} in 2002 came up with the following formula. For a derivation, see \textcolor{sigma@alertred}{Exercise 6 of \cite[Chapter~7]{TAOCP4A}}\pause
+    \begin{equation*}
+        \text{Let } f(x_1, \ldots, x_{2n}) = \prod_{k = 1}^n \pqty{x_k x_{n + k} \sum_{j = 1}^{2n - k - 1} x_j x_{j + k + 1}}
+    \end{equation*}
+    \begin{equation*}
+        \text{Then } \sum_{x_1, \ldots, x_{2n} \in \set{-1, 1}} f(x_1, \ldots, x_{2n}) = 2^{2n + 1} \cdot L_n
+    \end{equation*}\pause
+    \cite{LangfordAsymptotic} conjectures some asymptotic approximations for $L_n$
+\end{frame}
+
+\section{Exact Covers}
+\frame{\sectionpage}
+
+\begin{frame}{Exact Cover Problems}
+    \begin{itemize}
+        \item Langford Pairings are a special case of a type of problem called \emph{Exact Cover} \pause
+        \item In 1972, Richard Karp proved that Exact Cover, among 20 other problems, is \textcolor{sigma@mainblue}{NP-Complete}
+        \begin{itemize}
+            \item Easy to verify solutions in polynomial time
+            \item Hard to solve, best known solutions run in exponential time 
+            \item Can simulate (or reduce) other problems in NP using Exact Cover
+        \end{itemize} \pause
+        \item The goal of Exact Cover is to ``cover'' a list of items using different given subsets, and select each item exactly one time
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{An Example of Exact Cover}
+    \[
+        \begin{pmatrix}
+            0 & 0 & 1 & 0 & 1 & 0 & 0 \\
+            1 & 0 & 0 & 1 & 0 & 0 & 1 \\
+            0 & 1 & 1 & 0 & 0 & 1 & 0 \\
+            1 & 0 & 0 & 1 & 0 & 1 & 0 \\
+            0 & 1 & 0 & 0 & 0 & 0 & 1 \\
+            0 & 0 & 0 & 1 & 1 & 0 & 1 \\
+        \end{pmatrix}
+    \] \pause 
+    We can abstract this to \emph{option} containing \emph{items}
+    \begin{table}[]
+        \begin{tabular}{ l l l }
+            $1\colon \bqty{3, 5}$& $2\colon \bqty{1, 4, 7}$ & $3\colon \bqty{2, 3, 6}$ \\ 
+            $4\colon \bqty{1, 4, 6}$ & $5\colon \bqty{2, 7}$ & $6\colon \bqty{4, 5, 7}$ \\ 
+        \end{tabular}
+    \end{table} \pause
+    \textcolor{sigma@mainblue}{Answer:} Select items 1, 4, and 5
+\end{frame}
+
+\begin{frame}{Solving Exact Cover Problems}
+    In trying to solve the previous problem, you may have naturally found a recursive algorithm to find a solution \pause
+    \begin{nalgo}
+    \underline{\textsc{FindCover}(\emph{Options, Cover}, $i$)}:
+    \\\label{}  \textbf{if} \emph{Cover} is a cover:\+
+    \\\label{}      \textbf{terminate} successfully\-
+    \\\label{}  \textbf{if} no option in \emph{Options} contains $i$:\+
+    \\\label{}      \textbf{terminate} unsuccessfully\-
+    \\\label{}
+    \\\label{}  $I \gets$ options in \emph{Options} that contain $i$
+    \\\label{}  \emph{Options} $\gets$ \emph{Options} $\setminus I$
+    \\\label{}  \textbf{for} each $O$ in $I$:\+
+    \\\label{}      $j \gets$ an item still not covered
+    \\\label{}      \textsc{FindCover}(\emph{Options}, \emph{Cover} $\cup \set{O}$, $j$)
+    \end{nalgo}
+\end{frame}
+
+\begin{frame}{Non-recursive Algorithms}
+    \begin{itemize}
+        \item In \cite[Chapter~7.2.1.1]{TAOCP4B}, Knuth talks about algorithms which solve exact cover problems \pause
+        \item He does so using method involving \textcolor{sigma@mainblue}{doubly linked lists}
+        \begin{itemize}
+            \item He colorfully calls these \emph{dancing links}
+        \end{itemize} \pause
+        \item His \textsc{AlgorithmX} uses dancing links to solve exact cover problems
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Langford Pairings as an Exact Cover}
+    \begin{itemize}
+        \item Let's model finding a Langford Pairing as an exact cover problem
+        \item Suppose $n = 4$, then we want to place $\bqty{1, 1, \ldots, 4, 4}$ in a list of size 8
+        \item Our items can be slots in the list: $l_1, l_2, \ldots, l_8$
+        \item Our options can be modeled as such
+    \end{itemize}
+    \begin{table}[]
+        \begin{tabular}{llllll}
+            $1\colon \bqty{l_1, l_3}$ & $1\colon \bqty{l_2, l_4}$ & $1\colon \bqty{l_3, l_5}$ & $1\colon \bqty{l_4, l_6}$ & $1\colon \bqty{l_5, l_7}$ & $1\colon \bqty{l_6, l_8}$ \\[10pt]
+            $2\colon \bqty{l_1, l_4}$ & $2\colon \bqty{l_2, l_5}$ & $2\colon \bqty{l_3, l_6}$ & $2\colon \bqty{l_4, l_7}$ & $2\colon \bqty{l_5, l_8}$ &                           \\[10pt]
+            $3\colon \bqty{l_1, l_5}$ & $3\colon \bqty{l_2, l_6}$ & $3\colon \bqty{l_3, l_7}$ & $3\colon \bqty{l_4, l_8}$ &                           &                           \\[10pt]
+            $4\colon \bqty{l_1, l_6}$ & $4\colon \bqty{l_2, l_7}$ & $4\colon \bqty{l_3, l_8}$ &                           &                           &                          
+        \end{tabular}
+    \end{table}
+\end{frame}
+
+\begin{frame}{Langford Pairings as an Exact Cover}
+    \begin{itemize}
+        \item We can generalize this
+        \item For general $n$, what items do we have? \pause
+        \begin{itemize}
+            \item $l_1, \ldots, l_{2n}$
+        \end{itemize}
+        \item For some $1 \leq i \leq n$, what $j, k$ work to form an option $i\colon \bqty{l_j, l_k}$? Say $j < k$ to avoid duplicates \pause
+        \begin{itemize}
+            \item $1 \leq j < k \leq 2n$ \pause
+            \item $k = j + i + 1$ 
+        \end{itemize}
+        \item So all of our options take the form
+    \end{itemize}
+    \begin{align*}
+        i\colon \bqty{l_j, l_k}, & & \text{for } 1 \leq j < k \leq 2n, & & k = j + i + 1, & & 1 \leq i \leq n.
+    \end{align*}
+    \begin{itemize}
+        \item We can use our algorithm \textsc{FindCover} to (perhaps slowly) find all solutions for general $n$
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{}
+      \begin{center}
+    {\color{sigma@mainblue} \LARGE Questions?}
+  \end{center}
+\end{frame}
+
+\font\eightss=cmssq8
+\font\eightssi=cmssqi8
+\newcommand\quoteAuthorDate[3]{\begingroup
+  \baselineskip 10pt
+  \parfillskip 0pt
+  \interlinepenalty 10000 % not needed in example
+  \leftskip 0pt plus 40pc minus \parindent
+  \let\rm=\eightss
+  \let\sl=\eightssi
+  \everypar{\sl}#1\par
+  \nobreak\smallskip
+  \noindent\rm--- #2\unskip\enspace(#3)\par
+  \endgroup}
+% If someone can figure out how to horizontally center this and make the text bigger that'd be cool
+\begin{frame}
+    \begin{center}
+        \item \quoteAuthorDate{Combinatorics is special. Most mathematical topics which can be covered in a lecture course build towards a single, well-defined goal, such as the Prime Number Theorem. Even if such a clear goal doesn’t exist, there is a sharp focus (e.g. finite groups). By contrast, combinatorics appears to be a collection of unrelated puzzles chosen at random. Two factors contribute to this. First, combinatorics is broad rather than deep. Second, it is about techniques rather than results.}{PETER J. CAMERON}{\color{sigma@mainblue}1995}
+    \end{center}
+\end{frame}
+
+\begin{frame}{Questions!}
+    \begin{align*}
+        i\colon \bqty{l_j, l_k}, & & \text{for } 1 \leq j < k \leq 2n, & & k = j + i + 1, & & 1 \leq i \leq n.
+    \end{align*} \vspace{-25pt}
+    \begin{itemize}
+        \item \textcolor{sigma@alertred}{Exercise 15 of \cite[Chapter~7.2.2.1]{TAOCP4B}:} Recall our formulation of finding Langford Pairings as an exact cover. Running \textsc{FindCover} on this will produce a pairing and it's reverse. Modify our formulation to only produce half of the Langford Pairings for $n$, where the missing half is the reversals of the solutions we find. \vspace{10pt}
+        \item Use the formulation of Langford Pairings stated before, or the one you find in the previous exercise, to write a program that finds all Langford Pairings for a given $n$. Try your algorithm out for $n = 7$ (there are $26$, not including reversals).
+    \end{itemize}
+    
+\end{frame}
+
+% Remove this slide if you came up with all the material yourself
+\begin{frame}{Bibliography}
+    \bibliographystyle{alpha}
+    {\scriptsize \bibliography{refs}}
+\end{frame}
+
+\end{document}
