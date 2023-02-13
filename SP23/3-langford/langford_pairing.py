@@ -103,6 +103,10 @@ def find_pairings(n):
     __find_pairings(n, Options, set(), 1)
 
 def count_pairings(n):
+    # See The Art of Computer Programming, Volume 4A: Combinatorial Algorithms Part 1, Exercise 6 Solution
+    # or https://dialectrix.com/langford/godfrey/method.html for an explaination,
+    # or the written solutions on the SIGma website
+
     def f(x): #[x_1, x_2, ..., x_2n] as a list or tuple or whatever, *1 indexed*
         n = (len(x) - 1) // 2
         res = 1
