@@ -1,0 +1,45 @@
+\documentclass[letterpaper]{article}
+
+\usepackage{style}  % If you feel like procrastinating, mess with this file
+\usepackage{algo}   % Thank you Jeff, very cool!
+\usepackage{quiver} % https://q.uiver.app/
+
+\addbibresource{refs.bib}
+
+% Required reading
+% https://jmlr.csail.mit.edu/reviewing-papers/knuth_mathematical_writing.pdf
+% https://faculty.math.illinois.edu/~west/grammar.html
+
+% % % % % % % % % %
+%     Cursor      %
+%     Parking     %
+%     Lot         %
+% % % % % % % % % %
+
+\title{Permutations Exercise Answers}
+\author{Sam Ruggerio}
+
+\begin{document}
+\maketitle
+
+\section*{Delay between permutations in \textsc{AlgorithmL}}
+
+Between visiting each permutation, we run at least one \textbf{while} loop.
+These loops take $O(n)$ time in the worst case.
+Thus, there is an $O(n)$ time delay between visiting permutations
+
+\section*{Runtime of \textsc{AlgorithmL}}
+
+For $n$ items, there are $O(n!)$ possible permutations to visit.
+Then we have $O(n)$ delay between visiting each permutation.
+Thus, the overall runtime is $O(n \cdot n!)$
+
+\section*{Number of decrements of {\boldmath $j$} in \textsc{AlgorithmL}}
+
+Suppose all elements in $S$ are distint.
+Exactly half of the possible permutations of $S$ have that $s_{n - 1} < s_{n}$.
+Thus, the loop will not run for $\frac{n!}{2}$ permutations of $S$.
+\textbf{Note:} Exercise 1 of \cite[Chapter~7.2.1.2]{TAOCP4A} talks about how to modify \textsc{AlgorithmL} to take advantage of this fact and obtain a slightly faster algorithm.
+
+\printbibliography
+\end{document}
