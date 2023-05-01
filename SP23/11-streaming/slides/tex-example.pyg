@@ -1,0 +1,3 @@
+    x = 10
+    y = "mystring"
+    print("Hello world!")

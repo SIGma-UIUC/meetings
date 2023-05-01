@@ -1,0 +1,8 @@
+\frametitle{Some Sample Code}
+
+  \begin{minted}{python}
+    x = 10
+    y = "mystring"
+    print("Hello world!")
+  \end{minted}
+
