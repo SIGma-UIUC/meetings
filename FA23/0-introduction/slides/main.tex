@@ -1,0 +1,535 @@
+% Mirror: https://github.com/SIGma-UIUC/presentation-format
+% --------------------------------------------------------------------
+% This is a simple Beamer document that uses beamerthemesigma.sty
+% Reading the comments should help you create a presentation even if
+% you've never used Beamer before.
+% --------------------------------------------------------------------
+
+% Set our document class to Beamer
+\documentclass[aspectratio=169]{beamer}
+
+% From Jeff E
+\usepackage{algo}
+% Some more macros
+\usepackage{sigmastyle}
+
+
+% Set a title
+\title{Welcome to SIGma}
+
+% Set a subtitle if you desire
+\subtitle{\cite{zeck, robust}}
+
+% Whoever worked on the presentation:
+\author{SIGma}
+
+% Date looks ugly, so leave blank
+\date{}
+
+% An institute name, if you're so inclined
+% \institute{University of Illinois Urbana-Champaign}
+
+% Use the SIGma theme for this Beamer presentation
+\usetheme{sigma}
+% --------------------------------------------------------------------
+
+% Begin document
+\begin{document}
+
+% Beamer calls each slide a "frame", defined within the environment:
+% \begin{frame}
+%   <frame content here>
+% \end{frame}
+
+% This frame is just the title.
+\begin{frame}
+\titlepage
+\end{frame}
+
+% % A frame with the table of contents.
+% % This frame's title is "Outline".
+% \begin{frame}{Outline}
+%   \tableofcontents
+% \end{frame}
+
+\section{Officers in No Particular Order}
+\frame{\sectionpage}
+
+\begin{frame}{Anakin} 
+        \begin{itemize}
+        \item Math Major
+        \item Did Computational Group Theory at an REU
+        \item Graph Theory / Optimization Research during the year
+        \item SIGPwny Crypto\footnotemark\ Gang + Admin team
+        \item Coffee Club
+        \item CA for CS 173 + CS 374
+    \end{itemize}
+    \footnotetext[1]{Not that one, the other one}
+\end{frame}
+
+\begin{frame}{Aditya}
+    \begin{itemize}
+        \item ECE/Math double major.
+        \item Interned at a satellite internet startup over the summer.
+        \item CA for ECE 411, ECE 391 + SIGARCH co-lead.
+        \item Other interests: FP, EE, Crypto(graphy).
+    \end{itemize} 
+\end{frame}
+
+\begin{frame}{Sam}
+    \begin{itemize}
+    \item CS PhD
+    \item Doing Computational Geometry with Sariel Har-Peled
+    \item SIGPwny
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Hassam}
+    \begin{itemize}
+        \item Intern at IMC Trading over the summer
+        \item CS Major (takes math classes for fun ???)
+        \item SIGPwny Crypto Gang + Admin team + Infra lead
+        \item CA for CS 341, CS 173
+        \item Compiler research
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{We Need Officers!}
+    \begin{itemize}
+        \item This list is smaller than last year \pause
+        \item Reach out to me if you are interested in improving SIGma and making meetings!
+    \end{itemize}
+\end{frame}
+
+\section{Fibonacci Codes}
+\frame{\sectionpage}
+
+\begin{frame}{But Why?}
+    \begin{itemize}
+        \item Almost everything you do online involves sending and receiving messages \pause
+        \item How can we make these messages ``robust'' to errors?
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Starting From The End}
+    \begin{itemize}
+        \item Suppose we want to uniquely assign the natural numbers a \emph{codeword} \pause
+        \item We want this \emph{code} to have a couple properties
+        \begin{itemize}
+            \item Quick to compute
+            \item Variable length
+            \item Robust to errors
+        \end{itemize} \pause
+        \item It turns out \emph{Fibonacci Numbers} do all this for us
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Our Favorite Sequence}
+    \[
+        F_n = \begin{cases}
+                0                       & n = 0 \\
+                1                       & n = 1 \\
+                F_{n - 1} + F_{n - 2}   & n \geq 2
+              \end{cases}
+    \]
+    
+    \pause
+    \vspace{20pt}
+    \begin{table}[]
+        \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+            \hline
+            $F_0$ & $F_1$ & $F_2$ & $F_3$ & $F_4$ & $F_5$ & $F_6$ & $F_7$ & $F_8$ & $F_9$ & $F_{10}$ & $F_{11}$ & $F_{12}$ & $F_{13}$ \\ \hline
+            0     & 1     & 1     & 2     & 3     & 5     & 8     & 13    & 21    & 34    & 55       & 89       & 144      & 233      \\ \hline
+        \end{tabular}
+    \end{table}
+\end{frame}
+
+\begin{frame}{Zeckendorf's Theorem}
+    \begin{thrm}[\cite{zeck}]
+        Every natural number $n \geq 1$ can be represented as a unique sum of non-consecutive Fibonacci numbers $F_i$ where $i \geq 2$. \pause
+        \textit{If we allow $F_0$ and $F_1$ we lose uniqueness}
+        
+        We call this sum a \emph{Zeckendorf sum}.
+    \end{thrm} \pause
+    \begin{itemize}
+        \item $4 = F_4 + F_2 = 3 + 1$
+        \item $64 = F_{10} + F_6 + F_2 = 55 + 8 + 1$
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Recursion is Induction is Recursion is Induction is $\ldots$}
+    We prove existence by \emph{induction} on our natural number $n$.
+    Suppose that for all natural numbers strictly smaller than $n$, such a Zeckendorf sum exists.
+    There are two cases. \pause
+
+    If $n \leq 4\colon$
+    \begin{align*}
+        1 &= F_2 & 2 &= F_3 \\
+        3 &= F_4 & 4 &= F_4 + F_2 
+    \end{align*} \pause
+
+    If $n > 4$ itself is a Fibonacci number, we are done.
+\end{frame}
+
+\begin{frame}{Recursion is Induction is Recursion is Induction is $\ldots$}
+    If $n > 4$ is not a Fibonacci number:
+    \begin{itemize}
+        \item Since $n > 4$, it is strictly between two consecutive Fibonacci numbers $F_i < n < F_{i + 1}$ for some $i \geq 3$ \pause
+        \item $n - F_i < n$ so, by \emph{induction}, $n - F_i$ has some Zeckendorf sum \pause
+        \item Note that
+        \begin{align*}
+                    & n - F_i + F_i = n < F_{i + 1} = F_{i - 1} + F_i \\
+           \implies & n - F_i < F_{i - 1}
+        \end{align*} 
+        and thus the Zeckendorf sum of $n - F_i$ does not contain $F_{i - 1}$ \pause
+        \item Combine the Zeckendorf sum of $n - F_i$ with $F_i$ to obtain a Zeckendorf sum for $n$ \qed
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Deadly Sins $\implies$ Fast Algorithms}
+    The statement and proof of the theorem helps design a \emph{greedy} algorithm \pause
+    \begin{itemize}
+        \item The inductive proof implies we should find the largest $F_i \leq n$ \pause
+        \item The statement implies that if we picked $F_i$, we should skip $F_{i - 1}$ \pause
+        \item Our goal is to encode text, so we can precompute an array of Fibonacci numbers ahead of time up to some maximum
+    \end{itemize}
+    \begin{nalgo}
+      \label{}  \textit{maximum} $\gets 1114111$ \Comment{largest Unicode value U+10FFFF}
+    \\\label{}  \textsc{F} $\gets [0, 1]$
+    \\\label{}  $i \gets 2$
+    \\\label{}  while $\textsc{F}[i - 1] \leq \textit{maximum}$:\+
+    \\\label{}      \textsc{F}.append($\textsc{F}[i - 2] + \textsc{F}[i - 1]$)
+    \\\label{}      $i \pluseq 1$
+    \end{nalgo}
+\end{frame}
+
+\begin{frame}{Deadly Sins $\implies$ Fast Algorithms}
+   \begin{nalgo}[0.925]
+       \underline{\textbf{\textsc{Zeckendorf}}$(x)$:}\+
+    \\\label{}      $i \gets$ max $i$ such that $\textsc{F}[i] \leq x$
+    \\\label{}      \textit{rep} $\gets $ ``~''
+    \\\label{}      \textit{rem} $\gets x$
+    \\\label{}      while $i \geq 2:$\+
+    \\\label{}          if $\textsc{F}[i] \leq \textit{rem}:$\+
+    \\\label{}              $\textit{rem} \minuseq \textsc{F}[i]$
+    \\\label{}              $\textit{rep} \pluseq \texttt{1}$
+    \\\label{}              if $\textit{rem} > 0:$\+
+    \\\label{}                  $\textit{rep} \pluseq \texttt{1}$
+    \\\label{}                  $i \minuseq 1$\-\-
+    \\\label{}          else:\+
+    \\\label{}              $\textit{rep} \pluseq \texttt{0}$\-
+    \\\label{}          $i \minuseq 1$\-
+    \\\label{}      return \textit{rep}
+   \end{nalgo}
+\end{frame}
+
+\begin{frame}{Deadly Sins $\implies$ Fast Algorithms}
+\vspace{-5pt}
+\begin{minipage}[t]{0.45\textwidth}
+   \begin{nalgo}[0.925]
+       \underline{\textbf{\textsc{Zeckendorf}}$(x)$:}
+    \\\label{}      $i \gets$ max $i$ such that $\textsc{F}[i] \leq i$
+    \\\label{}      {\color{lightgray}\textit{rep} $\gets $ ``~''}
+    \\\label{}      {\color{lightgray}\textit{rem} $\gets x$}
+    \\\label{}      {\color{lightgray}while $i \geq 2:$\+}
+    \\\label{}      {\color{lightgray}    if $\textsc{F}[i] \leq \textit{rem}:$\+}
+    \\\label{}      {\color{lightgray}        $\textit{rem} \minuseq \textsc{F}[i]$}
+    \\\label{}      {\color{lightgray}        $\textit{rep} \pluseq \texttt{1}$}
+    \\\label{}      {\color{lightgray}        if $\textit{rem} > 0:$\+}
+    \\\label{}      {\color{lightgray}            $\textit{rep} \pluseq \texttt{1}$}
+    \\\label{}      {\color{lightgray}            $i \minuseq 1$\-\-}
+    \\\label{}      {\color{lightgray}    else:\+}
+    \\\label{}      {\color{lightgray}        $\textit{rep} \pluseq \texttt{0}$\-}
+    \\\label{}      {\color{lightgray}    $i \minuseq 1$\-}
+    \\\label{}      {\color{lightgray}return \textit{rep}}
+   \end{nalgo}
+\end{minipage}
+\hspace{1pt}
+\begin{minipage}[t]{0.5\textwidth}
+    \begin{align*}
+          & \# \text{ of } i \text{ such that } F_i \leq x \\
+          =& \floor{\log_\phi\pqty{x\sqrt{5}}} = O(\log x)
+    \end{align*}
+    \begin{itemize}
+        \item {\color{lightgray}The while loop does $i = O(\log x)$ iterations}
+        \item {\color{lightgray}The work inside the while loop takes $O(1)$ time}
+        \item {\color{lightgray}So \textbf{\textsc{Zeckendorf}} takes $O(\log x)$ time}
+        \item {\color{lightgray}Each iteration we add at most 2 characters $\implies \abs{\textbf{\textsc{Zeckendorf}}(x)} = O(\log x)$}
+    \end{itemize}
+\end{minipage}
+\end{frame}
+
+\begin{frame}{Deadly Sins $\implies$ Fast Algorithms}
+\vspace{-5pt}
+\begin{minipage}[t]{0.45\textwidth}
+   \begin{nalgo}[0.925]
+       \underline{\textbf{\textsc{Zeckendorf}}$(x)$:}
+    \\\label{}      {\color{lightgray}$i \gets$ max $i$ such that $\textsc{F}[i] \leq i$}
+    \\\label{}      {\color{lightgray}\textit{rep} $\gets $ ``~''}
+    \\\label{}      {\color{lightgray}\textit{rem} $\gets x$}
+    \\\label{}      while $i \geq 2:$\+
+    \\\label{}          if $\textsc{F}[i] \leq \textit{rem}:$\+
+    \\\label{}              $\textit{rem} \minuseq \textsc{F}[i]$
+    \\\label{}              $\textit{rep} \pluseq \texttt{1}$
+    \\\label{}              if $\textit{rem} > 0:$\+
+    \\\label{}                  $\textit{rep} \pluseq \texttt{1}$
+    \\\label{}                  $i \minuseq 1$\-\-
+    \\\label{}          else:\+
+    \\\label{}              $\textit{rep} \pluseq \texttt{0}$\-
+    \\\label{}          $i \minuseq 1$\-
+    \\\label{}      {\color{lightgray}return \textit{rep}}
+   \end{nalgo}
+\end{minipage}
+\hspace{1pt}
+\begin{minipage}[t]{0.5\textwidth}
+    {\color{lightgray}\begin{align*}
+          & \# \text{ of } i \text{ such that } F_i \leq x \\
+          =& \floor{\log_\phi\pqty{x\sqrt{5}}} = O(\log x)
+    \end{align*}}
+    \begin{itemize}
+        \item The while loop does $i = O(\log x)$ iterations 
+        \item {\color{lightgray}The work inside the while loop takes $O(1)$ time}
+        \item {\color{lightgray}So \textbf{\textsc{Zeckendorf}} takes $O(\log x)$ time}
+        \item {\color{lightgray}Each iteration we add at most 2 characters $\implies \abs{\textbf{\textsc{Zeckendorf}}(x)} = O(\log x)$}
+    \end{itemize}
+\end{minipage}
+\end{frame}
+
+\begin{frame}{Deadly Sins $\implies$ Fast Algorithms}
+\vspace{-5pt}
+\begin{minipage}[t]{0.45\textwidth}
+   \begin{nalgo}[0.925]
+       \underline{\textbf{\textsc{Zeckendorf}}$(x)$:}
+    \\\label{}      {\color{lightgray}$i \gets$ max $i$ such that $\textsc{F}[i] \leq i$}
+    \\\label{}      {\color{lightgray}\textit{rep} $\gets $ ``~''}
+    \\\label{}      {\color{lightgray}\textit{rem} $\gets x$}
+    \\\label{}      {\color{lightgray}while $i \geq 2:$\+}
+    \\\label{}          if $\textsc{F}[i] \leq \textit{rem}:$\+
+    \\\label{}              $\textit{rem} \minuseq \textsc{F}[i]$
+    \\\label{}              $\textit{rep} \pluseq \texttt{1}$
+    \\\label{}              if $\textit{rem} > 0:$\+
+    \\\label{}                  $\textit{rep} \pluseq \texttt{1}$
+    \\\label{}                  $i \minuseq 1$\-\-
+    \\\label{}          else:\+
+    \\\label{}              $\textit{rep} \pluseq \texttt{0}$\-
+    \\\label{}          $i \minuseq 1$\-
+    \\\label{}      {\color{lightgray}return \textit{rep}}
+   \end{nalgo}
+\end{minipage}
+\hspace{1pt}
+\begin{minipage}[t]{0.5\textwidth}
+    {\color{lightgray}\begin{align*}
+          & \# \text{ of } i \text{ such that } F_i \leq x \\
+          =& \floor{\log_\phi\pqty{x\sqrt{5}}} = O(\log x)
+    \end{align*}}
+    \begin{itemize}
+        \item {\color{lightgray}The while loop does $i = O(\log x)$ iterations}
+        \item The work inside the while loop takes $O(1)$ time
+        \item {\color{lightgray}So \textbf{\textsc{Zeckendorf}} takes $O(\log x)$ time}
+        \item {\color{lightgray}Each iteration we add at most 2 characters $\implies \abs{\textbf{\textsc{Zeckendorf}}(x)} = O(\log x)$}
+    \end{itemize}
+\end{minipage}
+\end{frame}
+
+
+
+\begin{frame}{Deadly Sins $\implies$ Fast Algorithms}
+\vspace{-5pt}
+\begin{minipage}[t]{0.45\textwidth}
+   \begin{nalgo}[0.925]
+       \underline{\textbf{\textsc{Zeckendorf}}$(x)$:}
+    \\\label{}      $i \gets$ max $i$ such that $\textsc{F}[i] \leq i$
+    \\\label{}      \textit{rep} $\gets $ ``~''
+    \\\label{}      \textit{rem} $\gets x$
+    \\\label{}      while $i \geq 2:$\+
+    \\\label{}          if $\textsc{F}[i] \leq \textit{rem}:$\+
+    \\\label{}              $\textit{rem} \minuseq \textsc{F}[i]$
+    \\\label{}              $\textit{rep} \pluseq \texttt{1}$
+    \\\label{}              if $\textit{rem} > 0:$\+
+    \\\label{}                  $\textit{rep} \pluseq \texttt{1}$
+    \\\label{}                  $i \minuseq 1$\-\-
+    \\\label{}          else:\+
+    \\\label{}              $\textit{rep} \pluseq \texttt{0}$\-
+    \\\label{}          $i \minuseq 1$\-
+    \\\label{}      return \textit{rep}
+   \end{nalgo}
+\end{minipage}
+\hspace{1pt}
+\begin{minipage}[t]{0.5\textwidth}
+    {\color{lightgray}\begin{align*}
+          & \# \text{ of } i \text{ such that } F_i \leq x \\
+          =& \floor{\log_\phi\pqty{x\sqrt{5}}} = O(\log x)
+    \end{align*}}
+    \begin{itemize}
+        \item {\color{lightgray}The while loop does $i = O(\log x)$ iterations}
+        \item {\color{lightgray}The work inside the while loop takes $O(1)$ time}
+        \item So \textbf{\textsc{Zeckendorf}} takes $O(\log x)$ time 
+        \item Each iteration we add at most 2 characters $\implies \abs{\textbf{\textsc{Zeckendorf}}(x)} = O(\log x)$
+    \end{itemize}
+\end{minipage}
+\end{frame}
+
+\begin{frame}{Undo}
+    \begin{nalgo}
+       \underline{\textbf{\textsc{Frodnekcez}}$(\textit{rep}[0..n])$:}
+    \\\label{}      $\textit{res} \gets 0$
+    \\\label{}      for $i \gets 0..n$:\+
+    \\\label{}          if $\textit{rep}[i] = \texttt{1}$:\+
+    \\\label{}              $\textit{res} \pluseq \textsc{F}[i + 2]$ \Comment{Remember we don't use $F_0$ or $F_1$}\-\-
+    \\\label{}      return $\textit{res}$
+    \end{nalgo}\pause
+
+    Runtime analysis:
+    \begin{itemize}
+        \item Work is constant for each iteration of the for loop $\implies O(n)$ \pause
+        \item If $\textit{rep}[0..n] = \textbf{Zeckendorf}(x)$ then $O(n) = O(\log x)$
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{A Fibonacci Code}
+    We now show how to assign natural numbers a code word using the Zeckendorf Decomposition \cite{robust}
+    \begin{itemize}
+        \item The length of the Zeckendorf Representation for numbers can vary
+        \begin{itemize}
+            \item $\textbf{\textsc{Zeckendorf}}(2) = \texttt{01}$, $\textbf{\textsc{Zeckendorf}}(7) = \texttt{0101}$
+        \end{itemize}\pause
+        \item We want to be able to send this bit strings and tell when a character begins and ends
+        \begin{itemize}
+            \item Does $\texttt{0101}$ correspond to $\bqty{2, 2}$ or $\bqty{7}$?
+        \end{itemize} \pause
+        \item Solution: Add a \emph{``comma''} using an extra \texttt{1}
+        \begin{itemize}
+            \item $\textbf{\textsc{ENC}}\pqty{\bqty{2, 2}} = \texttt{011011}$, $\textbf{\textsc{ENC}}\pqty{\bqty{7}} = \texttt{01011}$
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Heavy Lifting Has Already Been Done}
+    \begin{nalgo}
+        \underline{\textbf{\textsc{enc}}$(x)$:}
+    \\\label{}      return \textbf{\textsc{Zeckendorf}}($x$) + \texttt{1} \Comment{add comma} \hspace{41.25pt}
+    \end{nalgo} \pause
+    
+    \begin{nalgo}
+        \underline{\textbf{\textsc{dec}}$(\textit{rep}[0..n])$:}
+    \\\label{}      return \textbf{\textsc{Frodnekcez}}($\textit{rep}[0..n - 1]$) \Comment{remove comma}
+    \end{nalgo} \pause
+
+    Runtime analysis:
+    \begin{itemize}
+        \item Same as $\textbf{\textsc{Zeckendorf}}$ and $\textbf{\textsc{Frodnekcez}}$
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Heavy Lifting Has Already Been Done}
+    \begin{nalgo}
+        \underline{\textbf{\textsc{encode}}$(m[0..n])$:}
+    \\\label{}      $\textit{code} \gets$ ``~''
+    \\\label{}      for $i \gets 0..n$:\+
+    \\\label{}          $\textit{val} \gets \textsc{ord}(m[i])$
+    \\\label{}          $\textit{code} \pluseq \textbf{\textsc{enc}}(\textit{val})$\-
+    \\\label{}      return \textit{code}
+    \end{nalgo} \pause
+    Runtime analysis:
+    \begin{itemize}
+        \item To simplify our life, since $\textsc{ord}(m[i])$ is some Unicode value which has a set maximum, $\textbf{\textsc{enc}}$ runs in constant time \pause
+        \begin{itemize}
+            \item More precise analysis would require knowledge of the distribution of characters in whatever language being used. Ask your nearest linguist.
+        \end{itemize} \pause
+        \item Thus, $\textbf{\textsc{encode}}(m[0..n])$ runs in $O(n)$ time
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Heavy Lifting Has Already Been Done}
+    \begin{nalgo}
+        \underline{\textbf{\textsc{decode}}$(code[0..n])$:}
+    \\      $m \gets$ ``~''
+    \\      $i \gets 0$
+    \\      while $i \leq n$:\+
+    \\          $j \gets $ smallest $j > i$ such that 
+    \\          $\textit{code}[j] = \textit{code}[j + 1] = \texttt{1}$
+    \\          $\textit{rep} = \textit{code}[i..j + 1]$
+    \\          $n \gets \textbf{\textsc{dec}}(\textit{rep})$
+    \\          $m \pluseq \textsc{chr}(n)$
+    \\          $i \gets j + 1$\-
+    \\      return $m$
+    \end{nalgo} \pause
+    Runtime analysis:
+    \begin{itemize}
+        \item By similar logic, $\textbf{\textsc{decode}}(code[0..n])$ runs in $O(n)$ time
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{An Example}
+   \begin{tabular}{ccccc}
+       \texttt{S} & \texttt{I} & \texttt{G} & \texttt{m} & \texttt{a} \\
+       \hline
+       83         & 73         & 71         & 109        & 97         \\ 
+       \hline
+       \texttt{0101001011} & \texttt{0001010011} & \texttt{0010010011}  & \texttt{01010100011}  & \texttt{00001000011} \\ 
+   \end{tabular}
+\end{frame}
+
+\begin{frame}{Containment of Errors}
+    \emph{Claim:} When a single error occurs, at most 3 codewords are lost \pause
+    \begin{itemize}
+        \item We know that $\textbf{\textsc{enc}}(x)$ ends with \texttt{011} for all $x > 1$ \pause
+        \item For such $x$, if an error occurs outside of these last 3 bits, only one codeword is lost:
+        \begin{itemize}
+            \item If a \texttt{01} gets turned into a \texttt{11}, if a \texttt{0} is deleted, or if a \texttt{1} is inserted in some specific spot, then one codeword may turn into two 
+            \item Consider \texttt{0101011} $\leadsto$ \texttt{0111011} / \texttt{011011} / \texttt{01101011} \pause
+            \item Otherwise, we just misconvert that single codeword
+        \end{itemize}
+    \end{itemize} \pause
+\end{frame}
+
+
+% Asking questions is fun but we should answer some first
+\begin{frame}{}
+      \begin{center}
+    {\color{sigma@mainblue} \LARGE Questions?}
+  \end{center}
+\end{frame}
+
+% Quotes are fun, find some to use!
+\font\eightss=cmssq8
+\font\eightssi=cmssqi8
+\newcommand\quoteAuthorDate[3]{\begingroup
+  \baselineskip 10pt
+  \parfillskip 0pt
+  \interlinepenalty 10000 % not needed in example
+  \leftskip 0pt plus 40pc minus \parindent
+  \let\rm=\eightss
+  \let\sl=\eightssi
+  \everypar{\sl}#1\par
+  \nobreak\smallskip
+  \noindent\rm--- #2\unskip\enspace(#3)\par
+  \endgroup}
+% If someone can figure out how to horizontally center this and make the text bigger that'd be cool
+\begin{frame}
+    \begin{center}
+        \item \quoteAuthorDate{Abstract is a word people use when they haven't gotten used to something}{EUGENE LERMAN}{\color{sigma@mainblue} 8/28/2023}
+    \end{center}
+\end{frame}
+
+\begin{frame}{Question: Containment of Errors}
+    \emph{Claim:} When a single error occurs, at most 3 codewords are lost 
+    \begin{itemize}
+        \item We know that $\textbf{\textsc{enc}}(x)$ ends with \texttt{011} for all $x > 1$ 
+        \item For such $x$, if an error occurs outside of these last 3 bits, only one codeword is lost:
+        \begin{itemize}
+            \item If a \texttt{01} gets turned into a \texttt{11}, if a \texttt{0} is deleted, or if a \texttt{1} is inserted in some specific spot, then one codeword may turn into two 
+            \item Consider \texttt{0101011} $\leadsto$ \texttt{0111011} / \texttt{011011} / \texttt{01101011} 
+            \item Otherwise, we just misconvert that single codeword
+        \end{itemize}
+    \end{itemize} 
+    \textcolor{sigma@alertred}{\textit{Exercise:}} Consider what may happen in the cases of insertion, deletion, and bitflipping for each of the last three bits of $\textbf{\textsc{enc}}(x)$ for $x > 1$
+\end{frame}
+
+% Remove this slide if you came up with all the material yourself
+\begin{frame}{Bibliography}
+    \bibliography{refs}
+    \bibliographystyle{alpha}
+\end{frame}
+
+\end{document}
