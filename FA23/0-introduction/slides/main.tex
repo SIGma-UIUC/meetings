@@ -214,7 +214,7 @@
     \\\label{}              $\textit{rem} \minuseq \textsc{F}[i]$
     \\\label{}              $\textit{rep} \pluseq \texttt{1}$
     \\\label{}              if $\textit{rem} > 0:$\+
-    \\\label{}                  $\textit{rep} \pluseq \texttt{1}$
+    \\\label{}                  $\textit{rep} \pluseq \texttt{)}$
     \\\label{}                  $i \minuseq 1$\-\-
     \\\label{}          else:\+
     \\\label{}              $\textit{rep} \pluseq \texttt{0}$\-
@@ -272,7 +272,7 @@
     \\\label{}              $\textit{rem} \minuseq \textsc{F}[i]$
     \\\label{}              $\textit{rep} \pluseq \texttt{1}$
     \\\label{}              if $\textit{rem} > 0:$\+
-    \\\label{}                  $\textit{rep} \pluseq \texttt{1}$
+    \\\label{}                  $\textit{rep} \pluseq \texttt{0}$
     \\\label{}                  $i \minuseq 1$\-\-
     \\\label{}          else:\+
     \\\label{}              $\textit{rep} \pluseq \texttt{0}$\-
@@ -449,9 +449,9 @@
     \\          $j \gets $ smallest $j > i$ such that 
     \\          $\textit{code}[j] = \textit{code}[j + 1] = \texttt{1}$
     \\          $\textit{rep} = \textit{code}[i..j + 1]$
-    \\          $n \gets \textbf{\textsc{dec}}(\textit{rep})$
-    \\          $m \pluseq \textsc{chr}(n)$
-    \\          $i \gets j + 1$\-
+    \\          $x \gets \textbf{\textsc{dec}}(\textit{rep})$
+    \\          $m \pluseq \textsc{chr}(x)$
+    \\          $i \gets j + 2$\-
     \\      return $m$
     \end{nalgo} \pause
     Runtime analysis:

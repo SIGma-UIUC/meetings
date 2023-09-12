@@ -124,20 +124,22 @@ def decode(code):
 
 
 def main():
-    # Testing
-    for i in range(1, 100000):
-        assert frodnekcez(zeckendorf(i)) == i == dec(enc(i))
-    for m in random_strings(100, 1000):
-        assert decode(encode(m)) == m
+    # # Testing
+    # for i in range(1, 100000):
+    #     assert frodnekcez(zeckendorf(i)) == i == dec(enc(i))
+    # for m in random_strings(100, 1000):
+    #     assert decode(encode(m)) == m
 
-    for i in range(1, 20):
-        print(f"{i : <2} = {enc(i)}")
+    # View decomposition
+    n = 123
+    zeck_rep(n)
 
-    for c in "SIGma":
-        print(c)
-        print(ord(c))
-        print(enc(ord(c)))
-        print()
+    # # Encode a message
+    # for c in "SIGma":
+    #     print(c)
+    #     print(ord(c))
+    #     print(enc(ord(c)))
+    #     print()
 
 if __name__ == "__main__":
     main()
