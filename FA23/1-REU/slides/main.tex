@@ -1,0 +1,407 @@
+% Mirror: https://github.com/SIGma-UIUC/presentation-format
+% --------------------------------------------------------------------
+% This is a simple Beamer document that uses beamerthemesigma.sty
+% Reading the comments should help you create a presentation even if
+% you've never used Beamer before.
+% --------------------------------------------------------------------
+
+% Set our document class to Beamer
+\documentclass[aspectratio=169]{beamer}
+% \documentclass[aspectratio=169, handout]{beamer}
+% Add handout option to ignore pauses
+
+% From Jeff E
+\usepackage{algo}
+% Some more macros
+\usepackage{sigmastyle}
+
+
+% Set a title
+\title{Doing Math with Computers for Fun and Profit}
+
+% Set a subtitle if you desire
+\subtitle{\cite{classifying}}
+
+% Whoever worked on the presentation:
+\author{Anakin}
+
+% Date looks ugly, so leave blank
+\date{}
+
+% An institute name, if you're so inclined
+% \institute{University of Illinois Urbana-Champaign}
+
+% Use the SIGma theme for this Beamer presentation
+\usetheme{sigma}
+% --------------------------------------------------------------------
+
+% Begin document
+\begin{document}
+
+% Beamer calls each slide a "frame", defined within the environment:
+% \begin{frame}
+%   <frame content here>
+% \end{frame}
+
+% This frame is just the title.
+\begin{frame}
+\titlepage
+\end{frame}
+
+\section{REU}
+\frame{\sectionpage}
+
+\begin{frame}{What is an REU?}
+    \begin{itemize}
+        \item Research Experience for Undergraduates \pause
+        \item Get paid to do research in Math, CS, Engineering, Science, etc., over the summer \pause
+        \item See how other schools do things, meet new people \pause
+        \item Maybe even get a paper out of it!
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{How do I find them?}
+    Save these slides for later!
+    \begin{itemize}
+        \item \href{https://www.nsf.gov/crssprgm/reu/reu_search.jsp}{NSF List}
+        \item \href{https://www.mathprograms.org/db?joblist-0-0----p--}{Math Programs}
+        \item \href{https://docs.google.com/spreadsheets/d/1U-27BeHMSJCWumbNByal2tHyYo9wRVud9WoRE70E47Y/edit\#gid=1262276228}{This spreadsheet}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{How do I apply to them?}
+    \begin{itemize}
+        \item Personal Statement \pause
+        \item 2 Letters of Rec \pause
+        \item Resume / CV \pause
+        \item Most deadlines are early -- mid March
+        \begin{itemize}
+            \item Start drafting in Winter Break
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Tips \& Tricks}
+    \begin{itemize}
+        \item Most are government funded which means usually US citizens get funding.
+        \begin{itemize}
+            \item It is possible for non-US citizens to get funding in some special cases.
+        \end{itemize} \pause
+        \item Get your letter writers to read your personal statement.
+        \item There are other options outside of REUs (\href{https://www.microsoft.com/en-us/research/}{MSR}, \href{https://www.ttic.edu/}{TTIC}, \href{https://summer.epfl.ch/}{EPFL}, \href{https://inf.ethz.ch/studies/summer-research-fellowship.html}{ETH Z{\"u}rich}, \href{https://www.cis.mpg.de/internships/}{Max Planck}, \href{https://idaccr.org/scamp}{SCAMP}, Independent Study, etc).
+        \item Most people don't apply to enough REUs.
+    \end{itemize} \pause
+    \textcolor{sigma@alertred}{Any other questions?}
+\end{frame}
+
+\begin{frame}{}
+      \begin{center}
+    {\color{sigma@mainblue} \LARGE Questions?}
+  \end{center}
+\end{frame}
+
+\section{Introduction to Group Theory}
+\frame{\sectionpage}
+
+\begin{frame}{Groups and Group Actions}
+    \begin{itemize}
+        \item A \emph{group} is an object in the category of groups
+        \item A \emph{group action} is a functor from a $1$-groupoid to the category of sets
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{What is a Group?}
+    Groups are one of the most ubiquitous objects in all of math. They generalize structures with some sort of addition/multiplication. \pause
+
+    \begin{defn}
+        A \emph{group} is a set $G$ with an operation $\_ \cdot \_ \colon G \times G \to G$ such that
+        \begin{itemize}
+            \item $\cdot$ is associative: $(x \cdot y) \cdot z = x \cdot (y \cdot z)$ \pause
+            \item There exists an identity $e$ such that $g \cdot e = g = e \cdot g$ \pause
+            \item Every element $g$ has an inverse $g^{-1}$ such that $g \cdot g^{-1} = e = g^{-1} \cdot g$
+        \end{itemize}
+    We will usually just write $x \cdot y$ as $xy$
+        
+    \end{defn}
+\end{frame}
+
+\begin{frame}{Important Examples of Groups}
+    Consider the set $S_n$ of bijections $\sigma\colon [n] \to [n]$ where $[n] = \set{1, \ldots, n}$. 
+    This forms a group with ``multiplication'' using composition\pause
+    \begin{itemize}
+        \item Composing bijections with each other yields a bijection
+        \item Identity: \pause $\id(i) = i$ for all $1 \leq i \leq n$ \pause
+        \item Inverses: \pause $\sigma$ has an inverse $\sigma$ such that $\sigma \circ \sigma^{-1} = \id$
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Important Examples of Groups}
+    Recall that the integers mod $p$ are $ \Z_{p} = \set{1, 2, \ldots, p}$ with addition and multiplication done modulo $p$.
+    Consider the set $\GL(n, p)$ of all $n \times n$ matrices with entries in $\Z_p$ with non-zero determinant. 
+    This forms a group with matrix multiplication \pause
+    \begin{itemize}
+        \item Multiplying two matrices with non-zero determinant yields a matrix with non-zero determinant since $\det(AB) = \det(A) \cdot \det(B)$
+        \item Identity: \pause $I_n$ with $1$s on the diagonal and $0$s elsewhere
+        \item Inverses: \pause Matrices have an inverse if and only if they have non-zero determinant, so each $A$ has an inverse $A^{-1}$ such that $A \times A^{-1} = I_n$
+    \end{itemize}
+    If you've taken Linear Algebra, these are just invertible linear transformations!
+\end{frame}
+
+\begin{frame}{Group Isomorphism}
+    Consider the following two groups:
+    \[
+       G = \Bigg\{  { \id = \begin{pmatrix} 1 & 2 & 3 \\ 1 & 2 & 3 \end{pmatrix}}, \sigma =  {\begin{pmatrix} 1 & 2 & 3 \\ 2 & 3 & 1 \end{pmatrix}},  { \sigma^2 = \begin{pmatrix} 1 & 2 & 3 \\ 3 & 1 & 2 \end{pmatrix}}  \Bigg\}  \subseteq S_3
+    \]
+    \[
+     \hspace{-30pt}  \Z_3 = \{ \hspace{45pt} 0, \hspace{70pt} 1, \hspace{75pt} 2 \hspace{20pt} \}  
+    \]
+    So $G$ are some permutations with the operation of composition and $\Z_3$ are integers modulo $3$ where the operation is addition but we keep the remainder after division by $3$. So $2 + 2 \equiv 1 \pmod{3}$.
+    
+    \textcolor{sigma@alertred}{Question:} In what sense are these two groups the same group? \pause
+
+    \textcolor{sigma@mainblue}{Answer:} Mapping $\id \mapsto 0$, $\sigma \mapsto 1$, $\sigma^2 \mapsto 2$ preserve operations! \pause
+    
+    Notice that $\sigma \circ \sigma = \sigma^2$ and $1 + 1 \equiv 2 \pmod{3}$. \pause
+    
+    Similarly, $\sigma \circ \sigma \circ \sigma = \id$ and $1 + 1 + 1 \equiv 0 \pmod{3}$.
+\end{frame}
+
+\begin{frame}{Group Actions}
+    We want to study how a group $G$ interacts with other sets. \pause
+    Let $\Omega$ be some set.
+    
+    \begin{defn}
+        Then a \emph{group action} is an operation $\_ \cdot \_ \colon G \times \Omega \to \Omega$ such that \pause
+        \begin{itemize}
+            \item $e\cdot x = x$, for all $x\in \Omega$ \pause
+            \item $g\cdot(h\cdot x) = (gh)\cdot x$, for all $g,h\in G$, and for all $x\in \Omega$
+        \end{itemize}
+    We write $G \acts \Omega$.
+    \end{defn}
+    
+    To prevent confusion with the group operation in $G$, we will keep the $\cdot$ when talking about actions.
+\end{frame}
+
+\begin{frame}{Important Examples of Group Actions}
+    Let $G = S_n$ and $\Omega = [n]$. \pause
+    \begin{itemize}
+        \item Say $\sigma\colon [n] \to [n] \in S_n$ and $i \in [n]$. 
+            What would be a good choice of action $\sigma \cdot i$? \pause
+        \item $\sigma \cdot i \defeq \sigma(i)$ \pause
+    \end{itemize}
+
+    Now let $G$ be a group of invertible linear transformations from a vector space $V \to V$. \pause
+    \begin{itemize}
+        \item Say $T\colon V \to V \in G$ and $v \in V$. 
+            What would be a good choice of action $T \cdot v$? \pause
+        \item $T \cdot v \defeq T(v)$
+    \end{itemize}
+    
+\end{frame}
+
+\begin{frame}{Orbits and Stabilizers}
+    We want to study the structure of $G \acts \Omega$.
+
+    \begin{defn}
+        The \emph{orbit} of $\alpha \in \Omega$ is the set $G \cdot \alpha = \Set{g \cdot \alpha | g \in G}$
+    \end{defn} \pause
+
+    Every element of $\Omega$ belongs in some orbit.
+    It turns out the orbits partition $\Omega$. \pause
+
+    \begin{defn}
+        The \emph{stabilizer} of $\alpha \in \Omega$ is the set $G_\alpha = \Set{g \in G | g \cdot \alpha = \alpha}$
+    \end{defn} \pause
+
+    \textcolor{sigma@alertred}{Exercise:} Stabilizers are subgroups of $G$
+\end{frame}
+
+\begin{frame}{Example}
+    \[
+       G = \Bigg\{  { \id = \begin{pmatrix} 1 & 2 & 3 & 4 \\ 1 & 2 & 3 & 4 \end{pmatrix}}, \sigma =  {\begin{pmatrix} 1 & 2 & 3 & 4 \\ 2 & 3 & 1 & 4 \end{pmatrix}},  { \sigma^2 = \begin{pmatrix} 1 & 2 & 3 & 4 \\ 3 & 1 & 2 & 4 \end{pmatrix}}  \Bigg\}  \subseteq S_4
+    \]
+    This is the same group as before, but now $4$ is a valid input and we don't do anything to it.
+    \textcolor{sigma@alertred}{Exercise:} Check that this is a subgroup of $S_4$.
+
+    Consider $G \acts [4]$.
+
+    \begin{itemize}
+        \item $G \cdot 1 = $ \pause $\set{1, 2, 3}$ \pause
+        \item $G \cdot 4 = $ \pause $\set{4}$       \pause
+        \item $G_1 = $       \pause $\set{\id}$     \pause
+        \item $G_4 = $       \pause $G$
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Group Classification}
+    \begin{center}
+        The \emph{Group Classification Problem} is the problem of identifying groups satisfying some property ``up to'' isomorphism.
+    \end{center} \pause
+
+    \vspace{40pt}
+
+    \begin{itemize}
+        \item This is one of the hardest problems in all of group theory. \pause
+        \item Even checking if two finite groups are isomorphic is difficult for computer. \pause
+        \item The classification of the finite simple groups took tens of thousands of pages written by over 100 authors between 1955 and 2004.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Rank}
+    \begin{itemize}
+        \item Let $G$ be some group of permutations in $S_n$ and consider $G \acts [n]$ such that $G$ only has one orbit.
+        \item Let $G_0$ be the stabilizer of some element of $\Omega$. 
+        It turns out it doesn't matter which one.
+    \end{itemize} \pause
+
+    \begin{defn}
+        The \emph{rank} of $G$ is the number of orbits of $G_0 \acts [n]$.
+    \end{defn}
+
+    This is a sort of measurement of the ``reach'' of stabilizer subgroups of $G$.
+\end{frame}
+
+\section{Groups, Algorithms, and Programming}
+\frame{\sectionpage}
+
+\begin{frame}{Structure}
+    \begin{itemize}
+        \item Let $G$ be some group of permutations in $S_n$ and consider $G \acts [n]$ such that $G$ only has one orbit.
+        \item Let $G_0$ be the stabilizer of some element of $\Omega$.  \pause
+        \item \textcolor{sigma@mainblue}{Result 1:} This is the same as considering $G_0 \acts V$ where $G_0$ is now a group of linear transformations and $V$ is a vector space $\F_p^k$. 
+        \item \# Orbits of $G_0 \acts [n]$ = \# Orbits of $G_0 \acts \F_p^k$. \pause 
+        \item \textcolor{sigma@mainblue}{Result 2:} $G_0$ must contain a certain subgroup $E$ of order $q^{2m + 1}$.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Making Change using Group Theory}
+    So now we can consider $G_0 \acts \F_p^k$ and $E \subseteq G_0$ $\abs{E} = q^{2m + 1}$.
+    This gives us a nice set of parameters.
+
+    \begin{enumerate}
+        \item We find a value $B(p, k, q, m)$ such that $\abs{G_0}$ divides $B$ \pause
+        \item A theorem in group theory tells us that the size of orbits of $G_0$ divides $\abs{G_0}$, so they divide $B$
+        \begin{itemize}
+            \item Let $d_1, \ldots, d_t$ be the divisors of $B$
+        \end{itemize}
+        \item We know there is one orbit of size $1$ and the sizes of the other orbits must sum up to $p^k - 1$ \pause
+    \end{enumerate}
+
+    \textcolor{sigma@mainblue}{Result 3: } We can get a lower bound on rank by solving the \emph{Change Making Problem} with coins $d_1, \ldots, d_t$ and target value $p^k - 1$.    
+\end{frame}
+
+\begin{frame}{Making Change using Group Theory}
+    In the \emph{Change-making Problem}, we are given coins from some set of denominations $d_1, \ldots, d_t$ and a target value $T$, we want to ``make change'' for $T$ using as few coins as possible
+
+    \vspace{20pt}
+    
+    \begin{itemize}
+        \item We have a fixed set of possible sizes of orbits and a target value $p^k - 1$ \pause
+        \item We know the orbits partition this target value \pause
+        \item A worst case lower bound is the most efficient packing as possible
+        \item Thus we want to solve the Change Making Problem with coins $d_1, \ldots, d_t$ and target value $p^k - 1$.    
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Inductively Making Change}
+    Let \emph{coins} $= [d_1, \ldots, d_n]$ be a sorted list of denominations of coins.
+    Let \textsc{NumCoins}$(i, c)$ be the smallest possible number coins of denomination $[d_1, \ldots, d_c]$ needed make change for $i$
+    \begin{itemize}
+        \item If \emph{coins} = $[1, 3, 5, 7]$ then \textsc{NumCoins}$(10, 1) = 10$ but \textsc{NumCoins}$(10, 4) = 2$
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Inductively Making Change}
+    Let \emph{coins} $= [d_1, \ldots, d_n]$ be a sorted list of denominations of coins.
+    Let \textsc{NumCoins}$(i, c)$ be the smallest possible number coins of denomination $[d_1, \ldots, d_c]$ needed make change for $i$. 
+    \vspace{10pt}
+    
+    $\textsc{NumCoins}(i, c) = $
+    \[
+        \begin{cases}
+            \infty & c = 0 \\
+            \textsc{NumCoins}(i, c - 1) & i < \textit{coins}[c] \\
+            1 & i = \textit{coins}[c] \\
+            \min\set{\textsc{NumCoins}(i, c - 1), 1 + \textsc{NumCoins}(i - \textit{coins}[c], c)} & \text{otherwise}
+        \end{cases}
+    \]
+\end{frame}
+
+
+
+\begin{frame}{A (very high level) Overview of the Whole Paper}
+    \begin{enumerate}
+        \item Define the parameters $p, k, q, m$ \pause
+        \item Do a bunch of pure math to get finite bounds on these parameters
+        \item Enumerate all possible sets of parameters and keep the ones that have a lower bound $\leq 6$
+    \end{enumerate}
+\end{frame}
+
+\begin{frame}{A (very high level) Overview of the Whole Paper}
+    For each set of valid parameters $p, k, q, m$.
+    Let $N =$ the largest possible $N$ such that $N \acts \F_p^k$ \pause
+    \begin{enumerate}
+        \item Check if the subgroup $E$ with $\abs{E} = q^{2m + 1}$ is contained in $N$ \textcolor{sigma@alertred}{(HARD!)} \pause
+        \item Check if $N$ has rank $\leq 6$ \pause
+        \item Enumerate all possible subgroups of $N$ \textcolor{sigma@alertred}{(HARD!)} \pause
+        \item Repeat for each subgroup
+    \end{enumerate}
+\end{frame}
+
+\begin{frame}{How?}
+    \begin{itemize}
+        \item All of this was done in a programming language called \textcolor{sigma@mainblue}{\textsc{GAP}}: Groups, Algorithms, and Programming \pause
+        \item \textsc{GAP} is just one of many computational algebra systems
+        \begin{itemize}
+            \item SageMath (Built on top of Python
+            \item Mathmatica
+            \item Magma (popular in Cryptography)
+            \item Macauley2 (Created at UIUC!)
+        \end{itemize} \pause
+        \item Hard computations were done on AWS.
+        \item These techniques extend to higher ranks but computational resources are a large issue.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{More Details?}
+    \begin{itemize}
+        \item Check out the paper (linked on my website \href{https://www.anakin-dey.com/}{\ul{anakin-dey.com}})
+        \item Come to the Undergraduate Math Seminar (details coming soon)
+        \item Ask me in the Discord!
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{}
+      \begin{center}
+    {\color{sigma@mainblue} \LARGE Questions?}
+  \end{center}
+\end{frame}
+
+% Quotes are fun, find some to use!
+\font\eightss=cmssq8
+\font\eightssi=cmssqi8
+\newcommand\quoteAuthorDate[3]{\begingroup
+  \baselineskip 10pt
+  \parfillskip 0pt
+  \interlinepenalty 10000 % not needed in example
+  \leftskip 0pt plus 40pc minus \parindent
+  \let\rm=\eightss
+  \let\sl=\eightssi
+  \everypar{\sl}#1\par
+  \nobreak\smallskip
+  \noindent\rm--- #2\unskip\enspace(#3)\par
+  \endgroup}
+% If someone can figure out how to horizontally center this and make the text bigger that'd be cool
+\begin{frame}
+    \begin{center}
+        \item \quoteAuthorDate{So long and thanks for all the fish!}{DOUGLAS ADAMS}{\color{sigma@mainblue} 1979}
+    \end{center}
+\end{frame}
+
+% Remove this slide if you came up with all the material yourself
+\begin{frame}{Bibliography}
+    \bibliography{refs}
+    \bibliographystyle{alpha}
+\end{frame}
+
+\end{document}
