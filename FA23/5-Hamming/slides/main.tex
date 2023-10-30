@@ -1,0 +1,496 @@
+% Mirror: https://github.com/SIGma-UIUC/presentation-format
+% --------------------------------------------------------------------
+% This is a simple Beamer document that uses beamerthemesigma.sty
+% Reading the comments should help you create a presentation even if
+% you've never used Beamer before.
+% --------------------------------------------------------------------
+
+% Set our document class to Beamer
+\documentclass[aspectratio=169, handout]{beamer}
+% \documentclass[aspectratio=169, handout]{beamer}
+% Add handout option to ignore pauses
+
+
+
+% From Jeff E
+\usepackage{algo}
+% Some more macros
+\usepackage{sigmastyle}
+\usepackage{minted}
+
+\usepackage{colortbl}
+\definecolor{LightRed}{RGB}{252,160,140}
+\newcolumntype{a}{>{\columncolor{LightRed}}c}
+
+% Set a title
+\title{Hamming Codes}
+
+% Set a subtitle if you desire
+% \subtitle{[TAOCP 5 8.9.10.11]}
+
+% Whoever worked on the presentation:
+\author{Sam Ruggerio}
+
+% Date looks ugly, so leave blank
+\date{}
+
+% An institute name, if you're so inclined
+% \institute{University of Illinois Urbana-Champaign}
+
+% Use the SIGma theme for this Beamer presentation
+\usetheme{sigma}
+% --------------------------------------------------------------------
+
+\newcommand{\err}[1]{{\color{sigma@alertred}#1}}
+\newcommand{\blu}[1]{{\color{sigma@mainblue}#1}}
+% Begin document
+\begin{document}
+
+% Beamer calls each slide a "frame", defined within the environment:
+% \begin{frame}
+%   <frame content here>
+% \end{frame}
+
+% This frame is just the title.
+\begin{frame}
+\titlepage
+\end{frame}
+
+% A frame with the table of contents.
+% This frame's title is "Outline".
+\begin{frame}{Outline}
+  \tableofcontents
+\end{frame}
+
+% Start a section: *sections* (subsections, etc.) are what show up in the TOC.
+\section{Review}
+% Section pages can be printed thus:
+\frame{\sectionpage}
+% There's a way to automate this, see:
+% https://tex.stackexchange.com/questions/178800/creating-sections-each-with-title-pages-in-beamers-slides/178803
+\begin{frame}{Error Correction and Detection}
+    \begin{itemize}
+        \item Sending messages between parties might be subject to noise and errors. \pause
+        \item How do we: \pause
+            \begin{itemize}
+                \item Detect Errors? \pause
+                \item Correct Errors? \pause
+            \end{itemize}
+        \item The goal is to send a message that minimizes the necessary redundancy to achieve both goals.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Error Correction and Detection}
+    \begin{itemize}
+        \item Easy solution: send $k$ bits for every bit. Use majority voting to determine true bit. \pause
+        \item For example, the message $1011$:
+        \begin{itemize}
+            \item I send: \ \ \ \ \ \ $11111000001111111111$ (i.e. $k=5$) \pause
+            \item You receive $11\err{0}1100\err{11}0\err{0}111111111$ \pause
+            \item You determine the correct message by voting $1011$ \pause
+        \end{itemize}
+        \item Recall the \emph{rate} of a code is $\frac{\text{\textit{len}(original message)}}{\text{\textit{len}(code word)}}$
+        \item Good robustness, but our rate is 20\% (4 extra bits for every 1 bit of information).
+    \end{itemize}
+\end{frame}
+
+\section{Hamming Codes}
+
+\frame{\sectionpage}
+
+\begin{frame}{Better Codes}
+    \begin{itemize}
+        \item Can we do better? \pause
+        \item \emph{Claim:} For 11 bits, we can correct 1 error, and detect 2 errors, using only 5 bits, to make ``nice'' 16 bit blocks  \pause
+        \begin{itemize}
+            \item 11/16 = 68.75\% rate!
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Block Messages}
+    \begin{columns}[c]
+    \begin{column}{5cm}
+    \begin{table}
+        \centering
+        \begin{tabular}{|c|c|c|c|}
+            \hline 
+            0 & 0 & 0 & 0 \\ \hline
+            0 & 0 & 0 & 0 \\ \hline
+            0 & 0 & 0 & 0 \\ \hline
+            0 & 0 & 0 & 0 \\ \hline
+        \end{tabular}
+    \end{table}
+    \end{column}
+    \hfill
+    \begin{column}{5cm}
+        \begin{itemize}
+            \item Consider a 16-bit block
+        \end{itemize}
+    \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Block Messages}
+    \begin{columns}[c]
+    \begin{column}{5cm}
+    \begin{table}
+        \centering
+        \begin{tabular}{|c|c|c|c|}
+            \hline 
+            0 & 0 & 0 & \blu{0} \\ \hline
+            0 & \blu{1} & \blu{1} & \blu{0} \\ \hline
+            0 & \blu{1} & \blu{0} & \blu{0} \\ \hline
+            \blu{1} & \blu{0} & \blu{1} & \blu{1} \\ \hline
+        \end{tabular}
+    \end{table}
+    \end{column}
+    \hfill
+    \begin{column}{5cm}
+        \begin{itemize}
+            \item Consider a 16-bit block
+            \item We want to fill it with the message 01101001011
+        \end{itemize}
+    \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Block Messages}
+    \begin{columns}[c]
+    \begin{column}{5cm}
+    \begin{table}
+        \centering
+        \begin{tabular}{|c|c|c|c|}
+            \hline 
+            \err{0} & \err{0} & \err{0} & \blu{0} \\ \hline
+            \err{0} & \blu{1} & \blu{1} & \blu{0} \\ \hline
+            \err{0} & \blu{1} & \blu{0} & \blu{0} \\ \hline
+            \blu{1} & \blu{0} & \blu{1} & \blu{1} \\ \hline
+        \end{tabular}
+    \end{table}
+    \end{column}
+    \hfill
+    \begin{column}{5cm}
+        \begin{itemize}
+            \item Consider a 16-bit block
+            \item We want to fill it with the message 01101001011
+            \item We'll use the remaining 5 bits to mark \err{parity} of certain regions of the block.
+        \end{itemize}
+    \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Hamming Codes}
+    \begin{columns}[c]
+    \begin{column}{5cm}
+    \begin{table}
+        \centering
+        \begin{tabular}{|c|a|c|a|}
+            \hline 
+            0 & \blu{\textbf{1}} & 0 & 0 \\ \hline
+            0 & 1 & 1 & 0 \\ \hline
+            0 & 1 & 0 & 0 \\ \hline
+            1 & 0 & 1 & 1 \\ \hline
+        \end{tabular}
+    \end{table}
+    \end{column}
+    \hfill
+    \begin{column}{5cm}
+        \begin{itemize}
+            \item We use the parity bit to keep the marked region even parity (ignoring parity bits themselves).
+        \end{itemize}
+    \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Hamming Codes}
+    \begin{columns}[c]
+    \begin{column}{5cm}
+    \begin{table}
+        \centering
+        \begin{tabular}{|c|c|a|a|}
+            \hline 
+            0 & 1 & \blu{\textbf{1}} & 0 \\ \hline
+            0 & 1 & 1 & 0 \\ \hline
+            0 & 1 & 0 & 0 \\ \hline
+            1 & 0 & 1 & 1 \\ \hline
+        \end{tabular}
+    \end{table}
+    \end{column}
+    \hfill
+    \begin{column}{5cm}
+        \begin{itemize}
+            \item We use the parity bit to keep the marked region even parity (ignoring parity bits themselves).
+        \end{itemize}
+    \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Hamming Codes}
+    \begin{columns}[c]
+    \begin{column}{5cm}
+    \begin{table}
+        \centering
+        \begin{tabular}{|c|c|c|c|}
+            \hline
+            0 & 1 & 1 & 0 \\ \hline
+            \rowcolor{LightRed}
+            \blu{\textbf{1}} & 1 & 1 & 0 \\ \hline
+            0 & 1 & 0 & 0 \\ \hline
+            \rowcolor{LightRed}
+            1 & 0 & 1 & 1 \\ \hline
+        \end{tabular}
+    \end{table}
+    \end{column}
+    \hfill
+    \begin{column}{5cm}
+        \begin{itemize}
+            \item We use the parity bit to keep the marked region even parity (ignoring parity bits themselves).
+        \end{itemize}
+    \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Hamming Codes}
+    \begin{columns}[c]
+    \begin{column}{5cm}
+    \begin{table}
+        \centering
+        \begin{tabular}{|c|c|c|c|}
+            \hline 
+            0 & 1 & 1 & 0 \\ \hline
+            1 & 1 & 1 & 0 \\ \hline
+            \rowcolor{LightRed}
+            \blu{\textbf{0}} & 1 & 0 & 0 \\ \hline
+            \rowcolor{LightRed}
+            1 & 0 & 1 & 1 \\ \hline
+        \end{tabular}
+    \end{table}
+    \end{column}
+    \hfill
+    \begin{column}{5cm}
+        \begin{itemize}
+            \item We use the parity bit to keep the marked region even parity (ignoring parity bits themselves).
+        \end{itemize}
+    \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Hamming Codes}
+    \begin{columns}[c]
+    \begin{column}{5cm}
+    \begin{table}
+        \centering
+        \begin{tabular}{|c|c|c|c|}
+            \hline 
+            \blu{\textbf{0}} & 1 & 1 & 0 \\ \hline
+            1 & 1 & 1 & 0 \\ \hline
+            0 & 1 & 0 & 0 \\ \hline
+            1 & 0 & 1 & 1 \\ \hline
+        \end{tabular}
+    \end{table}
+    \end{column}
+    \hfill
+    \begin{column}{5cm}
+        \begin{itemize}
+            \item What about the bit in the zero position? \pause
+            \item We'll set it to keep the parity of the entire table. \pause
+            \item This allows us to detect a second error, should one exist.
+        \end{itemize}
+    \end{column}
+    \end{columns}
+\end{frame}
+
+
+\begin{frame}{Hamming Codes}
+    \begin{itemize}
+        \item We can detect the error by checking each parity bit, and fix it!
+    \end{itemize}
+    \begin{columns}[c]
+    \begin{column}{2cm}
+    \begin{table}
+        \centering
+        \begin{tabular}{|c|a|c|a|}
+            \hline 
+            0 & 1 & 1 & 0 \\ \hline
+            1 & 1 & \blu{0} & 0 \\ \hline
+            0 & 1 & 0 & 0 \\ \hline
+            1 & 0 & 1 & 1 \\ \hline
+        \end{tabular}
+    \end{table}
+    \end{column}
+    \hfill
+    \begin{column}{2cm}
+    \begin{table}
+        \centering
+        \begin{tabular}{|c|c|a|a|}
+            \hline 
+            0 & 1 & 1 & 0 \\ \hline
+            1 & 1 & \blu{0} & 0 \\ \hline
+            0 & 1 & 0 & 0 \\ \hline
+            1 & 0 & 1 & 1 \\ \hline
+        \end{tabular}
+    \end{table}
+    \end{column}
+    \hfill
+    \begin{column}{2cm}
+    \begin{table}
+        \centering
+        \begin{tabular}{|c|c|c|c|}
+            \hline 
+            0 & 1 & 1 & 0 \\ \hline
+            \rowcolor{LightRed}
+            1 & 1 & \blu{0} & 0 \\ \hline
+            0 & 1 & 0 & 0 \\ \hline
+            \rowcolor{LightRed}
+            1 & 0 & 1 & 1 \\ \hline
+        \end{tabular}
+    \end{table}
+    \end{column}
+    \hfill
+    \begin{column}{2cm}
+    \begin{table}
+        \centering
+        \begin{tabular}{|c|c|c|c|}
+            \hline     
+            0 & 1 & 1 & 0 \\ \hline
+            1 & 1 & \blu{0} & 0 \\ \hline
+            \rowcolor{LightRed}
+            0 & 1 & 0 & 0 \\ \hline
+            \rowcolor{LightRed}
+            1 & 0 & 1 & 1 \\ \hline
+        \end{tabular}
+    \end{table}
+    \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{}
+      \begin{center}
+    {\color{sigma@mainblue} \LARGE Questions?}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Making More Codes}
+    \begin{itemize}
+        \item What we described was a (15,11) Extended Hamming Code. (11 bits of message, 4 bit EC parity, 1 bit detection) \pause
+        \item You can easily make any $(2^n-1,2^n-(n+1))$ Hamming Code the same way. 
+        \begin{itemize}
+            \item Place each parity bit in the row/column corresponding to powers of 2 \pause 
+        \end{itemize}
+        \item In a $2^n$ block, we can efficiently detect 2 errors, and correct 1 error.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{In Practice}
+    \begin{itemize}
+        \item You can implement hamming code processing in hardware, or in software
+        \item When sending info, errors tend to happen in \textit{bursts}.
+        \item Interleave blocks to spread out the errors that could happen.
+    \end{itemize}
+\end{frame}
+
+\section{Hamming Bound}
+
+\frame{\sectionpage}
+
+\begin{frame}{Hamming Bound}
+    \begin{itemize}
+        \item Exactly how efficient can we get with error correcting codes? \pause
+        \item We have a lower bound called the {\color{sigma@mainblue}Hamming Bound} \pause
+        \item It gives us the efficiency of how well any error correcting code can utilize the space within the entire code word. \pause
+        \item Codes that achieve this bound are called \blu{Perfect Codes}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Hamming Bound}
+    Let $\Sigma = \{0,1\}$. Let $A_\Sigma(n,d)$ be the maximum possible size of a block code $C$ of length $n$, with minimum hamming distance $d$ between elements of the block code.
+
+    Then,
+    $$A_\Sigma(n,d) \leq \frac{|\Sigma|^n}{\sum\limits_{k=0}^{\lfloor (d-1)/2\rfloor} \binom{n}{k}(|\Sigma|-1)^k}$$
+
+    \textit{(Recall that hamming distance is the number of flips you need to reach another string)}
+\end{frame}
+
+\begin{frame}{Hamming Bound}
+    \begin{itemize}
+        \item We're effectively that over all strings of length $n$ $(|\Sigma|^n)$,\pause
+        \item If we can make at most $t=\lfloor(d-1)/2\rfloor$ errors, \pause
+        \item Then our code $C$ covers the sum over all possible errors up to $k\leq t$, choosing $k$ bits to flip to some other bit. 
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Hamming Bound}
+    Let $\Sigma = \{0,1\}$. Let $A_\Sigma(n,d)$ be the maximum possible size of a block code $C$ of length $n$, with minimum hamming distance $d$ between elements of the block code.
+
+    Then,
+    $$A_2(n,d) \leq \frac{2^n}{\sum\limits_{k=0}^{\lfloor (d-1)/2\rfloor} \binom{n}{k}}$$
+
+    \textit{(Recall that hamming distance is the number of flips you need to reach another string)}
+\end{frame}
+
+\begin{frame}{What does $A_\Sigma(n,d)$ \textit{mean?}}
+    \begin{itemize}
+        \item We have a $q$-ary language ($q = |\Sigma|$), of which we consider some string of length $n$ \pause
+        \item \textit{How many strings can we make from at most $d$ changes}?
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Computing $A_\Sigma(n,d)$ for Hamming Codes}
+
+    \begin{itemize}
+        \item Our basic (15,11) Hamming code (no 0 bit), requires \textit{three} flips to go from one valid code to another \pause
+        \item While we can detect errors of 2 flips or less, once we go above 2, distinguishing between one valid message to another is impossible. \pause
+        \item This means that the number of strings we can represent with our (15,11) Hamming code, with a minimum hamming distance of $3$ is $2^{11}= 2048$
+    \end{itemize}
+    
+\end{frame}
+
+\begin{frame}{Computing $A_\Sigma(n,d)$ for Hamming Codes}
+    \begin{itemize}
+        \item So let's compute the Hamming bound for $A_\Sigma(15,3)$ \pause
+    \end{itemize}
+    $$\frac{2^{15}}{\sum_{k=0}^1 \binom{15}{k}(2-1)^k} = \frac{2^{15}}{16} = 2048$$ \pause
+    \begin{itemize}
+        \item So our (15,11) Hamming code matches our hamming bound, thus it is considered a \blu{Perfect Code}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Practical, not Perfect}
+    \begin{itemize}
+        \item Our \textit{extended} Hamming code includes that 0 bit to detect \textit{one more error.} \pause
+        \item This means that in a 16 bit code word, we have a minimum hamming distance of 4 \pause
+        \item $A_\Sigma(16,4) \leq 3855.06$, but we still can only represent $2048$ messages. \pause
+        \item Even though its not \textit{perfect}, this is the mechanism still used in error correction within RAM on your computers. Nice powers of 2 are easy to send around.
+    \end{itemize}
+\end{frame}
+
+% Quotes are fun, find some to use!
+\font\eightss=cmssq8
+\font\eightssi=cmssqi8
+\newcommand\quoteAuthorDate[3]{\begingroup
+  \baselineskip 10pt
+  \parfillskip 0pt
+  \interlinepenalty 10000 % not needed in example
+  \leftskip 0pt plus 40pc minus \parindent
+  \let\rm=\eightss
+  \let\sl=\eightssi
+  \everypar{\sl}#1\par
+  \nobreak\smallskip
+  \noindent\rm--- #2\unskip\enspace(#3)\par
+  \endgroup}
+% If someone can figure out how to horizontally center this and make the text bigger that'd be cool
+\begin{frame}
+    \begin{center}
+        \item \quoteAuthorDate{The purpose of computing is insight, not numbers.}{Richard Hamming, PhD UIUC}{1960s}
+    \end{center}
+\end{frame}
+
+% Remove this slide if you came up with all the material yourself
+%im lazy to fix this atm
+% \begin{frame}{Bibliography}
+%     \bibliography{refs}
+%     \bibliographystyle{alpha}
+% \end{frame}
+
+\end{document}

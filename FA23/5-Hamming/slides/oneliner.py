@@ -1,0 +1,1 @@
+reduce(op.xor, [i for i, bit in enumerate(bits) if bit])
