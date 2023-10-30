@@ -35,10 +35,13 @@ def monte_carlo_BER(rounds: int, trials: int, sigma: float) -> float:
     return errs / (trials * rounds)
 
 
+# Increase the number of rounds/trials for more precision!
 ber_exp = [
-    monte_carlo_BER(10**3, 10**4, sqrt(1 / (2 * 10**(y / 10)))) for y in x
+    monte_carlo_BER(10**2, 10**2, sqrt(1 / (2 * 10**(y / 10)))) for y in x
 ]
 ber_exp = [x if x != 0 else float("NaN") for x in ber_exp]
+
+path = "tmp.svg"
 
 plt.plot(x, ber_exp, color='red')
 plt.plot(x, ber, color='black', linewidth=1)
