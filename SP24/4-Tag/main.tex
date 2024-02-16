@@ -1,0 +1,317 @@
+% Mirror: https://github.com/SIGma-UIUC/presentation-format
+% --------------------------------------------------------------------
+% This is a simple Beamer document that uses beamerthemesigma.sty
+% Reading the comments should help you create a presentation even if
+% you've never used Beamer before.
+% --------------------------------------------------------------------
+
+% Set our document class to Beamer
+\documentclass[aspectratio=169]{beamer}
+% \documentclass[aspectratio=169, handout]{beamer}
+% Add handout option to ignore pauses
+
+% From Jeff E
+\usepackage{algo}
+% Some more macros
+\usepackage{sigmastyle}
+
+
+% Set a title
+\title{Some Basic Turing-Complete Systems}
+
+% Whoever worked on the presentation:
+\author{Parth Deshmukh}
+
+% Date looks ugly, so leave blank
+\date{}
+
+% An institute name, if you're so inclined
+% \institute{University of Illinois Urbana-Champaign}
+
+% Use the SIGma theme for this Beamer presentation
+\usetheme{sigma}
+% --------------------------------------------------------------------
+
+% Begin document
+\begin{document}
+
+% Beamer calls each slide a "frame", defined within the environment:
+% \begin{frame}
+%   <frame content here>
+% \end{frame}
+
+% This frame is just the title.
+\begin{frame}
+\titlepage
+\end{frame}
+
+% A frame with the table of contents.
+% This frame's title is "Outline".
+\begin{frame}{Outline}
+  \tableofcontents
+\end{frame}
+
+% Start a section: *sections* (subsections, etc.) are what show up in the TOC.
+\section{Turing-completeness}
+% Section pages can be printed thus:
+\frame{\sectionpage}
+% There's a way to automate this, see:
+% https://tex.stackexchange.com/questions/178800/creating-sections-each-with-title-pages-in-beamers-slides/178803
+
+\begin{frame}{What are some Turing-complete systems?}
+    \begin{itemize}
+        \pause
+        \item Turing machines \pause
+        \item Lambda calculus, formal grammars and languages \pause
+        \item Most programming languages (all of the useful ones) \pause
+        \item Electrical circuits with NAND gates (or NOT and AND/OR gates) \pause
+        \item TeX, SQL (more on that later!) \pause
+        \item (kind of) Minecraft, Cities: Skylines, Dwarf Fortress, Magic: The Gathering, you could probably add to this list
+        % \item \textcolor{sigma@mainblue}{colors} \textcolor{sigma@highlightpink}{are} \textcolor{sigma@alertred}{cool}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{What does it mean to be Turing-complete?}{It runs DOOM (eventually)}
+    \begin{itemize}
+        \item A system of computation is Turing-complete if it can simulate any Turing machine \pause
+        \item Turing machines are \textit{abstract computers} \pause
+        \begin{itemize}
+            \item Memory is an infinite tape \pause
+            \item Computation is performed by following a table of states \pause
+            \item Importantly, Turing machines have \textit{infinite time and space} \pause
+        \end{itemize}
+        \item To show something is Turing-complete, we can show that it simulates an arbitrary Turing machine
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Why Turing machines?}{Some philosophy}
+    \begin{itemize}
+        \item We want to define what it means to compute some function $f: \mathbb{N} \rightarrow \mathbb{N}$ for any input $x$ \pause
+        \item Turns out, two important ways to define this are equivalent: \pause
+        \begin{enumerate}
+            \item Turing-computable functions can be run on a Turing machine \pause
+            \item $\lambda$-computable functions can be written (and solved) in the language of lambda calculus: composing building block functions \pause
+        \end{enumerate}
+        \item The \textcolor{sigma@mainblue}{Church-Turing thesis}\cite{sep-church-turing} posits that these definitions are enough to define all computable functions - there is no challenge to this \pause
+        \item The efficient Church-Turing thesis, in comparison, posits these define all \textit{realistically computable} functions - this is up to debate
+    \end{itemize}
+\end{frame}
+
+% However, this doesn't work in math mode. It is quite annoying to figure out
+% So just copy this as reference
+% This works for \onslide<> and \item<>
+% Really good read on this: 
+%   https://www.texdev.net/2014/01/17/the-beamer-slide-overlay-concept/
+% \begin{frame}{Sequential Math Frames}
+%     Here is a sentence \pause
+%     
+%     I shall now carry out some calculations \pause
+%     \begin{align*}
+%         \onslide<+->{\zeta(s) &= \sum_{n = 1}^\infty \frac{1}{n^s} \\}
+%         \onslide<+->{&= \prod_{p \in \text{primes}} \frac{1}{1 - p^{-s}} \\}
+%         \onslide<.->{&= \frac{1}{1 - 2^-s} \cdot \frac{1}{1 - 3^-s} \cdots \\}
+%         \onslide<+->{&= \frac{1}{\Gamma(s)} \int_0^\infty \frac{x^{s - 1}}{e^x - 1} ~\textrm{d}x\\}
+%     \end{align*}
+% \end{frame}
+
+\section{Tag systems}
+\frame{\sectionpage}
+
+\begin{frame}{Motivations}
+    \begin{itemize}
+        \item It can be useful to find simple Turing-complete systems to study \pause
+        \item Most frequently, it's easiest to show a system of interest is Turing-complete through one or more intermediary steps \pause
+        \item We will demonstrate this through \textit{cyclic tag systems}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Tag systems}
+\begin{defn}
+    A \textcolor{sigma@mainblue}{$m$-tag system} is specified via a triplet $(m, A, P):$
+    \begin{enumerate}
+        \item $m:$ the deletion number, $m \geq 1$
+        \item $A:$ the alphabet, a set of symbols
+        \item $P:$ a set of production rules, essentially a function $P: A \rightarrow A^*$
+    \end{enumerate}
+    \pause
+    \vspace{8pt}
+    A tag system takes as input a word $W$ in $A^*$. Let $w$ be the first letter in $W$. At each step, it removes the first $m$ letters and concatenates $P(w)$ to the end of $W$, re-reading $w$ as it goes.
+    \vspace{4pt}
+    As the tag system iterates, we denote $W$ to be the \textcolor{sigma@mainblue}{register.}
+\end{defn}
+\end{frame}
+
+\begin{frame}{Halt states}
+    Unlike Turing machines, tag systems can halt in two ways: \pause
+    \begin{enumerate}
+        \item Either the machine halts if the register goes below a set size... \pause
+        \item ...or we include a halting symbol $h \in A$ that halts the machine when it reaches the head (when $P(h)$ is called).
+    \end{enumerate}
+\end{frame}
+
+\begin{frame}{A worked example}
+    This example is from \cite{DEMOL200892} and calculates the Collatz/hailstone sequence of the given number.
+\begin{gather*}
+    m = 2 \\
+    A = \{a, c, y\} \\
+    P = \begin{cases}
+        a &\rightarrow cy \\
+        c &\rightarrow a \\
+        y &\rightarrow aaa
+    \end{cases}
+\end{gather*}
+A number $n$ is represented with repeating $a$ $n$ times. We'll start with $n = 5$, so the starting word is $aaaaa.$ We halt when our register has only one symbol in it.
+\end{frame}
+
+\begin{frame}{Doing the worked example}
+\begin{itemize}
+    \item First letter is $a$: we append $cy,$ and remove 2 letters from the front, so $aaaaa \rightarrow aaacy$ \pause
+    \item Similarly, $aaacy \rightarrow acycy \rightarrow ycycy$ \pause
+    \item Now, the first letter is $y$: append $aaa$, so $ycycy \rightarrow ycyaaa \rightarrow yaaaaaa \rightarrow aaaaaaaa = 8$ \pause
+    \item We've computed two steps in one: $5 \rightarrow 3(5) + 1 \rightarrow \frac{3(5) + 1}{2} = 8$ \pause
+    \item If you continue from here, you'll see the production rule $c \rightarrow a$ is used to divide our number by 2 \pause
+    \item We halt when our register has one symbol, which ends up being $a \implies$ we halt iff the Collatz sequence terminates
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Tag systems are Turing-complete}{(trust me bro)}
+\begin{thrm}
+    2-tag systems are Turing-complete\cite{10.1145/321203.321206}.
+\end{thrm}
+\begin{pf}
+    Cocke and Minsky show a construction to make a tag system simulating a given Turing machine. The construction is too complicated to cover here; it uses 17 symbols per state in the Turing machine it wants to simulate, and works by representing Turing machine states with special words.
+\end{pf}
+\end{frame}
+
+\section{Cyclic tag systems}
+\frame{\sectionpage}
+
+\begin{frame}{Can we go simpler?}{Tag systems are tough to work with!}
+\pause
+    \begin{itemize}
+        \item The answer is yes, actually \pause
+        \item \textcolor{sigma@mainblue}{Cyclic tag systems} can simulate any tag system and have much simpler specifications, making them way easier to work with \pause
+        \item The downside is that $P(x)$ has a different function signature \pause
+        \item Halting is also more confusing
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Cyclic tag systems}
+    \begin{defn}
+        A \textcolor{sigma@mainblue}{cyclic tag system} is a modified tag system where $m=1$ and $A=\{0, 1\}.$ The set of production rules is a function $P: \mathbb{Z}_n \rightarrow A^*$ where $n$ is the number of production rules.
+    \end{defn}
+    \pause
+    A cyclic tag system takes as input a word $W$ in $A^*$ and additionally tracks its step number $k \geq 1$. At each step, it removes the first letter $w,$  concatenating $P(k)$ to the end of $W$ only if $w=1.$
+\end{frame}
+
+\begin{frame}{Some notes on the definition}
+    \begin{itemize}
+        \item This is a non-standard but equivalent definition; usually $P$ is taken to be an ordered list of words instead of a function \pause
+        \item Why this definition? Since choice of $P$ \textit{exactly specifies a cyclic tag system!}\pause
+        \begin{itemize}
+            \item Therefore, there are as many cyclic tag systems with $n$ rules as there are functions $\mathbb{Z}_n \rightarrow A^*$ \pause
+            \item Also, this definition is easier to code: removes one pointer
+        \end{itemize} \pause
+        \item We can rewrite the updating rule at each step compactly: $$(W, k) \rightarrow (Wq, k+1)$$
+        $$q = \begin{cases}
+            \epsilon &\text{if } w = 0 \\ P(k) &\text{if } w = 1
+        \end{cases}$$
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Halt states}
+    Cyclic tag systems also have two halts: \pause
+    \begin{enumerate}
+        \item Either the register clears out entirely, or... \pause
+        \item ...the system enters an infinitely repeating loop of states
+    \end{enumerate} \pause
+    What an infinite loop usually would be is actually represented by the register growing to unbounded length! \pause
+    \vspace{4pt}
+    
+    Side note: These two are equivalent; see \url{https://cs.stackexchange.com/a/44931} for a sketch of why.
+\end{frame}
+
+\begin{frame}{Are cyclic tag systems Turing-complete?}
+    \pause
+    \begin{itemize}
+        \item Remember how we saw that tag systems are Turing-complete? \pause
+        \item The heavy lifting's already done! Just show that we can simulate tag systems with cyclic tag systems \pause
+        \item Thankfully, it's a simple construction: just one-hot encode the alphabet of a tag system \pause
+        \begin{itemize}
+            \item \textcolor{sigma@mainblue}{One-hot encoding} is a common trick: if you have $n$ categories, you map each category to one of the standard basis vectors in $\mathbb{R}^n$ to keep them both equally weighted and orthogonal to each other
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Proving cyclic tag systems are Turing-complete}
+\begin{itemize}
+    \item Suppose we're given a tag system $(m, A = \{a_1, a_2, \dots a_n\}, P).$ We assume $A$ is ordered; order it if not \pause
+    \item First, one-hot encode the letters: $a_1 = 100\dots, a_2 = 010\dots,$ so on until $a_n = \dots001$ \pause
+    \item Now create the new production rules $\Hat{P}: \mathbb{Z}_{(mn)} \rightarrow \{0, 1\}^*$ as follows: \pause
+    \begin{itemize}
+        \item For $1 \leq k \leq n,$ $\Hat{P}(k) = P(a_k)$ in the one-hot encoded form. This removes the first letter $w$ and concatenates $P(w)$ onto the register. \pause
+        \item For $n < k \leq mn,$ $\Hat{P}(k) = \epsilon.$ This deletes the remaining $m-1$ symbols from the front of the register.
+    \end{itemize} \pause
+    \item Apply this to Cocke and Minsky's construction to simulate any Turing machine!
+\end{itemize}
+\end{frame}
+
+\section{Conclusion}
+\frame{\sectionpage}
+
+\begin{frame}{So what was the point?}
+    \begin{itemize}
+        \item I promised a proof that SQL is Turing-complete \pause
+        \item We've shown that all we need to do is implement a cyclic tag system within SQL: that's a proof that SQL is Turing-complete! \pause
+        \item \url{https://wiki.postgresql.org/wiki/Cyclic_Tag_System} implements a cyclic tag system in \textit{only 28 lines}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{So what was the point?}
+    \begin{itemize}
+        \item Cyclic tag systems are far easier to reason with and implement than directly implementing Turing machines \pause
+        \item I've written a cyclic tag system simulator in Haskell: \url{https://github.com/papermango/cyts} \pause
+        \begin{itemize}
+            \item This is a proof that Haskell is Turing-complete! \pause
+            \item It also lets you run any cyclic tag system of your choice on the command line - check it out if that sounds interesting
+        \end{itemize} \pause
+        \item For fun, go implement a cyclic tag system in any language of your choice - it won't take too long, but you'll have written something that can run DOOM!
+    \end{itemize}
+\end{frame}
+
+% Asking questions is fun but we should answer some first
+\begin{frame}{}
+      \begin{center}
+    {\color{sigma@mainblue} \LARGE Questions?}
+  \end{center}
+\end{frame}
+
+% Quotes are fun, find some to use!
+\font\eightss=cmssq8
+\font\eightssi=cmssqi8
+\newcommand\quoteAuthorDate[3]{\begingroup
+  \baselineskip 10pt
+  \parfillskip 0pt
+  \interlinepenalty 10000 % not needed in example
+  \leftskip 0pt plus 40pc minus \parindent
+  \let\rm=\eightss
+  \let\sl=\eightssi
+  \everypar{\sl}#1\par
+  \nobreak\smallskip
+  \noindent\rm--- #2\unskip\enspace(#3)\par
+  \endgroup}
+% If someone can figure out how to horizontally center this and make the text bigger that'd be cool
+\begin{frame}
+    \begin{center}
+        \item \quoteAuthorDate{Google "hypercomputation."}{SCOTT AARONSON}{\textcolor{sigma@mainblue}{2016}}
+    \end{center}
+\end{frame}
+
+% Remove this slide if you came up with all the material yourself
+\begin{frame}[allowframebreaks]{Bibliography}
+    \tiny
+    \bibliography{refs}
+    \bibliographystyle{alpha}
+\end{frame}
+
+\end{document}
