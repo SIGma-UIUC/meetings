@@ -1,0 +1,898 @@
+% Mirror: https://github.com/SIGma-UIUC/presentation-format
+% --------------------------------------------------------------------
+% This is a simple Beamer document that uses beamerthemesigma.sty
+% Reading the comments should help you create a presentation even if
+% you've never used Beamer before.
+% --------------------------------------------------------------------
+
+% Set our document class to Beamer
+% \documentclass[aspectratio=169]{beamer}
+\documentclass[aspectratio=169]{beamer}
+% Add handout option to ignore pauses
+
+% From Jeff E
+\usepackage{algo}
+% Some more macros
+\usepackage{sigmastyle}
+\usepackage{amssymb}
+\usepackage{subcaption}
+\usepackage{wrapfig}
+
+\usepackage{forest}
+\forestset{
+  default preamble={
+    for tree={
+        grow=south,
+        circle, draw, minimum size=3ex, inner sep=1pt,
+        s sep=3mm,
+    }
+  }
+}
+\usepackage{adjustbox}
+
+\newcommand{\TT}{\mathcal{T}}
+
+% Set a title
+\title{Generating Functions}
+
+% Set a subtitle if you desire
+% \subtitle{[TAOCP 5 8.9.10.11]}
+
+% Whoever worked on the presentation:
+\author{Franklin}
+
+% Date looks ugly, so leave blank
+\date{}
+
+% An institute name, if you're so inclined
+% \institute{University of Illinois Urbana-Champaign}
+
+% Use the SIGma theme for this Beamer presentation
+\usetheme{sigma}
+% --------------------------------------------------------------------
+
+% Begin document
+\begin{document}
+
+% Beamer calls each slide a "frame", defined within the environment:
+% \begin{frame}
+%   <frame content here>
+% \end{frame}
+
+% This frame is just the title.
+\begin{frame}
+\titlepage
+\end{frame}
+
+% A frame with the table of contents.
+% This frame's title is "Outline".
+\begin{frame}{Outline}
+  \tableofcontents
+\end{frame}
+
+% \begin{frame}{Updates!}
+%   % Let's put some real content in this frame:
+%   Weekly updates:
+%   \begin{itemize}
+%     \item SIGma is an excellent SIG.
+%     \item I'm out of ideas for updates.
+%   \end{itemize}
+% \end{frame}
+
+% Start a section: *sections* (subsections, etc.) are what show up in the TOC.
+\section{Overview}
+% Section pages can be printed thus:
+\frame{\sectionpage}
+% There's a way to automate this, see:
+% https://tex.stackexchange.com/questions/178800/creating-sections-each-with-title-pages-in-beamers-slides/178803
+
+\begin{frame}{Introduction}
+  Suppose we have a sequence $a_0, a_1, a_2, \dots$. \pause
+  
+  The \textbf{generating function} for this sequence is
+  \[
+    f(x) = a_0 + a_1x + a_2 x^2 + \cdots + a_k x^k + \cdots,
+  \]
+  a polynomial or power series whose coefficients are the elements of the sequence. \pause
+
+  Generating functions enable us to use manipulations to learn more about the sequence.
+  
+\end{frame}
+
+\begin{frame}{Examples}
+  \begin{center}
+  \begin{tabular}{c|c}
+    \hline \\
+    $1, 6, 15, 20, 15, 6, 1$ & $1 + 6x + 15x^2 + 20x^3 + 15x^4 + 6x^5 + x^6 = (1+x)^6$ \\ 
+    \\ \hline \\
+    $1, 1, 1, 1, \dots$ & $\displaystyle 1 + x + x^2 + x^3 + \cdots = \frac{1}{1-x}$ \\
+    \\ \hline \\
+    $0, 1, 1, 2, 3, 5, 8, 13, \dots$ & $x + x^2 + 2x^3 + 3x^4 + 5x^5 + 8x^6 + 13x^7 + \cdots$ \\
+    \\ \hline
+  \end{tabular}
+  \end{center}
+  
+\end{frame}
+
+\begin{frame}{Size}
+  Often, the terms $x^k$ of a generating function correspond to something of \textit{size} $k$. \pause
+
+  Consider the generating function from the Binomial Theorem:
+  \[\binom{n}{0} + \binom{n}{1}x + \binom{n}{2}x^2 + \cdots + \binom{n}{n}x^n = (1+x)^n.\] \pause
+  The $x^k$ term has coefficient $\displaystyle \binom{n}{k}$. Given a set with $n$ elements, this coefficient is the number of ways to choose a subset of size $k$.
+\end{frame}
+
+\section{Counting}
+\frame{\sectionpage}
+
+\begin{frame}{Coin Tosses} 
+  \textbf{\textcolor{sigma@mainblue}{Q}}:
+  Flip 4 coins. How many ways are there to get 2 heads? \pause
+
+  The answer is $\binom{4}{2} = 6$, but let's see how generating functions can be used. \pause
+
+  Consider a single coin -- it either gives us 1 tail (no heads), or 1 head. \pause
+  There's only one way each of these can occur,
+  so the generating function for a single coin is $1 \cdot x^0 + 1 \cdot x^1 = 1 + x$. \pause
+
+  Here $x$ represents a head -- the coefficient of $x^1$ is the number of ways to get 1 head with a single coin.
+  The "size" in this problem is the total number of heads -- the $x^k$ term will correspond to getting $k$ heads.
+\end{frame}
+
+\begin{frame}{Combining Generating Functions}
+  Now let's combine 2 coins by multiplying their generating functions: \pause
+  \[(\textcolor{red}{1}+\textcolor{blue}{x}) (\textcolor{red}{1}+\textcolor{blue}{x})
+  = \textcolor{red}{1} \cdot \textcolor{red}{1}
+  + \textcolor{red}{1} \cdot \textcolor{blue}{x}
+  + \textcolor{blue}{x} \cdot \textcolor{red}{1}
+  + \textcolor{blue}{x} \cdot \textcolor{blue}{x} = 1 + 2x + x^2.\]
+  What does multiplying mean here? \pause
+  \begin{itemize}
+    \item $\textcolor{red}{1} \cdot \textcolor{red}{1} = x^0$ corresponds to TT (no heads) \pause
+    \item $\textcolor{red}{1} \cdot \textcolor{blue}{x} = x^1$ corresponds to TH (1 head) \pause
+    \item $\textcolor{blue}{x} \cdot \textcolor{red}{1} = x^1$ corresponds to HT (1 head) \pause
+    \item $\textcolor{blue}{x} \cdot \textcolor{blue}{x} = x^2$ corresponds to HH (2 heads) \pause
+  \end{itemize}
+  Each way to get $k$ heads contributes a term of $x^k$ to the product.
+  So the coefficient of $x^k$ in the product is the total number of ways to get $k$ heads!
+  \pause
+
+  For 2 coins, there are 2 ways to get 1 head (coefficient of $x$ in $1 + 2x + x^2$).
+\end{frame}
+
+\begin{frame}{More Coins}
+  If we have 4 coins, simply multiply the generating functions for each:
+  \[ (1+x) (1+x) (1+x) (1+x) = (1+x)^4 = 1 + 4x + 6x^2 + 4x^3 + 1.\]
+  \pause
+  The coefficient of $x^2$ (6) is our answer -- the number of ways to get 2 heads.
+  \pause
+
+  More generally, if we flip $n$ coins, the number of ways to get $k$ heads is
+  the coefficient of $x^k$ in $(1+x)^n$, which is $\binom{n}{k}$.
+\end{frame}
+
+\begin{frame}{Changemaking}
+  \textbf{\textcolor{sigma@mainblue}{Q}}: How many ways can we make a dollar with (unlimited) pennies, nickels, and dimes?
+  \pause
+
+  The generating function for the amounts we can make in pennies is
+  \[1 + x + x^2 + x^3 + \cdots.\]
+  Here our "size" is the total money -- the coefficient of $x^k$ is the number of ways to make $k$ cents.
+
+  For pennies, the coefficients are all 1, because we can make $k$ cents in exactly one way: use $k$ pennies.
+
+\end{frame}
+
+\begin{frame}{Changemaking}
+  For nickels and dimes, the generating functions are
+  \[1 + x^5 + x^{10} + \cdots, \qquad 1 + x^{10} + x^{20} + \cdots.\]
+  \pause
+  Putting it all together, our generating function using pennies, nickels, and dimes is
+  \begin{align*}
+    F(x) &= (1 + x + x^2 + \cdots)(1 + x^5 + x^{10} + \cdots)(1 + x^{10} + x^{20} + \cdots) \\
+    &= \frac{1}{1-x} \cdot \frac{1}{1-x^5} \cdot \frac{1}{1-x^{10}}.
+  \end{align*}
+  \pause
+  The answer for making a dollar is the coefficient of $x^{100}$.
+  This is nontrivial to find, but there are ways \cite{gasarch2014ways}, which we won't go into here.
+\end{frame}
+
+\begin{frame}{Biased Coin Tosses}
+  \textbf{\textcolor{sigma@mainblue}{Q}}: There are $n$ coins $C_1, C_2, \dots, C_n$.
+  For each $k$, coin $C_k$ is biased so that, when tossed, it has probability $\tfrac{1}{(2k+1)}$ of falling heads.
+  If the $n$ coins are tossed, what is the probability that the number of heads is odd? (Putnam 2001)
+  \pause
+  
+  Consider coin $C_1$.
+  It has a $\frac{1}{3}$ chance of being heads, and a $\frac{2}{3}$ chance of being tails.
+  \pause
+
+  The "size" in this problem is the total number of heads.
+  For coin $C_1$, we can write the \textit{probability} generating function
+  $f_1(x) = \frac{1}{3}x + \frac{2}{3}$.
+
+  In other words, $C_1$ has a $\frac{1}{3}$ chance of contributing 1 to the total number of heads, and a $\frac{2}{3}$ chance of contributing 0.
+\end{frame}
+
+\begin{frame}{Combining the Coins}
+  The generating function for coin $C_k$ is $f_k(x) = \frac{1}{2k+1} x + \frac{2k}{2k+1}$.
+  \pause
+
+  Then the probability generating function for all coins is the product of the individual generating functions for each coin:
+  \begin{align*}
+  F_n(x)
+  % &= f_1(x) f_2(x) \cdots f_n(x) \\
+  &= \left( \frac{1}{3}x + \frac{2}{3} \right) \left( \frac{1}{5}x + \frac{4}{5} \right)
+  \cdots \left( \frac{1}{2n+1}x + \frac{2n}{2n+1} \right).
+  \end{align*}
+  \pause
+  Given $k$, this product produces an $x^k$ term for every possible way to choose $k$ factors to take an $x$ term from, corresponding to choosing $k$ coins to land heads.
+  The probabilities for each coin are multiplied, producing the probability that $k$ specific coins land on heads.
+
+  The overall coefficient of $x^k$ is then the sum of all these probabilities over all combinations of $k$ heads. This is the probability of getting $k$ heads!
+\end{frame}
+
+\begin{frame}{The Generating Function}
+  We have
+  \begin{align*}
+    F_n(x) &= \left( \frac{1}{3}x + \frac{2}{3} \right) \left( \frac{1}{5}x + \frac{4}{5} \right)
+    \cdots \left( \frac{1}{2n+1}x + \frac{2n}{2n+1} \right) \\
+    &= \frac{(x+2) (x+4) \cdots (x+2n)}{3 \cdot 5 \cdots (2n+1)} \\
+    &= p_0 + p_1 x + p_2 x^2 + \cdots + p_n x^n,
+  \end{align*}
+  where $p_k$ is the probability of getting $k$ heads.
+  \pause
+  
+  Expanding the generating function and finding each coefficient is difficult.
+  But we actually only want the probability that the total number of heads is odd:
+  \[ p_1 + p_3 + p_5 + \cdots .\]
+\end{frame}
+
+\begin{frame}{The Generating Function}
+  A generating function is still a function of a variable. So what happens if we plug things in?
+  \pause
+  
+  If we plug in $x = 1$, we get
+  \[ F_n(1) = p_0 + p_1 + p_2 + \cdots + p_n
+  = \frac{(1+2)(1+4) \cdots (1+2n)}{3 \cdot 5 \cdots (2n+1)}
+  = 1.\]
+  \pause
+  That seems useful, but we only want the sum of every other coefficient.
+  Let's try $x = -1$:
+  \begin{align*} F_n(-1) &= p_0 - p_1 + p_2 - \cdots \pm p_n \\
+  &= \frac{(-1+2)(-1+4) \cdots (-1+2n)}{3 \cdot 5 \cdots (2n-1) (2n+1)}
+  = \frac{1}{2n+1}.
+  \end{align*}
+\end{frame}
+
+\begin{frame}{Filtering Oddities}
+  We have the sum and alternating sum of the coefficients.
+  Subtracting them will cancel the terms we don't want:
+  \begin{align*}
+    F_n(1) - F_n(-1)
+    &= 2p_1 + 2p_3 + 2p_5 + \cdots \\
+    &= 1 - \frac{1}{2n+1} = \frac{2n}{2n+1}.
+  \end{align*}
+  \pause
+  So $p_1 + p_3 + p_5 + \cdots = \frac{n}{2n+1}$.
+  That's our answer -- the probability of getting an odd number of heads upon rolling the coins $C_1, \dots, C_n$.
+\end{frame}
+
+\begin{frame}{Roots of Unity Filter}
+  Plugging in 1 and $-1$ is a common way to filter out every 2nd term.
+  \pause
+
+  This technique can be extended to filter out every $k$th term, by plugging in the $k$th roots of unity (complex solutions to $x^k = 1$).
+  \pause
+
+  If you're interested, I highly recommend this 3Blue1Brown video:
+  \href{https://youtu.be/bOXCLR3Wric}{https://youtu.be/bOXCLR3Wric}.
+
+  It nicely presents a solution using generating functions and the roots of unity filter to the following problem: 
+  \newline
+
+  \begin{quote}
+    Find the number of subsets of $\{1, 2, 3, 4, 5, \dots, 2000\}$,
+    the sum of whose elements is divisible by 5.
+  \end{quote}
+\end{frame}
+
+\section{Binary Trees}
+\frame{\sectionpage}
+
+\subsection{Enumeration}
+\frame{\subsectionpage}
+
+\begin{frame}{Enumerating Binary Trees}
+  \textbf{\textcolor{sigma@mainblue}{Q}}: How many different binary trees have $n$ nodes? \cite{algoanalysis} \pause
+
+  \begin{itemize}
+    \item For $n = 0$, there is 1 tree -- the empty tree \pause
+    \item For $n = 1$, there is 1 tree -- a single node \pause
+    \item For $n = 2$, there are 2 trees -- a node with a left child, or a node with a right child \pause
+    \item For $n = 3$, there are 5 trees:
+  \end{itemize}
+
+
+  \begin{adjustbox}{valign=t}
+    \begin{forest} [ [] [] ] \end{forest}
+  \end{adjustbox} \hspace{1cm}
+  \begin{adjustbox}{valign=t}
+    \begin{forest} [ [[] [, phantom]] [, phantom]] \end{forest}
+  \end{adjustbox} \hspace{1cm}
+  \begin{adjustbox}{valign=t}
+    \begin{forest} [ [[, phantom] []] [, phantom]] \end{forest}
+  \end{adjustbox} \hspace{1cm}
+  \begin{adjustbox}{valign=t}
+    \begin{forest} [ [, phantom] [[] [, phantom]] ] \end{forest}
+  \end{adjustbox} \hspace{1cm}
+  \begin{adjustbox}{valign=t}
+    \begin{forest} [ [, phantom] [[, phantom] []] ] \end{forest}
+  \end{adjustbox}
+  
+\end{frame}
+
+\begin{frame}{The Generating Function}
+  Let $\TT$ be the set of all binary trees.
+  Given a tree $t \in \TT$, let $\abs{t}$ be the number of nodes in $t$.
+  We want the number of trees in $\TT$ with $n$ nodes (trees of "size" $n$). \pause
+
+  Consider the generating function
+  \[T(x) = \sum_{t \in \TT} x^{\abs{t}}.\]
+  In other words, each tree contributes a single term to the sum, which is determined by the number of nodes in that tree.
+  \pause
+
+  For example, the 3-node trees on the previous slide would each contribute an $x^3$ term to $T(x)$.
+  Since there are exactly 5 trees with 3 nodes, the coefficient of $x^3$ in $T(x)$ is $5x^3$.
+\end{frame}
+
+\begin{frame}{The Generating Function}
+  So we have the generating function
+  \[T(x) = \sum_{t \in \TT} x^{\abs{t}} = 1 + x + 2x^2 + 5x^3 + \cdots = \sum_{n \ge 0} T_n x^n.\] \pause
+  The coefficients $T_n$ represent the number of binary trees with $n$ nodes.
+  We want to find an expression for $T_n$.
+  \pause
+
+  To use this generating function, we exploit the recursive structure of binary trees.
+\end{frame}
+
+\begin{frame}{Recursive Structure}
+  A binary tree $t$ is either:
+  \begin{itemize}
+    \item Empty with 0 nodes, or
+    \item A single node with a left subtree $t_L$ and a right subtree $t_R$ (binary trees) -- with $1 + \abs{t_L} + \abs{t_R}$ nodes total \pause
+    \begin{itemize}
+      \item In this case, each tree $t$ uniquely corresponds to a pair of trees $(t_L, t_R)$
+    \end{itemize}
+  \end{itemize} \pause
+
+  Using this, we can write our generating function as follows:
+  \begin{align*}
+    T(x) &= \sum_{t \in \TT} x^{\abs{t}}
+    = 1 + \sum_{t_L \in \TT} \sum_{t_R \in \TT} x^{\abs{t_L} + \abs{t_R} + 1} \\
+  \end{align*}
+\end{frame}
+
+\begin{frame}{A Functional Equation}
+  Then,
+  \begin{align*}
+    T(x) &= 1 + \sum_{t_L \in \TT} \sum_{t_R \in \TT} x^{\abs{t_L} + \abs{t_R} + 1} \\
+    \onslide<+->{&= 1 + x \sum_{t_L \in \TT} x^{\abs{t_L}} \sum_{t_R \in \TT} x^{\abs{t_R}} \\}
+    \onslide<+->{&= 1 + xT(x)^2.}
+  \end{align*} \pause
+  Solving for $T(x)$ using the quadratic formula,
+  \[T(x) = \frac{1 \pm \sqrt{1 - 4x}}{2x}.\]
+  Since $T(0) = 1$, we take the minus sign.
+\end{frame}
+
+\begin{frame}{Binomial Expansion}
+  We need to expand our expression for $T(x)$ to extract coefficients.
+  \pause
+
+  According to an extended form of the binomial theorem,
+  \begin{align*}
+    (1+y)^{1/2} = 1 + \binom{1/2}{1} y + \binom{1/2}{2} y^2 + \binom{1/2}{3} y^3 + \cdots
+    = \sum_{k=0}^{\infty} \binom{1/2}{k} y^k.
+  \end{align*}
+  where we can generalize the definition of $\displaystyle \binom{n}{k}$ to real $n$ as follows:
+  \[\binom{n}{k} = \frac{n(n-1) \cdots (n-k+1)}{k!}.\]
+\end{frame}
+
+\begin{frame}{Extracting Coefficients}
+  Using this expansion with $y = -4x$,
+  \begin{align*}
+    T(x) &= \frac{1 - \sqrt{1 - 4x}}{2x} \\
+    &= \frac{1 - \left( 1 + \binom{1/2}{1}(-4x) + \binom{1/2}{2} (-4x)^2 + \binom{1/2}{3} (-4x)^3 + \cdots \right)}{2x}
+  \end{align*} \pause
+  After some simplification, we find that the coefficient of $x^n$ is
+  \[T_n = \frac{1}{n+1} \binom{2n}{n}.\]
+  This is the number of binary trees with $n$ nodes!
+  \pause
+  Note: The numbers $T_n$ are called the \textit{Catalan numbers}.
+\end{frame}
+
+\subsection{Path Length}
+\frame{\subsectionpage}
+
+\begin{frame}{Path Length}
+  Given a binary tree $t$, its \textbf{path length} $\pi(t)$ is the sum of the lengths of the paths from the root to each node in the tree.
+  \pause
+  \begin{minipage}{0.7 \textwidth}
+    For example, this binary tree has path length
+    
+    $0 + 1 + 1 + 2 + 3 = 7$.
+  \end{minipage}%
+  \begin{minipage}{0.3 \textwidth}
+    \centering
+    \begin{forest} [ 0 [1 [2 [, phantom] [3]] [, phantom]] [1] ] \end{forest}
+  \end{minipage}
+
+  \hspace{1cm} \pause
+
+  If we divide the path length by the number of nodes, we get the average distance from the root to a node in the tree.
+  This is useful for analyzing algorithms that involve searching for nodes in a tree.
+\end{frame}
+
+\begin{frame}{Path Length in Random Trees}
+  \textbf{\textcolor{sigma@mainblue}{Q}}: What is the expected path length of a random binary tree with $n$ nodes? \cite{algoanalysis}
+  
+  Here, "random" means that each of the $T_n$ binary trees with $n$ nodes has an equal probability of being selected (\textit{random binary Catalan trees}). \pause
+  \begin{itemize}
+    \item This is often used in compiler design for parse trees for expression evaluation.
+    However, other models of random trees exist.
+  \end{itemize} \pause
+  In other words, over all binary trees with $n$ nodes, what is the average path length?
+
+  We'll answer this question using a similar approach to enumerating binary trees.
+  % But this time, we'll need an extra variable in the generating function,
+  % because not only do we have to keep track of the tree size, we also have to keep track of the path length.
+\end{frame}
+
+% Change to cumulative approach
+% \begin{frame}{The Bivariate Generating Function}
+%   Recall that $\TT$ is the set of all binary trees.
+
+%   Define the \textit{bivariate} generating function
+%   \[P(u, x) = \sum_{t \in \TT} u^{\pi(t)} x^{\abs{t}}
+%   = \sum_{n \ge 0} \sum_{k \ge 0} p_{nk} u^k x^n.\]
+
+%   In the middle is the generating function written summing tree-by-tree.
+%   On the right, all the like terms are collected, and we sum over each term.
+
+%   The coefficients $p_{nk}$ tell us the number of trees with $n$ nodes and path length $k$.
+%   If we know how many trees there are of each path length, we can find the average path length.
+% \end{frame}
+
+\begin{frame}{The Generating Function}
+  Recall that $\TT$ is the set of all binary trees.
+
+  Define the \textit{cumulative} generating function
+  \[C_T(x) = \sum_{t \in \TT} \pi(t) x^{\abs{t}}
+  = \sum_{n \ge 0} C_{n} x^n.\] \pause
+  In the middle is the generating function written summing tree-by-tree.
+  On the right, all the like terms are collected, and we sum over each term.
+
+  The coefficients $C_{n}$ tell us the total path length over all trees with $n$ nodes.
+\end{frame}
+
+\begin{frame}{Example}
+  Here are the five 3-node trees from earlier, and their contribution to $C_T(x)$:
+  \begin{figure}
+    \begin{subfigure}[b]{0.18\linewidth}
+      \begin{forest} [ 0 [1 [, phantom] [, phantom]] [1] ] \end{forest}
+      \centering
+      \caption*{$2 x^3$}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.18\linewidth}
+      \begin{forest} [ 0 [1 [2] [, phantom]] [, phantom]] \end{forest}
+      \centering
+      \caption*{$3 x^3$}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.18\linewidth}
+      \begin{forest} [0 [1 [, phantom] [2]] [, phantom]] \end{forest}
+      \centering
+      \caption*{$3 x^3$}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.18\linewidth}
+      \begin{forest} [0 [, phantom] [1 [2] [, phantom]] ] \end{forest}
+      \centering
+      \caption*{$3 x^3$}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.18\linewidth}
+      \begin{forest} [0 [, phantom] [1 [, phantom] [2] ]] \end{forest}
+      \centering
+      \caption*{$3 x^3$}
+    \end{subfigure}
+  \end{figure}
+  The coefficient corresponds to path length;
+  the exponent of $x$ corresponds to the number of nodes.
+  
+\end{frame}
+
+\begin{frame}{Recursive Definition of Path Length}
+  % \begin{figure}
+  % \begin{subfigure}[t]{0.2 \textwidth}
+  %   \centering
+  %   \begin{forest} [ 0 [1, fill=green [2, fill=green [, phantom] [3, fill=green]] [, phantom]] [1, fill=yellow] ] \end{forest}
+  % \end{subfigure}
+  % \begin{subfigure}[t]{0.1 \textwidth}
+  %   $\implies$
+  % \end{subfigure}
+  % \begin{subfigure}[t]{0.2 \textwidth}
+  %   \centering
+  %   \begin{forest}
+  %     [0, fill=green [1, fill=green [, phantom] [2, fill=green]] [, phantom]]
+  %   \end{forest}
+  %   \caption*{$\pi(t_L) = 3$}
+  % \end{subfigure}
+  % \begin{subfigure}[t]{0.2 \textwidth}
+  %   \centering
+  %   \begin{forest}
+  %     [0, fill=yellow]
+  %   \end{forest}
+  % \end{subfigure}
+  % \end{figure}
+
+  Consider the tree $t$ from earlier; its subtrees $t_L$ and $t_R$ are colored.
+  % Can we write $\pi(t)$ in terms of $t_L$ and $t_R$?
+  \vspace{0.2cm}
+
+  \begin{minipage}{0.5 \textwidth}
+  \begin{forest} [ 0 [1, fill=green, baseline [2, fill=green [, phantom] [3, fill=green]] [, phantom]] [1, fill=yellow] ] \end{forest}
+  \quad
+  $\implies$
+  \quad
+  \begin{forest}
+    [0, fill=green, baseline [1, fill=green [, phantom] [2, fill=green]] [, phantom]]
+  \end{forest}
+  \quad
+  \begin{forest}
+    [0, fill=yellow, baseline]
+  \end{forest}
+  \quad
+  \end{minipage}\pause%
+  \begin{minipage}{0.5 \textwidth}
+  When $t_L$ is split off from $t$, the "new root" is one level lower.
+  \\
+
+  So the depths of the nodes in $t_L$ are one less than the depths of the same nodes of in $t$.
+  \\
+
+  The same is true for $t_R$.
+  \end{minipage}
+  \vspace{0.3cm} \pause
+
+  So $\pi(t) = 0 + \pi(t_L) + \abs{t_L} + \pi(t_R) + \abs{t_R}$.
+\end{frame}
+
+\begin{frame}{Using Recursion}
+  Now,
+  \begin{align*}
+    C_T(x) &= \sum_{t \in \TT} \pi(t) x^{\abs{t}} \\
+    &= \sum_{t_L \in \TT} \sum_{t_R \in \TT} (\pi(t_L) + \pi(t_R) + \abs{t_L} + \abs{t_R}) x^{\abs{t_L} + \abs{t_R} + 1}
+    % &= x \sum_{t_L \in \TT} \sum_{t_R \in \TT} \pi(t_L) x^{\abs{t_L}} x^{\abs{t_R}}
+    % + x \sum_{t_L \in \TT} \sum_{t_R \in \TT} \pi(t_R) x^{\abs{t_L}} x^{\abs{t_R}} \\
+    % & \quad + x \sum_{t_L \in \TT} \sum_{t_R \in \TT} \abs{t_L} x^{\abs{t_L}} x^{\abs{t_R}}
+    % + x \sum_{t_L \in \TT} \sum_{t_R \in \TT} \abs{t_R} x^{\abs{t_L}} x^{\abs{t_R}}
+  \end{align*}
+  Note that there's no constant term ($1 + \cdots$) since the only tree with 0 nodes (the empty tree) has path length 0, so the coefficient of $x^0$ is 0. \pause
+
+  This expands into 4 parts. The first is
+  \begin{align*}
+    \sum_{t_L \in \TT} \sum_{t_R \in \TT} \pi(t_L) x^{\abs{t_L} + \abs{t_R} + 1}
+    = x \sum_{t_L \in \TT} \pi(t_L) x^{\abs{t_L}} \sum_{t_R \in \TT} x^{\abs{t_R}}
+    = x C_T(x) T(x).
+  \end{align*}
+\end{frame}
+
+\begin{frame}{Expansion}
+  The second part is similarly
+  \begin{align*}
+    \sum_{t_L \in \TT} \sum_{t_R \in \TT} \pi(t_R) x^{\abs{t_L} + \abs{t_R} + 1}
+    = x \sum_{t_L \in \TT} x^{\abs{t_L}} \sum_{t_R \in \TT} \pi(t_R) x^{\abs{t_R}}
+    = x T(x) C_T(x).
+  \end{align*} \pause
+  The third part is (recall $T(x) = \displaystyle \sum_{t \in \TT} x^{\abs{t}}$, so $T'(x) = \displaystyle \sum_{t \in \TT} \abs{t} x^{\abs{t}-1}$)
+  \begin{align*}
+    \sum_{t_L \in \TT} \sum_{t_R \in \TT} \abs{t_L} x^{\abs{t_L} + \abs{t_R} + 1} 
+    = x^2 \sum_{t_L \in \TT} \abs{t_L} x^{\abs{t_L} - 1} \sum_{t_R \in \TT} x^{\abs{t_R}}
+    = x^2 T'(x) T(x).
+  \end{align*} \pause
+  Similarly, the fourth part is
+  \begin{align*}
+    \sum_{t_L \in \TT} \sum_{t_R \in \TT} \abs{t_R} x^{\abs{t_L} + \abs{t_R} + 1} 
+    = x^2 \sum_{t_L \in \TT} x^{\abs{t_L}} \sum_{t_R \in \TT} \abs{t_R} x^{\abs{t_R} - 1}
+    = x^2 T(x) T'(x).
+  \end{align*}
+\end{frame}
+
+\begin{frame}{The Functional Equation}
+  Putting it all together,
+  \begin{align*}
+    C_T(x) &= \sum_{t \in \TT} \pi(t) x^{\abs{t}} \\
+    &= \sum_{t_L \in \TT} \sum_{t_R \in \TT} (\pi(t_L) + \pi(t_R) + \abs{t_L} + \abs{t_R}) x^{\abs{t_L} + \abs{t_R} + 1} \\
+    &= 2x C_T(x) T(x) + 2x^2 T(x) T'(x).
+  \end{align*} \pause
+  Earlier we found that $T(x) = \displaystyle \frac{1 - \sqrt{1-4x}}{2x}$.
+  Solving for $C_T(x)$,
+  \begin{align*}
+    C_T(x) = \frac{2x^2 T(x) T'(x)}{1 - 2x T(x)}
+    = \frac{1}{x} \left( \frac{x}{1 - 4x} - \frac{1 - x}{\sqrt{1 - 4x}} + 1 \right).
+  \end{align*}
+\end{frame}
+
+\begin{frame}{Coefficients}
+  The coefficient of $x^n$ is the total path length over all binary trees with $n$ nodes.
+
+  We want the average path length, so we divide the coefficient by the number of trees with $n$ nodes: $T_n$. \pause
+
+  After some messy expansions, the average path length comes out as
+  \begin{align*}
+    \frac{(n+1) 4^n}{\binom{2n}{n}} - 3n - 1 = n \sqrt{\pi n} - 3n + O(\sqrt{n}).
+  \end{align*}
+
+\end{frame}
+
+\begin{frame}{Other Applications of Generating Functions}
+  \begin{itemize}
+    \item General trees, permutations, strings/regular expressions, many other combinatorial structures
+    for analyzing algorithms \pause
+    \item Symbolic method (analytic combinatorics) \pause
+    \begin{itemize}
+      \item To get the generating function $T(x)$ for binary trees, we can actually just write this, since a tree is either empty or a node and two subtrees:
+      \[
+      \TT = \{ \square \} + \{ \bullet \} \times \TT \times \TT
+      \implies T(x) = 1 + xT(x)^2.\]
+    \end{itemize} \pause
+    \item Snake Oil method: evaluate terrible sums like
+    $f_n = \displaystyle \sum_{k} \binom{n+k}{2k} 2^{n-k}$
+    by throwing them in as coefficients of a generating function and swapping the order of summation \pause
+    \item Solving recurrences (e.g. finding a formula for Fibonacci numbers)
+  \end{itemize}
+\end{frame}
+
+% \begin{frame}{Some Text}
+%     \begin{itemixe}
+%         \item You may want some stuff to appear in a sequence \pause
+%         \item Use \textbackslash pause for this \pause
+%         \item \textcolor{sigma@mainblue}{colors} \textcolor{sigma@highlightpink}{are} \textcolor{sigma@alertred}{cool}
+%     \end{itemize}
+% \end{frame}
+
+% \begin{frame}
+%   \frametitle{Some Math Mode Testing}
+%   % Some fun with LaTeX Math
+%   $$\frac{x^2+3}{y^2+7}$$
+
+%   \[
+%     \mathcal L_{\mathcal T}(\vec{\lambda})
+%     = \sum_{(\mathbf{x},\mathbf{s})\in \mathcal T}
+%        \log P(\mathbf{s}\mid\mathbf{x}) - \sum_{i=1}^m
+%        \frac{\lambda_i^2}{2\sigma^2}
+%   \]
+
+%   $$\int_0^8 f(x) dx$$
+% \end{frame}
+
+% % Use \pause to make stuff readable
+% % Large walls of text scare the audience, we don't want that
+% % Introducing stuff sequentially allows for questions
+% \begin{frame}
+%   % Alternate syntax for frame titles
+%   \frametitle{There Is No Largest Prime Number}
+%   % Frames can have subtitles:
+%   \framesubtitle{The proof uses \textit{reductio ad absurdum}.}
+%   % Some frame content:
+%   \begin{thrm}
+%     There is no largest prime number.
+%   \end{thrm}
+%   \begin{pf}
+%     \begin{enumerate}
+%         \item Suppose $p$ were the largest prime number \pause
+%         \item Let $q$ be the product of the first $p$ primes \pause
+%         \item Then $q+1$ is not divisible by any of them \pause
+%         \item But $q + 1$ is greater than $1$, thus divisible by some prime number not in the first $p$ numbers. \pause
+%         \item Thus, there exists a prime larger than $p$.
+%     \end{enumerate}
+%   \end{pf}
+% \end{frame}
+
+% % However, this doesn't work in math mode. It is quite annoying to figure out
+% % So just copy this as reference
+% % This works for \onslide<> and \item<>
+% % Really good read on this: 
+% %   https://www.texdev.net/2014/01/17/the-beamer-slide-overlay-concept/
+% \begin{frame}{Sequential Math Frames}
+%     Here is a sentence \pause
+    
+%     I shall now carry out some calculations \pause
+%     \begin{align*}
+%         \onslide<+->{\zeta(s) &= \sum_{n = 1}^\infty \frac{1}{n^s} \\}
+%         \onslide<+->{&= \prod_{p \in \text{primes}} \frac{1}{1 - p^{-s}} \\}
+%         \onslide<.->{&= \frac{1}{1 - 2^-s} \cdot \frac{1}{1 - 3^-s} \cdots \\}
+%         \onslide<+->{&= \frac{1}{\Gamma(s)} \int_0^\infty \frac{x^{s - 1}}{e^x - 1} ~\textrm{d}x\\}
+%     \end{align*}
+% \end{frame}
+
+% \section{Some Template Slides}
+% \frame{\sectionpage}
+
+% % Similar for subsections:
+% \subsection{A subsection, Wow}
+% % And their pages:
+% \frame{\subsectionpage}
+
+% \begin{frame}{Image}
+%   % This is how you'd include an image, centered.
+%   \begin{center}
+%     \includegraphics[width=0.25\textwidth]{sigma.png}
+%   \end{center}
+% \end{frame}
+
+% \begin{frame}{Side by Side}
+%     \includegraphics[width=0.25\textwidth]{sigma.png}\hspace{0.4\textwidth}
+%     \includegraphics[width=0.25\textwidth]{sigma.png}
+% \end{frame}
+
+% \begin{frame}{Demonstration of algo and nalgo env}
+%     \begin{algo}
+%     \underline{\textsc{GetRandomNumber}():}\+
+%     \\      return $4$   \Comment{chosen by fair dice roll.}
+%     \\      \hspace{42.75pt}\Comment{guaranteed to be random.}
+%     \end{algo}
+    
+%     % nalgo has line numbers
+%     % only lines with \label{} are numbered
+%     \begin{nalgo}[1.3]
+%         \underline{\textsc{GetRandomNumber}():}\+
+%     \\\label{}  return $4$   \Comment{chosen by fair dice roll.}
+%     \\\label{}  \hspace{42.75pt}\Comment{guaranteed to be random.}
+%     \end{nalgo}
+    
+%     Random number generation from~\cite{site:xkcd}. 
+%     \quest{
+%     \textbackslash cref for line numbers does not work. 
+%     If you want to refer to specific line numbers, do it manually
+%     }
+    
+% \end{frame}
+
+% \begin{frame}{}
+% \begin{minipage}[c]{0.6\textwidth}
+% \begin{nalgo}
+% \textul{\textbf{\textsc{AlgorithmP}}$(S[a_0, \dots, a_n])$}:
+% \\\label{}  $C[1..n] \gets 0, O[1..n] \gets 1$
+% \\\label{}  \textbf{while} \textsc{True}:\+
+% \\\label{}      \textsc{print}$(S)$
+% \\\label{}      {\color{lightgray}$j \gets n, s \gets 0$}
+% \\\label{}      {\color{lightgray}\textbf{A:}~~$q \gets C[j] + O[j]$\+}
+% \\\label{}          {\color{lightgray}\textbf{if} $q < 0$: goto \textbf{D}}
+% \\\label{}          {\color{lightgray}\textbf{if} $q = j$: goto \textbf{B}}
+% \\\label{}          {\color{lightgray}\textsc{swap}$(S, j-C[j]+s, j-q+s)$}
+% \\\label{}          {\color{lightgray}$C[j] \gets q$} 
+% \\\label{}          {\color{lightgray}continue\-}
+% \\\label{}      {\color{lightgray}\textbf{B:}~~\textbf{if} $j=1$:\+\+}
+% \\\label{}              {\color{lightgray}break\-}
+% \\\label{}          {\color{lightgray}$s \gets s+1$\-}
+% \\\label{}    {\color{lightgray}\textbf{D:}~~$O[j] \gets -O[j], j \gets j-1$\+}
+% \\\label{}      {\color{lightgray}goto \textbf{A}}
+% \end{nalgo}
+% \end{minipage}
+% \begin{minipage}[c]{0.35\textwidth}
+% \begin{itemize}
+%     \item Here is an example of annotating an algorithms \pause
+%     \item We have grayed out text to highlight what we want to discuss 
+% \end{itemize}
+% \end{minipage}
+% \end{frame}
+
+% % Of course, not everything is in pseudocode
+% % You MUST have this [containsverbatim] option
+% % https://www.overleaf.com/learn/latex/Code_Highlighting_with_minted
+% \begin{frame}[containsverbatim]{Source Code}
+%     \begin{minted}
+%     [
+%     framesep=2mm,
+%     baselinestretch=1.2,
+%     bgcolor=black,
+%     fontsize=\footnotesize,
+%     ]
+%     {python}
+%     def algorithm_g(n):
+%         a = [0 for _ in range(n + 1)]
+%         while True:
+%             curr = a[1 : n + 1][::-1]
+%             yield "".join([str(i) for i in curr])
+    
+%             a[0] = 1 - a[0]
+%             j = 1
+%             while a[j - 1] != 1:
+%                 j += 1
+%             if j == n + 1:
+%                 return
+%             a[j] = 1 - a[j]
+%     \end{minted}
+% \end{frame}
+
+
+% \begin{frame}{Theorems and Lemmas}
+%     \begin{lem}
+%         The map $\C \times \pqty{\C \setminus \set{0}} \to \C$, $(z, w) \mapsto z / w$ is $C^{\infty}$.
+%     \end{lem}
+%     \begin{pf}
+%         To see this, we identify $\C$ with $\R^{2}$ where $a + bi = (a, b)$.
+%         Thus our map is now
+%         \begin{align*}
+%             \pqty{\R^{2}} \times \pqty{\R^{2} \setminus \set{(0, 0)}} &\to \R^{2} \\
+%                             ((a, b), (c, d)) &\mapsto \pqty{\frac{ac + bd}{c^{2} + d^{2}}, \frac{bc - ad}{c^{2} + d^{2}}}
+%         \end{align*}
+%         which is well defined since at least one of $c$ or $d$ is nonzero.
+%         It is simple to verify that this map is equivalent to the original one.
+%         Since this new map is $C^{\infty}$ in each component, we have that it is $C^{\infty}$ overall.
+%     \end{pf}
+% \end{frame}
+
+% \section{Conclusion}
+% \frame{\sectionpage}
+
+% Asking questions is fun but we should answer some first
+\begin{frame}{}
+      \begin{center}
+    {\color{sigma@mainblue} \LARGE Questions?}
+  \end{center}
+\end{frame}
+
+% \begin{frame}{Questions!}
+%     \begin{itemize}
+%         \item How many zeros of $\zeta(s) = \sum\limits_{i = 1}^\infty \frac{1}{n^s} = \prod\limits_{p \text{ prime}} \frac{1}{1 - p^{-s}}$ have real part equal to $\frac{1}{2}$?
+%         \item Find a closed form to the following recurrence:
+%         $$
+%             f(n) = \begin{cases} 
+%                 f\pqty{\frac{n}{2}} & n \text{ even} \\
+%                 f{3n + 1} & \text{otherwise}                
+%             \end{cases}
+%         $$
+%     \end{itemize}
+% \end{frame}
+
+% Quotes are fun, find some to use!
+\font\eightss=cmssq8
+\font\eightssi=cmssqi8
+\newcommand\quoteAuthorDate[3]{\begingroup
+  \baselineskip 10pt
+  \parfillskip 0pt
+  \interlinepenalty 10000 % not needed in example
+  \leftskip 0pt plus 40pc minus \parindent
+  \let\rm=\eightss
+  \let\sl=\eightssi
+  \everypar{\sl}#1\par
+  \nobreak\smallskip
+  \noindent\rm--- #2\unskip\enspace(#3)\par
+  \endgroup}
+% If someone can figure out how to horizontally center this and make the text bigger that'd be cool
+\begin{frame}
+    \begin{center}
+        \item \quoteAuthorDate{A generating function is a device somewhat similar to a bag. Instead of carrying many little objects detachedly, which could be embarrassing, we put them all in a bag, and then we have only one object to carry, the bag.}{George Polya}{\textcolor{sigma@mainblue}{1954}}
+    \end{center}
+\end{frame}
+
+% Remove this slide if you came up with all the material yourself
+\begin{frame}[allowframebreaks]{Bibliography}
+    \tiny
+    \bibliography{refs}
+    \bibliographystyle{alpha}
+    
+    \nocite{algoanalysis, ac, gfology, MITNotes, gasarch2014ways}
+    
+\end{frame}
+
+% @misc{site:xkcd,
+%   author={Randall Munroe},
+%   title={RFC 1149.5 specifies 4 as the standard IEEE-vetted random number.},
+%   howpublished={\url{https://xkcd.com/221/}},
+%   year={2007},
+%   note={Accessed: 01-09-2023},
+% }
+% Moved from refs.bib
+
+\end{document}
