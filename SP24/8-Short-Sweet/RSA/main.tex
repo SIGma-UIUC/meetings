@@ -1,0 +1,304 @@
+% Mirror: https://github.com/SIGma-UIUC/presentation-format
+% --------------------------------------------------------------------
+% This is a simple Beamer document that uses beamerthemesigma.sty
+% Reading the comments should help you create a presentation even if
+% you've never used Beamer before.
+% --------------------------------------------------------------------
+
+% Set our document class to Beamer
+\documentclass[handout, aspectratio=169]{beamer}
+% \documentclass[aspectratio=169, handout]{beamer}
+% Add handout option to ignore pauses
+
+% From Jeff E
+\usepackage{algo}
+% Some more macros
+\usepackage{sigmastyle}
+
+
+% Set a title
+\title{RSA}
+
+% Set a subtitle if you desire
+% \subtitle{[TAOCP 5 8.9.10.11]}
+
+% Whoever worked on the presentation:
+\author{Sasha Levinshteyn}
+
+% Date looks ugly, so leave blank
+\date{}
+
+% An institute name, if you're so inclined
+% \institute{University of Illinois Urbana-Champaign}
+
+% Use the SIGma theme for this Beamer presentation
+\usetheme{sigma}
+% --------------------------------------------------------------------
+
+% Begin document
+\begin{document}
+
+% Beamer calls each slide a "frame", defined within the environment:
+% \begin{frame}
+%   <frame content here>
+% \end{frame}
+
+% This frame is just the title.
+\begin{frame}
+\titlepage
+\end{frame}
+
+% A frame with the table of contents.
+% This frame's title is "Outline".
+\begin{frame}{Outline}
+  \tableofcontents
+\end{frame}
+
+% \begin{frame}{Updates!}
+%   % Let's put some real content in this frame:
+%   Weekly updates:
+%   \begin{itemize}
+%     \item SIGma is an excellent SIG.
+%     \item I'm out of ideas for updates.
+%   \end{itemize}
+% \end{frame}
+
+% Start a section: *sections* (subsections, etc.) are what show up in the TOC.
+\section{Public-Key Cryptosystems}
+\frame{\sectionpage}
+
+\begin{frame}{General Idea}
+    \begin{itemize}
+        \item Each user publicizes their encryption procedure $E$
+        \item The user determines their corresponding decryption procedure $D$
+        \item The user does not reveal $D$
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Goal}
+    \begin{itemize}
+        \item Alice has a message $M$ to send to Bob
+        \item Need an encryption method $E$ and a decryption method $D$ such that
+        \begin{itemize}
+            \item $D(E(M)) = M = E(D(M))$
+            \item Both $E$ and $D$ are easy to compute
+            \item Publicly revealing $E$ doesn't reveal $D$
+        \end{itemize}
+        \item We want an encryption key $(e, n)$ and a decryption key $(d, n)$
+    \end{itemize}
+\end{frame}
+
+
+
+\section{RSA Algorithm}
+\frame{\sectionpage}
+
+\begin{frame}{Key Distribution}
+    \begin{itemize}
+        \item If Bob sends a message $M$ to Alice...
+        \item Alice sends her public encryption key $(e, n)$ to Bob
+        \item She keeps her private decryption key $d$
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Encryption}
+    \begin{itemize}
+        \item Bob turns his message $M$ into some number $m < n$
+        \item Long messages can be split up into chunks
+        \item He computes the ciphertext $c$ using the encryption algorithm $E$:
+        \begin{equation*}
+            c \equiv E(m) \equiv m^e \mod n
+        \end{equation*}
+        \item Computers would use exponentiation by repeating squaring and multiplication
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Decryption}
+    \begin{itemize}
+        \item Alice receive the ciphertext $c$
+        \item She decrypts it and finds $m$ using the decryption algorithm $D$:
+        \begin{equation*}
+            m \equiv D(c) \equiv c^d \mod n
+        \end{equation*}
+        \item How do we find a valid $e$, $d$, and $n$?
+    \end{itemize}
+\end{frame}
+
+
+
+\begin{frame}{Key Generation}
+    \begin{enumerate}
+        \item Choose 2 prime numbers $p$ and $q$ \pause
+        \item Compute $n = p \cdot q$ \pause
+        \item Compute $\phi(n) = (p - 1) \cdot (q - 1)$
+        \begin{itemize}
+            \item We actually use the Carmichael function now instead \\
+            $\implies \lambda(n) = \lcm(p - 1, q - 1)$
+        \end{itemize}\pause
+        \item Choose $d$ relatively prime to $\phi(n)$ \\ $\implies \gcd(d, \phi(n)) = 1$ \pause
+        \item Choose $e$ to be the multiplicative inverse of $d \mod \phi(n)$ \\ $\implies e \cdot d = 1 \mod \phi(n)$ 
+        \begin{itemize}
+            \item Computers would use Euclid's algorithm \\
+        \end{itemize}
+    \end{enumerate}
+\end{frame}
+
+\begin{frame}{Example}
+    \begin{enumerate}
+        \item Choose $p = 47$ and $q = 59$ \pause
+        \item Compute $n = p \cdot q = 47 \cdot 59 = 2773$ \pause
+        \item Compute $\phi(n) = (p - 1) \cdot (q - 1) = 46 \cdot 58 = 2668$ \pause
+        \item Choose $d = 157$, which is relatively prime to $\phi(n) = 2668$ \pause
+        \item We find that $e = 17$ as $17 \cdot 157 \equiv 1 \mod 2773$ \pause
+        \item We release $(n, e) = (2773, 17)$ as our public key and keep $d = 157$ as our private key
+    \end{enumerate}
+\end{frame}
+
+\begin{frame}{Example}
+\begin{enumerate}
+\item Convert the message to numbers and encrypt
+    \begin{equation*}
+    \begin{split}
+        &\text{ITS ALL GREEK TO ME} \\
+        &\implies 0920 1900 0112 1200 0718 0505 1100 2015 0013 0500 \\
+        &\implies 0948 2342 1084 1444 2663 2390 0778 0774 0219 1655
+    \end{split}
+    \end{equation*}
+    \item We write the first block ($m = 920$) as
+    \begin{equation*}
+        m^{17} \equiv 920^{17} \equiv 948 \mod 2773
+    \end{equation*}
+\end{enumerate}
+\end{frame}
+
+% % Asking questions is fun but we should answer some first
+\section{Proof of Correctness}
+% Section pages can be printed thus:
+\frame{\sectionpage}
+
+\begin{frame}{Proof}
+    \begin{itemize}
+        \item $\phi(n)$ is the Euler totient function returning the number of integers $k$ less than $n$ relatively prime to $n$ \\
+        $\implies \gcd(k, n) = 1, k < n$
+        \item Note that for a prime number $p$,
+        \begin{equation*}
+            \phi(p) = p - 1
+        \end{equation*}
+        \item Then,
+        \begin{equation*}
+        \begin{split}
+            \phi(n) &= \phi(p) \cdot \phi(q) \\
+            &= (p - 1) \cdot (q - 1)
+        \end{split}
+        \end{equation*}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{More Proof}
+    \begin{itemize}
+    \item $d$ is relatively prime to $\phi(n) \implies d$ has a multiplicative inverse $\mod \phi(n)$
+    
+    \item Consider $D(E(m))$ and $E(D(m))$
+    \begin{equation*}
+    \begin{split}
+        &D(E(m)) \equiv (E(m))^d \equiv (m^e)^d \equiv m^{e \cdot d} \mod n \\
+        &E(D(m)) \equiv (D(m))^e \equiv (m^d)^e \equiv m^{e \cdot d} \mod n
+    \end{split}
+    \end{equation*}
+    \item Then,
+    \begin{equation*}
+        e \cdot d \equiv 1 \mod \phi(n) \implies m^{e \cdot d} \equiv m^{k \cdot \phi(n) + 1}  \mod n
+    \end{equation*}
+
+        % \item We use Fermat's little theorem: for any integer $M$ which is relatively prime to $n$,
+        % \begin{equation*}
+        %     M^{\phi(n)} \equiv 1 \mod n            
+        % \end{equation*}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Even More Proof}
+    \begin{itemize}
+    \item For any integer $a$ which is relatively prime to $b$,
+        \begin{equation*}
+            a^{\phi(b)} \equiv 1 \mod b.           
+        \end{equation*}
+    \item So, as $p - 1$ and $q - 1$ divide $\phi(n)$
+    \begin{equation*}
+    \begin{split}
+            &m^{p - 1} \equiv 1 \mod p \implies m^{k \cdot \phi(n) + 1} = m \mod p \\
+            &m^{q - 1} \equiv 1 \mod q \implies m^{k \cdot \phi(n) + 1} = m \mod q
+    \end{split}
+    \end{equation*}
+    \item These equations yield that for all $m$ (as they are trivially true for $m \equiv 0 \mod p$),
+    \begin{equation*}
+        m^{e \cdot d} \equiv m^{k \cdot \phi(n) + 1} = m \mod n
+    \end{equation*}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Security}
+    \begin{itemize}
+        \item Security relies on the difficulty of factoring $n$
+        \begin{itemize}
+            \item About 200 digits long and $3.8 \times 10^9$ years to factor by 1977 standards
+            \item Typically a few hundred digits now
+             \item If we were to know $p$ and $q$, we could perhaps find $d$ from $e$
+        \end{itemize}
+        \item Computing $\phi(n)$ would allow us to find $d$ as the multiplicative inverse of $e \mod \phi(n)$
+        \item Finding $\phi(n)$ or determining $d$ otherwise is at least as hard as factoring $n$
+        \item If only there was some way to factor $n$ in polynomial time...
+    \end{itemize}
+\end{frame}
+
+\section{Conclusion}
+% Section pages can be printed thus:
+\frame{\sectionpage}
+
+\begin{frame}{Conclusion}
+    \begin{itemize}
+        \item RSA is very cool
+        \item Average Passover with too much wine moment (this is supposedly how Rivest came up with this idea)
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}{}
+      \begin{center}
+    {\color{sigma@mainblue} \LARGE Questions?}
+  \end{center}
+\end{frame}
+
+
+
+% Quotes are fun, find some to use!
+\font\eightss=cmssq8
+\font\eightssi=cmssqi8
+\newcommand\quoteAuthorDate[3]{\begingroup
+  \baselineskip 10pt
+  \parfillskip 0pt
+  \interlinepenalty 10000 % not needed in example
+  \leftskip 0pt plus 40pc minus \parindent
+  \let\rm=\eightss
+  \let\sl=\eightssi
+  \everypar{\sl}#1\par
+  \nobreak\smallskip
+  \noindent\rm--- #2\unskip\enspace(#3)\par
+  \endgroup}
+% If someone can figure out how to horizontally center this and make the text bigger that'd be cool
+\begin{frame}
+    \begin{center}
+        \item \quoteAuthorDate{The era of electronic mail may soon be upon us.}{Rivest, Shamir, and Adleman}{\textcolor{sigma@mainblue}{1977}}
+        \cite{site:csail}
+    \end{center}
+\end{frame}
+
+% Remove this slide if you came up with all the material yourself
+\begin{frame}[allowframebreaks]{Bibliography}
+    \tiny
+    \bibliography{refs}
+    \bibliographystyle{alpha}
+\end{frame}
+
+\end{document}
