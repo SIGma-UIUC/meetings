@@ -1,0 +1,155 @@
+% Mirror: https://github.com/SIGma-UIUC/presentation-format
+% --------------------------------------------------------------------
+% This is a simple Beamer document that uses beamerthemesigma.sty
+% Reading the comments should help you create a presentation even if
+% you've never used Beamer before.
+% --------------------------------------------------------------------
+
+% Set our document class to Beamer
+\documentclass[aspectratio=169, handout]{beamer}
+% \documentclass[aspectratio=169, handout]{beamer}
+% Add handout option to ignore pauses
+
+% From Jeff E
+\usepackage{algo}
+% Some more macros
+\usepackage{sigmastyle}
+
+
+% Set a title
+\title{Estimates in Analytical Number Theory}
+
+% Set a subtitle if you desire
+\author{Saurav Chittal}
+
+% Date looks ugly, so leave blank
+\date{}
+
+% An institute name, if you're so inclined
+% \institute{University of Illinois Urbana-Champaign}
+
+% Use the SIGma theme for this Beamer presentation
+\usetheme{sigma}
+% --------------------------------------------------------------------
+
+% Begin document
+\begin{document}
+
+% Beamer calls each slide a "frame", defined within the environment:
+% \begin{frame}
+%   <frame content here>
+% \end{frame}
+
+% This frame is just the title.
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}{The use of bigO notation in Analytic number theory}
+    \begin{itemize}
+        \item Presumably, You've seen the BigO notation in your CS classes. They are generally used to notify the speed or the size of a program \pause
+        \item For example, BFS takes O(V + E) time and hashing algorithms like maps generally take O(n) space.\pause
+        \item Similar ideas are used in Analytical Number theory as well. The BigO is used to usually indicate the size of the error. 
+        \begin{itemize}
+            \item It is very useful too, since you can pull out the bigO out of integrals and limits, more useful that other estimates such as smallO.
+            \int O(\log{x}) dx = O(\int \log{x} dx)
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+% \begin{frame}{Some Text}
+%     \begin{itemize}
+%         \item You may want some stuff to appear in a sequence \pause
+%         \item Use \textbackslash pause for this \pause
+%         \item \textcolor{sigma@mainblue}{colors} \textcolor{sigma@highlightpink}{are} \textcolor{sigma@alertred}{cool}
+%     \end{itemize}
+% \end{frame}
+
+\begin{frame}
+  \frametitle{Some examples}
+  % Some fun with LaTeX Math
+  The Prime Number Theorem is equivalent to the statement:
+  $$\pi(x) = \frac{x}{\log(x)} + o(\frac{x}{\log(x)}))$$
+  Where $\pi(x)$ is the number of prime numbers less than or equal to x.\pause
+
+  Knowing $$Li(x) = \int_2^x \frac{1}{\log(t)} dt$$ the current best known estimate is $$\pi(x) = Li(x) + O(x\exp{-(\log(x))^\alpha}); \alpha \in \mathbf{R}, \alpha < \frac{3}{5}$$. \pause
+
+  Finally, the Riemann Hypothesis is equivalent to:
+  $$\pi(x) = Li(x) + O(x^{\frac{1}{2} + \epsilon}); \epsilon > 0$$
+\end{frame}
+
+% Use \pause to make stuff readable
+% Large walls of text scare the audience, we don't want that
+% Introducing stuff sequentially allows for questions
+\begin{frame}
+  % Alternate syntax for frame titles
+  \frametitle{Manipulation with BigO notation}
+  % Frames can have subtitles:
+  \framesubtitle{Proof of Sterling Formula}.
+  % Some frame content:
+  \begin{thrm}
+    S(N) = \sum_{n \le N} \log(n) = N(\log(N) - 1) + \frac{\log(N)}{2} + c + O(\frac{1}{N})
+  \end{thrm}
+  \begin{pf}
+    \begin{enumerate}
+        \item We will use special case of Euler's Summation Formula here
+        $$\sum_{n \le x} f(n) = \int_1^x f(t) dt + \int_1^x \{t\} f^\prime(t) dt - \{x\}f(x) + f(1)$$
+        Here $\{x\}$ indicates the fractional part of x, and $f^\prime(x)$ indicates the derivative of f(x). There isn't enough time for a proof, so assume this formula exists.\pause
+        \item Use Euler's Summation formula but with $f(x) = \log(x)$, we note that $\{N\} = 0, f(1) = 0$. Hence $S(N) = I_1(N) + I_2(N)$
+    \end{enumerate}
+  \end{pf}
+\end{frame}
+
+\begin{frame}{Manipulation with BigO notation}
+    \begin{enumerate}
+      \setcounter{enumi}{2}
+      \item $I_1(N) = \int_1^N \log(t) dt = N\log(N) - N + 1$ \pause
+      \item $I_2(N) = \int_1^N \frac{\{t\}}{t} dt = \int_1^N \frac{1}{2t} dt + \int_1^N \frac{\{t\} - \frac{1}{2}}{t} dt = \frac{\log(N)}{2} + I_3(N)$\pause
+    \end{enumerate}
+    Combining these formulas gives us: $$S(N) = N\log(N) - N + 1 - \frac{\log(N)}{2} + I_3(N)$$
+\pause
+    Now, we use integration by parts on $I_3(N)$
+    $$I_3(N) = \left. \frac{R(t)}{t} \right\rvert_{1}^N + \int_1^N \frac{R(t)}{t^2} dt$$
+    where $R(N) = \int_1^N \{t\} - \frac{1}{2} dt$
+\end{frame}
+
+% However, this doesn't work in math mode. It is quite annoying to figure out
+% So just copy this as reference
+% This works for \onslide<> and \item<>
+% Really good read on this: 
+%   https://www.texdev.net/2014/01/17/the-beamer-slide-overlay-concept/
+\begin{frame}{Manipulation with BigO notation}
+    We note the following:
+    \begin{itemize}
+        \item $\rho(t) = \{t\} - \frac{1}{2}$ is periodic with period 1 and $\abs{\rho(t)} \le \frac{1}{2}$\pause
+        \item $\int_k^{k+1} \rho(t) dt = 0$ for any integer k, because of the way it's structured. \pause 
+        \item Finally, $\abs{R(t)} \le \frac{1}{2}$ for any t \pause
+    \end{itemize}
+    Hence we have that $I_3(N) = \int_1^N \frac{R(t)}{t^2} dt$.
+    This specific integral now converges as $N \to \infty$, since $\frac{\abs{R(t)}}{t^2} \le \frac{(\frac{1}{2})}{t^2}$ \pause
+
+    Therefore $$I_3(N) = I - \int_N^\infty \frac{R(t)}{t^2} dt = I - O(\int_N^\infty \frac{1}{t^2} dt) = I - O(\frac{1}{N})$$
+    where $I = \int_1^\infty \frac{R(t)}{t^2} dt$, a constant. 
+    \qed
+\end{frame}
+
+\begin{frame}{Manipulation with BigO notation}
+    \framesubtitle{The end is near}
+    Recapping what we've done so far, we have shown that:
+    $$S(N) = \sum_{n \le N} \log(n) = N\log(N) - N + C - \frac{\log(N)}{2} - O(\frac{1}{N})$$
+\pause
+    However, we note that $n! = \exp{\sum_{k \le n} \log(k)}$, exponentiating the formula that we just derived we get:
+
+    $$n! = n^ne^{-n}\sqrt{n}e^C(1 + O(\frac{1}{N}))$$ due to the taylor series of exponentials.
+    \qed
+
+    Note: We can accurately get the constant value to be $\sqrt{2\pi}$, but that is much more difficult, and will require a course in number theory
+\end{frame}
+
+\begin{frame}{}
+      \begin{center}
+    {\color{sigma@mainblue} \LARGE Questions?}
+  \end{center}
+\end{frame}
+
+\end{document}
