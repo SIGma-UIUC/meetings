@@ -1,0 +1,789 @@
+% Mirror: https://github.com/SIGma-UIUC/presentation-format
+% --------------------------------------------------------------------
+% This is a simple Beamer document that uses beamerthemesigma.sty
+% Reading the comments should help you create a presentation even if
+% you've never used Beamer before.
+% --------------------------------------------------------------------
+
+% Set our document class to Beamer
+\documentclass[aspectratio=169]{beamer}
+%\documentclass[aspectratio=169, handout]{beamer}
+% Add handout option to ignore pauses
+
+% From Jeff E
+\usepackage{algo}
+% Some more macros
+\usepackage{sigmastyle}
+\usepackage{amssymb}
+\usepackage{subcaption}
+\usepackage{wrapfig}
+\usepackage{tcolorbox}
+
+\usepackage{forest}
+\forestset{
+  default preamble={
+    for tree={
+        grow=south,
+        circle, draw, minimum size=3ex, inner sep=1pt,
+        s sep=3mm,
+    }
+  }
+}
+\usepackage{adjustbox}
+
+% Quotes are fun, find some to use!
+\font\eightss=cmssq8
+\font\eightssi=cmssqi8
+\newcommand\quoteAuthor[2]{\begingroup
+  \baselineskip 10pt
+  \parfillskip 0pt
+  \interlinepenalty 10000 % not needed in example
+  \leftskip 0pt plus 40pc minus \parindent
+  \let\rm=\eightss
+  \let\sl=\eightssi
+  \everypar{\sl}#1\par
+  \nobreak\smallskip
+  \noindent\rm--- #2\unskip\par
+  \endgroup}
+\newcommand\quoteAuthorDate[3]{\begingroup
+  \baselineskip 10pt
+  \parfillskip 0pt
+  \interlinepenalty 10000 % not needed in example
+  \leftskip 0pt plus 40pc minus \parindent
+  \let\rm=\eightss
+  \let\sl=\eightssi
+  \everypar{\sl}#1\par
+  \nobreak\smallskip
+  \noindent\rm--- #2\unskip\enspace(#3)\par
+  \endgroup}
+
+\newcommand{\TT}{\mathcal{T}}
+
+% Set a title
+\title{Factoring Integers}
+
+% Set a subtitle if you desire
+% \subtitle{[TAOCP 5 8.9.10.11]}
+
+% Whoever worked on the presentation:
+\author{Franklin}
+
+% Date looks ugly, so leave blank
+\date{}
+
+% An institute name, if you're so inclined
+% \institute{University of Illinois Urbana-Champaign}
+
+% Use the SIGma theme for this Beamer presentation
+\usetheme{sigma}
+% --------------------------------------------------------------------
+
+% Begin document
+\begin{document}
+
+% Beamer calls each slide a "frame", defined within the environment:
+% \begin{frame}
+%   <frame content here>
+% \end{frame}
+
+% This frame is just the title.
+\begin{frame}
+\titlepage
+\end{frame}
+
+% A frame with the table of contents.
+% This frame's title is "Outline".
+\begin{frame}{Outline}
+  \tableofcontents
+\end{frame}
+
+% \begin{frame}{Updates!}
+%   % Let's put some real content in this frame:
+%   Weekly updates:
+%   \begin{itemize}
+%     \item SIGma is an excellent SIG.
+%     \item I'm out of ideas for updates.
+%   \end{itemize}
+% \end{frame}
+
+% Start a section: *sections* (subsections, etc.) are what show up in the TOC.
+\section{Introduction}
+% Section pages can be printed thus:
+% \frame{\sectionpage}
+% There's a way to automate this, see:
+% https://tex.stackexchange.com/questions/178800/creating-sections-each-with-title-pages-in-beamers-slides/178803
+
+\begin{frame}{Introduction}
+  
+  \begin{tcolorbox}[title=Problem,colbacktitle=sigma@mainblue]
+    
+  Given a positive integer $n$, find a nontrivial factor.
+  \end{tcolorbox}
+
+  A \textit{nontrivial factor} is a factor other than $1$ or $n$. \pause
+  
+  If the input size is the number of bits $b$,
+  there is no known algorithm that runs in polynomial time. \pause
+
+  For simplicity, we'll often assume that $n$ is composite.
+  \begin{itemize}
+    \item Checking whether $n$ is prime is easier, and can be done in polynomial time
+    (AKS primality test).
+  \end{itemize} \pause
+
+  Important for RSA encryption, whose security depends on the
+  difficulty of factoring the product of two primes (a \textit{semiprime}).
+
+\end{frame}
+
+\begin{frame}{Trial Division}
+  The brute force approach: Simply try all integers less than $n$, checking if each is a factor.
+
+  We only need to check up to $\sqrt{n}$;
+  if we haven't found a factor by then, $n$ is prime. \pause
+
+  Unfortunately, $O(\sqrt{n}) = O(\sqrt{2^b}) = O(2^{b/2})$, so the time complexity
+  is still exponential in the number of bits. \pause
+
+  Considering that there's no known polynomial algorithm, this is not all that bad.
+  But can we do better?
+\end{frame}
+
+\begin{frame}{Fermat's Algorithm}
+  Suppose $n = a \cdot b$. Let's assume $n$ is odd, so $a$ and $b$ are odd. \pause
+
+  Then write $a = x+y$, $b = x-y$ for some integers $x, y$, so
+  $$n = ab = x^2 - y^2 \implies x^2 - n = y^2.$$ \pause
+  Now try values for $x$, starting from $x = \ceil{\sqrt{n}}$.
+  For each $x$, compute $x^2 - n$, and see if the result is a perfect square.
+
+  % Taking mod $n$,
+  % $$x^2 - y^2 \equiv 0 \pmod{n}
+  % \implies x^2 \equiv y^2 \pmod{n}.$$
+\end{frame}
+
+\begin{frame}{Example}
+  Consider $n = 1081$. Then $\ceil{\sqrt{1081}} = 33$, so we try: \pause
+  \begin{center}
+  \begin{tabular}{c|c|c}
+    $x$ & $x^2$ & $y^2 = x^2 - n$ \\
+    \hline
+    33 & 1089 & 8 \\
+    34 & 1156 & 75 \\
+    35 & 1225 & 144 \\
+  \end{tabular}
+  \end{center} \pause
+  We find $144$ is a perfect square, so $x = 35, y = 12$ works. \pause
+
+  Then we can recover $a, b$:
+  $$a = x + y = 47, \quad b = x - y = 23.$$ \pause
+  As expected, $47 \cdot 23 = 1081$.
+\end{frame}
+
+\begin{frame}{Fermat's Algorithm: Analysis}
+  If a factor is near $\sqrt{n}$, the algorithm is fast -- $x$ will not be far from $\sqrt{n}$.
+  \pause
+
+  But if the factors are far apart (or worse, if $n$ is prime), we could be looking
+  from $\sqrt{n}$ to near $n/2$.
+  In the worst case, that takes $O(n)$ time -- even worse than trial division!
+  \pause
+
+  We can make some optimizations to skip $x$ that won't work,
+  guess approximately where the primes are and start looking for $x$
+  around there, or use Fermat's algorithm to narrow the search space
+  for trial division.
+  \pause
+
+  But there's much better.
+\end{frame}
+
+\section{Dixon's Algorithm}
+\frame{\sectionpage}
+
+\begin{frame}{Modulo}
+  Let's loosen our conditions a bit, and instead look for $x, y$ such that
+  $x^2 - y^2$ is a multiple of $n$. In other words,
+  $$x^2 - y^2 \equiv 0 \pmod{n} \implies x^2 \equiv y^2 \pmod{n}.$$
+  \pause
+  We can try to just look for pairs $(x, y)$ satisfying this,
+  but there are a lot of different possible values of $x^2$ mod $n$
+  (these remainders are called \textit{quadratic residues}). Specifically,
+  if $n$ is the product of just two primes, there are around $n/4$
+  quadratic residues mod $n$.
+  \pause
+
+  We can also try various $x$, reduce $x^2$ to its remainder mod $n$,
+  and see if this result ($<n$) is a perfect square,
+  like in Fermat's algorithm.
+  Unfortunately, there are only $\sqrt{n}$ perfect squares less than $n$,
+  so it will take a long time to land on one.
+  \pause
+\end{frame}
+
+\begin{frame}{Combinations}
+  Landing the quadratic residue $x^2$ mod $n$ on a perfect square is quite hard. But we don't need to.
+  \pause
+
+  Consider $n = 84923$.
+  Then, here are some $x$ we might try at some point, with the remainders
+  factorized into primes: 
+  \begin{align*}
+    513^2 \equiv 8400 &= 2^4 \cdot 3 \cdot 5^2 \cdot 7 \pmod{84923} \\
+    537^2 \equiv 33600 &= 2^6 \cdot 3 \cdot 5^2 \cdot 7 \pmod{84923}
+  \end{align*} \pause
+  Neither of the residues are perfect squares. However, when multiplied:
+  \begin{align*}
+    8400 \cdot 33600 = 2^{10} \cdot 3^2 \cdot 5^4 \cdot 7^2
+    = (2^5 \cdot 3 \cdot 5^2 \cdot 7)^2 = 16800^2.
+  \end{align*} \pause
+  So we can multiply remainders to get a perfect square!
+\end{frame}
+
+\begin{frame}{Combinations}
+  We now have $(513 \cdot 537)^2 \equiv 16800^2 \pmod{84923}$.
+  To recover the original primes, note that
+  $513 \cdot 537 = 275481 \equiv 20712 \pmod{84923}$, so \pause
+  \begin{align*}
+    (513 \cdot 537)^2 - 16800^2 &\equiv 20712^2 - 16800^2 \\
+    &\equiv (20712 - 16800)(20712 + 16800) \\
+    &\equiv 0 \pmod{84923}.
+  \end{align*}
+  So some divisor of $20712-16800$ is a factor of $84923$,
+  and same for $20712+16800$.
+  \pause
+
+  Our factors are then
+  \begin{align*}
+    \gcd(20712-16800, 84923) = 163, \quad
+    \gcd(20712+16800, 84923) = 521.
+  \end{align*}
+\end{frame}
+
+\begin{frame}{Taking this Further}
+  The key idea is that we don't need to hit a quadratic residue that's a perfect square --
+  instead, we can find several residues whose product is a perfect square.
+  \pause
+
+  We could start just squaring numbers above $\sqrt{n}$ and tracking the quadratic residues... \pause
+  \begin{itemize}
+    \item 
+    ...but it's unrealistic to systematically check all the combinations of the residues.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Prime Factorization}
+  Let's return to our earlier example of $n = 84923$. We had:
+  \begin{align*}
+    513^2 \equiv 8400 &= 2^4 \cdot 3 \cdot 5^2 \cdot 7 \pmod{84923} \\
+    537^2 \equiv 33600 &= 2^6 \cdot 3 \cdot 5^2 \cdot 7 \pmod{84923}
+  \end{align*} \pause
+  From the prime factorizations, we can tell the product of these residues will give a
+  square because the resulting exponents will be even. \pause
+
+  So we can try:
+  \begin{enumerate}
+    \item Square a bunch of numbers to get some residues.
+    \item Find the prime factorization of the residues. \pause
+    \item Find some way to multiply them so that the sum of the exponents
+    of each prime in the result is even.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Factor Base}
+  Unfortunately, factoring all the residues and then dealing
+  with all the different primes that can appear in the factorizations is too much. \pause
+
+  Instead:
+  \begin{enumerate}
+    \item Choose a few small primes up to some bound $B$ -- a \textbf{factor base}. \pause
+    \item Square a bunch of numbers to get some residues.
+    \item Attempt to factor the residues over the factor base,
+    throwing out any that contain other prime factors.
+  \end{enumerate} \pause
+  The prime factors of the remaining residues are less than $B$ -- we call these residues \textbf{$B$-smooth}.
+  We can then try to combine the residues so that the resulting exponents in the prime factorization are even,
+  which would give us a perfect square.
+\end{frame}
+
+\begin{frame}{Example}
+  Suppose $n = 4183$. We'll choose $B = 11$, so our factor base is $\{2, 3, 5, 7, 11\}$.
+  Trying some random numbers not less than $\ceil{\sqrt{n}} = 65$,
+  generate 6 $B$-smooth numbers: \pause
+
+  \begin{minipage}[c]{0.8 \textwidth}
+  \begin{tabular}{c|c|c|c}
+    $x$ & $x^2$ & $y = x^2 \pmod{n}$ & Prime factorization \\
+    \hline
+    65 & 4225 & 42 & $2 \cdot 3 \cdot 7$ \\
+    82 & 6724 & 2541 & $3 \cdot 7 \cdot 11$ \\
+    92 & 8464 & 98 & $2 \cdot 7^2$ \\
+    104 & 10816 & 2450 & $2 \cdot 5^2 \cdot 7^2$ \\
+    113 & 12769 & 220 & $2^2 \cdot 5 \cdot 11$ \\
+    118 & 13924 & 1375 & $5^3 \cdot 11$ \\
+  \end{tabular} \pause
+  \end{minipage}
+  \begin{minipage}[c]{0.1 \textwidth}
+  \[\begin{pmatrix}
+    1 \\ 0 \\ 2 \\ 2 \\ 0
+  \end{pmatrix}\]
+  \end{minipage}
+  
+  Write the prime factorizations as column vectors, storing the exponent
+  for each prime in the factor base. The vector above corresponds to $y = 2450$.
+\end{frame}
+
+\begin{frame}{Example}
+  Multiplying residues is equivalent to adding the exponents in their prime factorizations.
+  So given the 6 column vectors,
+  \[
+  \begin{pmatrix} 1 \\ 1 \\ 0 \\ 1 \\ 0 \end{pmatrix} \quad
+  \begin{pmatrix} 0 \\ 1 \\ 0 \\ 1 \\ 1 \end{pmatrix} \quad
+  \begin{pmatrix} 1 \\ 0 \\ 2 \\ 0 \\ 0 \end{pmatrix} \quad
+  \begin{pmatrix} 1 \\ 0 \\ 2 \\ 2 \\ 0 \end{pmatrix} \quad
+  \begin{pmatrix} 2 \\ 1 \\ 0 \\ 0 \\ 1 \end{pmatrix} \quad
+  \begin{pmatrix} 0 \\ 0 \\ 3 \\ 0 \\ 1 \end{pmatrix}
+  \] \pause
+  our goal is to sum some of them to get a vector where every entry is even
+  -- in other words, $0 \pmod{2}$.
+\end{frame}
+
+\begin{frame}{Linear System}
+  Reduce the entries of the vectors mod 2.
+  Then, we want to find $x_1, \dots, x_6 \in \{0, 1\}$ (not all zero) such that, mod 2,
+  \[
+  x_1 \begin{pmatrix} 1 \\ 1 \\ 0 \\ 1 \\ 0 \end{pmatrix} +
+  x_2 \begin{pmatrix} 0 \\ 1 \\ 0 \\ 1 \\ 1 \end{pmatrix} +
+  x_3 \begin{pmatrix} 1 \\ 0 \\ 0 \\ 0 \\ 0 \end{pmatrix} +
+  x_4 \begin{pmatrix} 1 \\ 0 \\ 0 \\ 0 \\ 0 \end{pmatrix} +
+  x_5 \begin{pmatrix} 0 \\ 1 \\ 0 \\ 0 \\ 1 \end{pmatrix} +
+  x_6 \begin{pmatrix} 0 \\ 0 \\ 1 \\ 0 \\ 1 \end{pmatrix}
+  \equiv \begin{pmatrix} 0 \\ 0 \\ 0 \\ 0 \\ 0 \end{pmatrix}.
+  \] \pause
+  From linear algebra, this always has a solution. There are 5 equations and 6 variables --
+  the vectors are \textit{linearly dependent}, meaning there is some solution
+  $(x_1, x_2, x_3, x_4, x_5, x_6) \ne (0, 0, 0, 0, 0, 0)$.
+  \pause
+
+  In this case, $(0, 0, 1, 1, 0, 0)$ works.
+\end{frame}
+
+\begin{frame}{Combining the Residues}
+  Our solution $(0, 0, 1, 1, 0, 0)$ corresponds to the 3rd and 4th rows of our table:
+
+  %\begin{minipage}[c]{0.8 \textwidth}
+  \begin{tabular}{c|c|c|c}
+    $x$ & $x^2$ & $y = x^2 \pmod{n}$ & Prime factorization \\
+    \hline
+    92 & 8464 & 98 & $2 \cdot 7^2$ \\
+    104 & 10816 & 2450 & $2 \cdot 5^2 \cdot 7^2$ \\
+  \end{tabular} \pause
+  %\end{minipage}
+
+  Let's multiply these.
+  We have $92 \cdot 104 \equiv 1202 \pmod{4183}$, and
+  %Then we multiply these (recall $n = 4183$ is the number to be factored):
+  \begin{align*}
+  92^2 \cdot 104^2 \equiv 98 \cdot 2450
+  \equiv (2 \cdot 5 \cdot 7^2)^2 \equiv 490^2 \pmod{4183} \\
+    0 \equiv (92 \cdot 104)^2 - 490^2
+    \equiv (1202-490)(1202+490) \pmod{4183}
+  \end{align*}
+  Our factors are then
+  $$a = \gcd(1202-490, 4183) = 89,\quad b = \gcd(1202+490, 4183) = 41.$$
+\end{frame}
+
+\begin{frame}{Dixon's Algorithm}
+  Given an input $n$:
+  \begin{enumerate}
+    \item Choose a factor base of size $k$, containing all primes up to some bound $B$. \pause
+    \item Generate residues (at least $k+1$) that factor over the factor base.
+    \begin{itemize}
+      \item Repeatedly choose (random) numbers between $\sqrt{n}$ and $n$ and square them.
+    \end{itemize} \pause
+    \item From the prime factorizations, use the exponents
+    to create a system of linear equations mod 2.
+    \item Find a solution to the system. (e.g., with Gaussian elimination)
+    \item Multiply the corresponding residues and recover the factors of $n$.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Analysis}
+  Dixon's algorithm is dominated mainly by:
+  \begin{itemize}
+    \item Generation of residues (repeated squaring), most of which will be discarded
+    due to not factoring over the factor base
+    \item Attempting to factor the residues over the factor base
+  \end{itemize} \pause
+  Choosing the correct upper bound $B$ is important -- it turns out to be about
+  \[\exp\left(\sqrt{\log n} \sqrt{\log \log n} / 2\right).\]
+  \pause
+  The (expected) runtime of Dixon's algorithm ends up as roughly
+  $$O\left(\exp\left(2\sqrt{2} \sqrt{\log n}\sqrt{\log \log n}\right)\right).$$ \pause
+  This is actually sub-exponential in $b = \log n$, thanks to the square roots.
+\end{frame}
+
+\section{Quadratic Sieve}
+\frame{\sectionpage}
+
+\begin{frame}{Improving on Dixon's}
+  Ideas:
+  \begin{enumerate}
+    \item When generating residues, square values near $\sqrt{n}$.
+    This way, the residue will be small:
+    \[r(x) = x^2 - n \ll n.\] \pause
+    \item Choose the primes in the factor base wisely.
+    In particular, choose $p$ such that
+    $$r(x) = x^2 - n \equiv 0 \pmod{p}$$
+    has solutions. We'll see why shortly.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{The Sieve}
+  Suppose we have one solution $x$ to $x^2 - n \equiv 0 \pmod{p}$. \pause
+  Then note
+  \begin{align*}
+    r(x + kp) &\equiv (x+kp)^2 - n \\
+    &\equiv x^2 + 2kpx + (kp)^2 - n \\
+    &\equiv x^2 - n \\
+    &\equiv 0 \pmod{p}.
+  \end{align*} \pause
+  Therefore, if $x$ is a solution, $x+kp, x+2kp, \dots$ are solutions.
+  Each of these give residues that are multiples of $p$. \pause
+
+  So by solving $x^2 - n \equiv 0 \pmod{p}$,
+  we get many $x$ that give residues that are multiples of $p$ at once!
+
+  %(This holds as long as the residue is actually $x^2 - n < n$.
+  %As long as $x$ doesn't stray too far from $\sqrt{n}$, this is true.)
+\end{frame}
+
+\begin{frame}{The Sieve}
+  Let $x_0 = \ceil{\sqrt{n}}$. Say we generate an array of residues of some size:
+  \[A = 
+  \begin{bmatrix}
+    r(x_0) & r(x_0+1) & r(x_0+2) & r(x_0+3) & r(x_0+4) & r(x_0+5) & \cdots
+  \end{bmatrix}
+  \] \pause
+  % Now take the small prime $p$ (starting with $p = 2$).
+  Now consider $p = 2$.
+  Find the solution of $r(x) = x^2 - n \equiv 0 \pmod{2}$ closest to $\ceil{\sqrt{n}}$.
+  Let's say it's $x_0$ (it's either that or $x_0 + 1$).
+  Then we know 2 divides all of the following:
+  \[r(x_0), r(x_0+2), r(x_0+4), \dots\] \pause
+  So we can update our array as follows:
+  \[A = 
+  \begin{bmatrix}
+    \frac{r(x_0)}{2} & r(x_0+1) & \frac{r(x_0+2)}{2} & r(x_0+3) & \frac{r(x_0+4)}{2} & r(x_0+5) & \cdots
+  \end{bmatrix}
+  \]
+\end{frame}
+
+\begin{frame}{The Sieve}
+  Next, repeat for other primes $p$:
+  \begin{itemize}
+    \item Solve $x^2 - n \equiv 0 \pmod{p}$ to get a sequence of solutions
+    $x, x+p, x+2p, x+3p, \dots$.
+    \item Divide the corresponding entries in the array $A$ by $p$.
+  \end{itemize} \pause
+  This is the "sieve" in the quadratic sieve -- since we divide
+  every 2nd element by $p$, then every 3rd element, then every 5th element, etc.
+  (reminiscent of the Sieve of Eratosthenes). \pause
+
+  Once an entry in $A$ reaches 1, that means the
+  corresponding residue fully factors over all primes $p$ used in the sieving. \pause
+
+  A solution to $x^2 - n \equiv 0 \pmod{p}$ doesn't actually exist for all $p$,
+  so we'll have to skip some primes $p$.
+  The primes that we keep constitute our factor base.
+\end{frame}
+
+\begin{frame}{Combining Residues}
+  Once we have enough fully-factoring residues (likely one more than
+  the size of the factor base), we can create the system of equations
+  as in Dixon's algorithm to find the combination of residues
+  that will result in a perfect square. \pause
+
+  Then we can apply difference of squares to get the factors of $n$, as seen earlier.
+\end{frame}
+
+\begin{frame}{Quadratic Sieve Algorithm}
+  Given an input $n$:
+  \begin{enumerate}
+    \item Initialize a large array $A$ to hold information about
+    residues for $x$ near $\sqrt{n}$. \pause
+    \item Generate the factor base and sieve: \pause
+    \begin{itemize}
+      \item Solve $x^2 - n \equiv 0 \pmod{p}$ for increasing values of $p$.
+      \item Add the $p$ to the factor base.
+      \item Update the entries in $A$ corresponding to the solution.
+    \end{itemize} \pause
+    \item From the prime factorizations, use the exponents
+    to create a system of linear equations mod 2.
+    \item Find a solution to the system. (e.g., with Gaussian elimination)
+    \item Multiply the corresponding residues and recover the factors of $n$.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Analysis}
+  With proper selection of the size of the factor base
+  (too small and few residues factor over it; too large and we'll need a lot
+  of residues to solve the system of equations),
+  the expected runtime of the quadratic sieve is
+  $$O\left(\exp\left(\sqrt{9/8} \sqrt{\log n}\sqrt{\log \log n}\right)\right).$$ \pause
+  In particular, $\sqrt{9/8}$ is a smaller value than what appeared there in Dixon's algorithm.
+\end{frame}
+
+\begin{frame}{In Practice}
+  Currently, the quadratic sieve is the second-fastest known factoring algorithm,
+  beaten only by the general number field sieve.
+  For numbers under $\approx 100$ digits, the quadratic sieve
+  is still the fastest. \pause
+
+  The quadratic sieve was the first to factor
+  RSA-129, a 129-digit semiprime (in 1994). The factor base used 524339 primes.
+  The data collection (sieving) took over 5000 MIPS-years, distributed over 1600 computers.
+  The data processing (solving the system) took another 45 hours on a supercomputer. \pause
+  \begin{itemize}
+    \item We've come a long way since:
+
+    \quoteAuthor{In 2015, RSA-129 was factored in about one day,
+    with the CADO-NFS open source implementation of number field sieve,
+    using a commercial cloud computing service for about \$30.}{Wikipedia}
+    % \begin{quote}
+    %   In 2015, RSA-129 was factored in about one day,
+    %   with the CADO-NFS open source implementation of number field sieve,
+    %   using a commercial cloud computing service for about \$30.
+    % \end{quote}
+  \end{itemize}
+\end{frame}
+
+% \begin{frame}{Some Text}
+%     \begin{itemixe}
+%         \item You may want some stuff to appear in a sequence \pause
+%         \item Use \textbackslash pause for this \pause
+%         \item \textcolor{sigma@mainblue}{colors} \textcolor{sigma@highlightpink}{are} \textcolor{sigma@alertred}{cool}
+%     \end{itemize}
+% \end{frame}
+
+% \begin{frame}
+%   \frametitle{Some Math Mode Testing}
+%   % Some fun with LaTeX Math
+%   $$\frac{x^2+3}{y^2+7}$$
+
+%   \[
+%     \mathcal L_{\mathcal T}(\vec{\lambda})
+%     = \sum_{(\mathbf{x},\mathbf{s})\in \mathcal T}
+%        \log P(\mathbf{s}\mid\mathbf{x}) - \sum_{i=1}^m
+%        \frac{\lambda_i^2}{2\sigma^2}
+%   \]
+
+%   $$\int_0^8 f(x) dx$$
+% \end{frame}
+
+% % Use \pause to make stuff readable
+% % Large walls of text scare the audience, we don't want that
+% % Introducing stuff sequentially allows for questions
+% \begin{frame}
+%   % Alternate syntax for frame titles
+%   \frametitle{There Is No Largest Prime Number}
+%   % Frames can have subtitles:
+%   \framesubtitle{The proof uses \textit{reductio ad absurdum}.}
+%   % Some frame content:
+%   \begin{thrm}
+%     There is no largest prime number.
+%   \end{thrm}
+%   \begin{pf}
+%     \begin{enumerate}
+%         \item Suppose $p$ were the largest prime number \pause
+%         \item Let $q$ be the product of the first $p$ primes \pause
+%         \item Then $q+1$ is not divisible by any of them \pause
+%         \item But $q + 1$ is greater than $1$, thus divisible by some prime number not in the first $p$ numbers. \pause
+%         \item Thus, there exists a prime larger than $p$.
+%     \end{enumerate}
+%   \end{pf}
+% \end{frame}
+
+% % However, this doesn't work in math mode. It is quite annoying to figure out
+% % So just copy this as reference
+% % This works for \onslide<> and \item<>
+% % Really good read on this: 
+% %   https://www.texdev.net/2014/01/17/the-beamer-slide-overlay-concept/
+% \begin{frame}{Sequential Math Frames}
+%     Here is a sentence \pause
+    
+%     I shall now carry out some calculations \pause
+%     \begin{align*}
+%         \onslide<+->{\zeta(s) &= \sum_{n = 1}^\infty \frac{1}{n^s} \\}
+%         \onslide<+->{&= \prod_{p \in \text{primes}} \frac{1}{1 - p^{-s}} \\}
+%         \onslide<.->{&= \frac{1}{1 - 2^-s} \cdot \frac{1}{1 - 3^-s} \cdots \\}
+%         \onslide<+->{&= \frac{1}{\Gamma(s)} \int_0^\infty \frac{x^{s - 1}}{e^x - 1} ~\textrm{d}x\\}
+%     \end{align*}
+% \end{frame}
+
+% \section{Some Template Slides}
+% \frame{\sectionpage}
+
+% % Similar for subsections:
+% \subsection{A subsection, Wow}
+% % And their pages:
+% \frame{\subsectionpage}
+
+% \begin{frame}{Image}
+%   % This is how you'd include an image, centered.
+%   \begin{center}
+%     \includegraphics[width=0.25\textwidth]{sigma.png}
+%   \end{center}
+% \end{frame}
+
+% \begin{frame}{Side by Side}
+%     \includegraphics[width=0.25\textwidth]{sigma.png}\hspace{0.4\textwidth}
+%     \includegraphics[width=0.25\textwidth]{sigma.png}
+% \end{frame}
+
+% \begin{frame}{Demonstration of algo and nalgo env}
+%     \begin{algo}
+%     \underline{\textsc{GetRandomNumber}():}\+
+%     \\      return $4$   \Comment{chosen by fair dice roll.}
+%     \\      \hspace{42.75pt}\Comment{guaranteed to be random.}
+%     \end{algo}
+    
+%     % nalgo has line numbers
+%     % only lines with \label{} are numbered
+%     \begin{nalgo}[1.3]
+%         \underline{\textsc{GetRandomNumber}():}\+
+%     \\\label{}  return $4$   \Comment{chosen by fair dice roll.}
+%     \\\label{}  \hspace{42.75pt}\Comment{guaranteed to be random.}
+%     \end{nalgo}
+    
+%     Random number generation from~\cite{site:xkcd}. 
+%     \quest{
+%     \textbackslash cref for line numbers does not work. 
+%     If you want to refer to specific line numbers, do it manually
+%     }
+    
+% \end{frame}
+
+% \begin{frame}{}
+% \begin{minipage}[c]{0.6\textwidth}
+% \begin{nalgo}
+% \textul{\textbf{\textsc{AlgorithmP}}$(S[a_0, \dots, a_n])$}:
+% \\\label{}  $C[1..n] \gets 0, O[1..n] \gets 1$
+% \\\label{}  \textbf{while} \textsc{True}:\+
+% \\\label{}      \textsc{print}$(S)$
+% \\\label{}      {\color{lightgray}$j \gets n, s \gets 0$}
+% \\\label{}      {\color{lightgray}\textbf{A:}~~$q \gets C[j] + O[j]$\+}
+% \\\label{}          {\color{lightgray}\textbf{if} $q < 0$: goto \textbf{D}}
+% \\\label{}          {\color{lightgray}\textbf{if} $q = j$: goto \textbf{B}}
+% \\\label{}          {\color{lightgray}\textsc{swap}$(S, j-C[j]+s, j-q+s)$}
+% \\\label{}          {\color{lightgray}$C[j] \gets q$} 
+% \\\label{}          {\color{lightgray}continue\-}
+% \\\label{}      {\color{lightgray}\textbf{B:}~~\textbf{if} $j=1$:\+\+}
+% \\\label{}              {\color{lightgray}break\-}
+% \\\label{}          {\color{lightgray}$s \gets s+1$\-}
+% \\\label{}    {\color{lightgray}\textbf{D:}~~$O[j] \gets -O[j], j \gets j-1$\+}
+% \\\label{}      {\color{lightgray}goto \textbf{A}}
+% \end{nalgo}
+% \end{minipage}
+% \begin{minipage}[c]{0.35\textwidth}
+% \begin{itemize}
+%     \item Here is an example of annotating an algorithms \pause
+%     \item We have grayed out text to highlight what we want to discuss 
+% \end{itemize}
+% \end{minipage}
+% \end{frame}
+
+% % Of course, not everything is in pseudocode
+% % You MUST have this [containsverbatim] option
+% % https://www.overleaf.com/learn/latex/Code_Highlighting_with_minted
+% \begin{frame}[containsverbatim]{Source Code}
+%     \begin{minted}
+%     [
+%     framesep=2mm,
+%     baselinestretch=1.2,
+%     bgcolor=black,
+%     fontsize=\footnotesize,
+%     ]
+%     {python}
+%     def algorithm_g(n):
+%         a = [0 for _ in range(n + 1)]
+%         while True:
+%             curr = a[1 : n + 1][::-1]
+%             yield "".join([str(i) for i in curr])
+    
+%             a[0] = 1 - a[0]
+%             j = 1
+%             while a[j - 1] != 1:
+%                 j += 1
+%             if j == n + 1:
+%                 return
+%             a[j] = 1 - a[j]
+%     \end{minted}
+% \end{frame}
+
+
+% \begin{frame}{Theorems and Lemmas}
+%     \begin{lem}
+%         The map $\C \times \pqty{\C \setminus \set{0}} \to \C$, $(z, w) \mapsto z / w$ is $C^{\infty}$.
+%     \end{lem}
+%     \begin{pf}
+%         To see this, we identify $\C$ with $\R^{2}$ where $a + bi = (a, b)$.
+%         Thus our map is now
+%         \begin{align*}
+%             \pqty{\R^{2}} \times \pqty{\R^{2} \setminus \set{(0, 0)}} &\to \R^{2} \\
+%                             ((a, b), (c, d)) &\mapsto \pqty{\frac{ac + bd}{c^{2} + d^{2}}, \frac{bc - ad}{c^{2} + d^{2}}}
+%         \end{align*}
+%         which is well defined since at least one of $c$ or $d$ is nonzero.
+%         It is simple to verify that this map is equivalent to the original one.
+%         Since this new map is $C^{\infty}$ in each component, we have that it is $C^{\infty}$ overall.
+%     \end{pf}
+% \end{frame}
+
+% \section{Conclusion}
+% \frame{\sectionpage}
+
+% Asking questions is fun but we should answer some first
+\begin{frame}{}
+      \begin{center}
+    {\color{sigma@mainblue} \LARGE Questions?}
+  \end{center}
+\end{frame}
+
+% \begin{frame}{Questions!}
+%     \begin{itemize}
+%         \item How many zeros of $\zeta(s) = \sum\limits_{i = 1}^\infty \frac{1}{n^s} = \prod\limits_{p \text{ prime}} \frac{1}{1 - p^{-s}}$ have real part equal to $\frac{1}{2}$?
+%         \item Find a closed form to the following recurrence:
+%         $$
+%             f(n) = \begin{cases} 
+%                 f\pqty{\frac{n}{2}} & n \text{ even} \\
+%                 f{3n + 1} & \text{otherwise}                
+%             \end{cases}
+%         $$
+%     \end{itemize}
+% \end{frame}
+
+% If someone can figure out how to horizontally center this and make the text bigger that'd be cool
+\begin{frame}{Brainteaser}
+      Assume 100 zombies are walking on a straight line, all moving with the same speed. Some are moving towards left, and some towards right. If a collision occurs between two zombies, they both reverse their direction. Initially all zombies are standing at 1 unit intervals. For every zombie, you can see whether it moves left or right, can you predict the number of collisions?
+\end{frame}
+
+% Remove this slide if you came up with all the material yourself
+\begin{frame}[allowframebreaks]{Bibliography}
+    \tiny
+    \bibliography{refs}
+    \bibliographystyle{alpha}
+    
+    \nocite{fermatwiki,dixonwiki,qswiki,dixonqsblog,factoringlecture,qfssimple}
+    
+\end{frame}
+
+% @misc{site:xkcd,
+%   author={Randall Munroe},
+%   title={RFC 1149.5 specifies 4 as the standard IEEE-vetted random number.},
+%   howpublished={\url{https://xkcd.com/221/}},
+%   year={2007},
+%   note={Accessed: 01-09-2023},
+% }
+% Moved from refs.bib
+
+\end{document}
