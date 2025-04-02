@@ -1,0 +1,674 @@
+\documentclass[aspectratio=169]{beamer}
+
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{moredefs,lips}
+\usepackage{mathrsfs}
+\usepackage{simplebnf}
+\usepackage[indent=1em]{fitch}
+
+\renewcommand{\implies}{\Rightarrow}
+\newcommand{\emphc}[1]{\textcolor{sigma@mainblue}{\emph{#1}}}
+\newcommand{\urlc}[1]{\textcolor{sigma@mainblue}{\url{#1}}}
+
+% Set a title
+\title{Natural Deduction}
+
+% Whoever worked on the presentation:
+\author{Ethan Zhang}
+
+% A date, if you'd like.
+\date{}
+
+% An institute name, if you're so inclined
+\institute{University of Illinois Urbana-Champaign}
+
+\usetheme{sigma}
+
+\begin{document}
+
+\begin{frame}
+	\titlepage
+\end{frame}
+
+\begin{frame}{Outline}
+	\tableofcontents
+\end{frame}
+
+\section{Logic Refresher}
+\frame{\sectionpage}
+
+\begin{frame}{Basic Notions From Logic}
+	\begin{definition}
+		A \emphc{formula} is a string in a formal language.
+		A \emphc{sentence} is a formula with no free variables.
+		A \emphc{statement} is a sentence with a definite truth value.
+	\end{definition}
+	\pause
+	\begin{definition}
+		An \emphc{argument} is a sequence of statements.
+		We say an argument is \emphc{valid} if every statement deductively follows from previous statements,
+		and call it \emphc{sound} if it is valid and its premises hold.
+	\end{definition}
+\end{frame}
+
+\begin{frame}{Propositional (or Zeroth-Order) Logic}
+	\only<1-2>{
+		\emphc{Propositional Logic} is the most basic form of symbolic logic; its language is inductively defined by atomic propositions and truth functions.
+		\pause
+		\begin{definition}
+			A \emphc{truth function} is a function that takes truth values to truth values.
+			For example, a \emphc{logical connective} is a truth function since the truth of a statement $P \land Q$ depends solely on the truth values of the substatements $P$ and $Q$.
+		\end{definition}
+	}
+	\only<3->{
+		\centering
+		\begin{bnf}
+			$\mathscr{A}$ : \textsf{Formulae} ::=
+			| $P$ : propositions
+			| $\top$ : top (true)
+			| $\bot$ : bottom (false)
+			| $\mathscr{P} \land \mathscr{Q}$ : conjunction
+			| $\mathscr{P} \lor \mathscr{Q}$ : disjunction
+			| $\mathscr{P} \implies \mathscr{Q}$ : implication
+			| $\neg \mathscr{P}$ : negation
+		\end{bnf}
+	}
+\end{frame}
+
+\begin{frame}{First-Order Logic (FOL)}
+	\only<1-2>{
+		\emphc{First-Order Logic} extends propositional logic with predicates and quantification over objects.
+		\pause
+		\begin{definition}
+			An \emphc{object} belongs to the \emphc{domain} of a theory, e.g. natural numbers in number theory, sets in set theory, etc.
+			A \emphc{predicate} can be thought of like a function on objects: it takes in an object and outputs a truth value depending on said object and the \emphc{interpretation} in the model.
+		\end{definition}
+	}
+	\only<3->{
+		\centering
+		\begin{bnf}
+			$\tau$ : \textsf{Terms} ::=
+			| $x$ : variables
+			;;
+			$\mathscr{A}$ : \textsf{Formulae} ::=
+			| $P[\tau_1, \dots, \tau_n]$ : predicates
+			| $\top$ : top (true)
+			| $\bot$ : bottom (false)
+			| $\mathscr{P} \land \mathscr{Q}$ : conjunction
+			| $\mathscr{P} \lor \mathscr{Q}$ : disjunction
+			| $\mathscr{P} \implies \mathscr{Q}$ : implication
+			| $\neg \mathscr{P}$ : negation
+			| $\forall x. \mathscr{P}[x]$ : universal quantification
+			| $\exists x. \mathscr{P}[x]$ : existential quantification
+		\end{bnf}
+	}
+\end{frame}
+
+\begin{frame}{Intuitionistic vs. Classical Logic}
+	\begin{itemize}
+		\item \textbf{Truth is objectively real:}
+		      Logical sentences have definite truth values, even if we can't (or don't yet know how to) prove them.
+		\item \textbf{Truth is a mental construct:}
+		      Truth is subjective and dependent on the mind of the mathematician.
+		      Hence, a sentence is only true or false when we can provide an explicit construction for an object that witnesses its truth value.
+	\end{itemize}
+	In particular, \emphc{Classical Logic} admits the \emphc{Law of Excluded Middle} whereas \emphc{Intuitionistic Logic} rejects it.
+\end{frame}
+
+\section{A Bit of Proof Theory}
+\frame{\sectionpage}
+
+\begin{frame}{Proof Theory?}
+	\only<1>{
+		\emphc{Proof theory} is the study of ``formal'' proofs as mathematical objects.
+		Historically, it stemmed out of a desire to reduce mathematics to a \emphc{syntactical} game governed by axioms and inference rules.
+	}
+	\only<2>{
+		In particular, it studies \emphc{proof systems} and their strengths:
+		\begin{itemize}
+			\item What is the ``structure'' of a proof?
+			\item Can a particular proof system prove (derive) some sentence?
+			\item Is there any extra ``meaning''/``insight'' we can get from a particular proof?
+		\end{itemize}
+		This is in contrast to \emphc{model theory}, which studies the semantics of mathematical theories, i.e. in what contexts are so-and-so sentences true?
+	}
+\end{frame}
+
+\begin{frame}{Proof Calculi}
+	\begin{definition}[from the Pr$\infty$f Wiki]
+		A \emphc{proof system} $\mathscr{P}$ for a formal language $\mathscr{L}$ comprises:
+		\begin{itemize}
+			\item \emphc{Axioms} and/or \emphc{axiom schemata};
+			\item \emphc{Rules of inference} for deriving theorems.
+		\end{itemize}
+	\end{definition}
+	\pause
+	We write $\Gamma \vdash_{\mathscr{P}} \varphi$ if the formula $\varphi$ is \emphc{provable} (or \emphc{derivable}) in $\mathscr{P}$ from a set of assumptions $\Gamma$;
+	that is, if there is some sequence of deductions (governed by $\mathscr{P}$) that starts at $\Gamma$ and ends at $\varphi$.
+\end{frame}
+
+\begin{frame}{``Examples''}
+	\begin{columns}[t]
+		\begin{column}{.5\textwidth}
+			\textbf{Hilbert System:}
+			\begin{itemize}
+				\item Many axioms.
+				\item Few inference rules (typically only Modus Ponens).
+				\item Reasoning is primarily justified by axioms.
+				\item Proofs consist of a sequence of formulae, each of which either is an axiom or follows from a deduction.
+			\end{itemize}
+		\end{column}
+		\begin{column}{.5\textwidth}
+			\textbf{Natural Deduction:}
+			\begin{itemize}
+				\item Few (or no) axioms.
+				\item ``Natural'' inference rules.
+				\item Proofs are expressed by inference, mimicking the ``natural'' way of reasoning.
+				\item \textbf{Fitch-style} proofs look similar to those in a Hilbert system.
+				      \textbf{Gentzen-style} proofs make use of ``proof trees'' (\`a la CS 421).
+			\end{itemize}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Applications}
+	\begin{itemize}
+		\item \textbf{Formal verification} of software systems;
+		\item \textbf{Proof automation} in mathematics;
+		\item \textbf{Logic programming};
+		\item \textbf{Semantics} for programming (and natural!) languages.
+	\end{itemize}
+\end{frame}
+
+\section{(Fitch-Style) Natural Deduction for (Intuitionistic) Propositional Logic}
+\frame{\sectionpage}
+
+\begin{frame}{Idea/Motivation}
+	\only<1>{
+		\begin{itemize}
+			\item Truth tables don't give us very much insight into why an argument is true (and don't really work for intuitionistic logics).
+			      More importantly, verifying complex arguments becomes intractable!
+			\item Arguments involving substituting logical equivalences are hard to come up with, hard to follow, and can hide implicit assumptions.
+		\end{itemize}
+	}
+	\only<2>{
+		What if we instead focus on reasoning in the ``natural'' way?
+
+		\pause
+		\vspace{1em}
+		\begin{quote}
+			One of Gentzen’s main motivations was to devise rules that model mathematical reasoning as directly as possible, although clearly in much more detail than in a typical mathematical argument.
+
+			\vspace{1em}\textnormal{--- Frank Pfenning (\textcolor{sigma@mainblue}{2023})}
+		\end{quote}
+	}
+\end{frame}
+
+\begin{frame}{Language}
+	\centering
+	\begin{bnf}
+		$\mathscr{A}$ : \textsf{Formulae} ::=
+		| $P$ : propositions
+		| $\top$ : top (true)
+		| $\bot$ : bottom (false)
+		| $\mathscr{P} \land \mathscr{Q}$ : conjunction
+		| $\mathscr{P} \lor \mathscr{Q}$ : disjunction
+		| $\mathscr{P} \implies \mathscr{Q}$ : implication
+		| $\neg \mathscr{P}$ : negation
+	\end{bnf}
+\end{frame}
+
+\begin{frame}{Reiteration}
+	\[
+		\begin{nd}
+			\have[m] {m} {\mathscr{A}}
+			\have[n] {n} {\mathscr{A}} \r{m}
+		\end{nd}
+	\]
+\end{frame}
+
+\begin{frame}{Conjunction}
+	\pause
+	\begin{columns}
+		\begin{column}{.5\textwidth}
+			\[
+				\begin{nd}
+					\have[m] {m} {\mathscr{A}}
+					\have[n] {n} {\mathscr{B}}
+					\have[l] {l} {\mathscr{A} \land \mathscr{B}} \ai{m,n}
+				\end{nd}
+			\]
+		\end{column}
+		\pause
+		\begin{column}{.5\textwidth}
+			\[
+				\begin{nd}
+					\have[m] {m} {\mathscr{A} \land \mathscr{B}}
+					\have[n] {n} {\mathscr{A}} \ae{m}
+				\end{nd}
+			\]
+			\[
+				\begin{nd}
+					\have[m] {m} {\mathscr{A} \land \mathscr{B}}
+					\have[n] {n} {\mathscr{B}} \ae{m}
+				\end{nd}
+			\]
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Implication}
+	\pause
+	\begin{columns}
+		\begin{column}{.5\textwidth}
+			\[
+				\begin{nd}
+					\open
+					\hypo[m] {m} {\mathscr{A}}
+					\have[n] {n} {\mathscr{B}}
+					\close
+					\have[l] {l} {\mathscr{A} \implies \mathscr{B}} \ii{m-n}
+				\end{nd}
+			\]
+		\end{column}
+		\pause
+		\begin{column}{.5\textwidth}
+			\[
+				\begin{nd}
+					\have[m] {m} {\mathscr{A} \implies \mathscr{B}}
+					\have[n] {n} {\mathscr{A}}
+					\have[l] {l} {\mathscr{B}} \ie{m, n}
+				\end{nd}
+			\]
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Disjunction}
+	\pause
+	\begin{columns}
+		\begin{column}{.5\textwidth}
+			\[
+				\begin{nd}
+					\have[m] {m} {\mathscr{A}}
+					\have[n] {n} {\mathscr{A} \lor \mathscr{B}} \oi{m}
+				\end{nd}
+			\]
+			\[
+				\begin{nd}
+					\have[m] {m} {\mathscr{B}}
+					\have[n] {n} {\mathscr{A} \lor \mathscr{B}} \oi{m}
+				\end{nd}
+			\]
+		\end{column}
+		\pause
+		\begin{column}{.5\textwidth}
+			\[
+				\begin{nd}
+					\have[m] {m} {\mathscr{A} \lor \mathscr{B}}
+					\open
+					\hypo[i] {i} {\mathscr{A}}
+					\have[j] {j} {\mathscr{C}}
+					\close
+					\open
+					\hypo[k] {k} {\mathscr{B}}
+					\have[l] {l} {\mathscr{C}}
+					\close
+					\have[n] {n} {\mathscr{C}} \oe{m, i-j, k-l}
+				\end{nd}
+			\]
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Negation}
+	\pause
+	\begin{columns}
+		\begin{column}{.5\textwidth}
+			\[
+				\begin{nd}
+					\open
+					\hypo[m] {m} {\mathscr{A}}
+					\have[n] {n} {\bot}
+					\close
+					\have[l] {l} {\neg \mathscr{A}} \ni{m-n}
+				\end{nd}
+			\]
+		\end{column}
+		\pause
+		\begin{column}{.5\textwidth}
+			\[
+				\begin{nd}
+					\have[m] {m} {\neg \mathscr{A}}
+					\have[n] {n} {\mathscr{A}}
+					\have[l] {l} {\bot} \ne{m, n}
+				\end{nd}
+			\]
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Explosion}
+	\[
+		\begin{nd}
+			\have[m] {m} {\bot}
+			\have[n] {n} {\mathscr{A}} \be{m}
+		\end{nd}
+	\]
+\end{frame}
+
+\subsection{Examples}
+\frame{\subsectionpage}
+
+\begin{frame}{$A \implies (B \implies C) \vdash (A \land B) \implies C$}
+	\[
+		\begin{nd}
+			\hypo {h} {A \implies (B \implies C)}
+			\open
+			\hypo {hab} {A \land B}
+			\have {a} {A} \ae{hab}
+			\have {b} {B} \ae{hab}
+			\have {ib} {B \implies C} \ie{h, a}
+			\have {c} {C} \ie{ib, b}
+			\close
+			\have {r} {(A \land B) \implies C} \ii{hab-c}
+		\end{nd}
+	\]
+\end{frame}
+
+\begin{frame}{$P \land (Q \lor R), P \implies \neg R \vdash Q \lor E$}
+	\begin{columns}
+		\begin{column}{.4\textwidth}
+			\[
+				\begin{nd}
+					\hypo{hpqr} {P \land (Q \lor R)}
+					\hypo{hpnr} {P \implies \neg R}
+					\have{p} {P} \ae{hpqr}
+					\have{qr} {Q \lor R} \ae{hpqr}
+					\have{nr} {\neg R} \ie{hpnr, p}
+				\end{nd}
+			\]
+		\end{column}
+		\begin{column}{.6\textwidth}
+			\[
+				\begin{nd}
+					\open
+					\hypo[6] {hq} {Q}
+					\have[7] {qe1} {Q \lor E} \oi{hq}
+					\close
+					\open
+					\hypo[8] {hr} {R}
+					\have[9] {b} {\bot} \ne{nr, hr}
+					\have[10] {qe2} {Q \lor E} \be{b}
+					\close
+					\have[11] {qe} {Q \lor E} \oe{qr, hq-qe1, hr-qe2}
+				\end{nd}
+			\]
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\section{Extending Natural Deduction to FOL}
+\frame{\sectionpage}
+
+\begin{frame}{Language}
+	\centering
+	\begin{bnf}
+		$\tau$ : \textsf{Terms} ::=
+		| $x$ : variables
+		;;
+		$\mathscr{A}$ : \textsf{Formulae} ::=
+		| $P[\tau_1, \dots, \tau_n]$ : predicates
+		| $\top$ : top (true)
+		| $\bot$ : bottom (false)
+		| $\mathscr{P} \land \mathscr{Q}$ : conjunction
+		| $\mathscr{P} \lor \mathscr{Q}$ : disjunction
+		| $\mathscr{P} \implies \mathscr{Q}$ : implication
+		| $\neg \mathscr{P}$ : negation
+		| $\forall x. \mathscr{P}[x]$ : universal quantification
+		| $\exists x. \mathscr{P}[x]$ : existential quantification
+	\end{bnf}
+\end{frame}
+
+\begin{frame}{Universal Quantifier}
+	\pause
+	\begin{columns}
+		\begin{column}{.5\textwidth}
+			\[
+				\begin{nd}
+					\open
+					\hypo[m] {m} {a}
+					\have[n] {n} {\mathscr{P}[a/x]}
+					\close
+					\have[l] {l} {\forall x. \mathscr{P}[x]} \Ai{m-n}
+				\end{nd}
+			\]
+		\end{column}
+		\pause
+		\begin{column}{.5\textwidth}
+			\[
+				\begin{nd}
+					\have[m] {m} {\forall x. \mathscr{P}[x]}
+					\have[n] {n} {\mathscr{P}[a/x]} \Ae{m}
+				\end{nd}
+			\]
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Existential Quantifier}
+	\pause
+	\begin{columns}
+		\begin{column}{.5\textwidth}
+			\[
+				\begin{nd}
+					\have[m] {m} {\mathscr{P}[a]}
+					\have[n] {n} {\exists x. \mathscr{P}[x/a]} \Ei{m}
+				\end{nd}
+			\]
+		\end{column}
+		\pause
+		\begin{column}{.5\textwidth}
+			\[
+				\begin{nd}
+					\have[m] {m} {\exists x. \mathscr{P}[x]}
+					\open
+					\hypo[i] {i} {\mathscr{P}[a/x]}
+					\have[j] {j} {\mathscr{A}}
+					\close
+					\have[n] {n} {\mathscr{A}} \Ee{m, i-j}
+				\end{nd}
+			\]
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\subsection{Examples}
+\frame{\subsectionpage}
+
+\begin{frame}{$\forall x. Fx \implies Gx, \exists x. Fx \vdash \exists x.Gx$}
+	\[
+		\begin{nd}
+			\hypo {h1} {\forall x. Fx \implies Gx}
+			\hypo {h2} {\exists x. Fx}
+			\open
+			\hypo {hf} {Fa}
+			\have {faga} {Fa \implies Ga} \Ae{h1}
+			\have {ga} {Ga} \ie{faga, hf}
+			\have {Exgx1} {\exists x. Gx} \Ei{ga}
+			\close
+			\have {Exgx} {\exists x. Gx} \Ee{h2, hf-ga}
+		\end{nd}
+	\]
+\end{frame}
+
+\section{``Upgrading'' to Classical Logic}
+\frame{\sectionpage}
+
+\begin{frame}{Excluded Middle (and Related Axioms)}
+	\begin{columns}
+		\begin{column}{.5\textwidth}
+			\[
+				\begin{nd}
+					\open
+					\hypo[i] {i} {\mathscr{A}}
+					\have[j] {j} {\mathscr{B}}
+					\close
+					\open
+					\hypo[k] {k} {\neg\mathscr{A}}
+					\have[l] {l} {\mathscr{B}}
+					\close
+					\have[m] {m} {\mathscr{B}} \by{LEM}{i-j, k-l}
+				\end{nd}
+			\]
+		\end{column}
+		\begin{column}{.5\textwidth}
+			\[
+				\begin{nd}
+					\have[m] {m} {\neg \neg \mathscr{A}}
+					\have[n] {n} {\mathscr{A}} \by{DNE}{m}
+				\end{nd}
+			\]
+			\[
+				\begin{nd}
+					\open
+					\hypo[m] {m} {\neg \mathcal{A}}
+					\have[n] {n} {\bot}
+					\close
+					\have[l] {l} {\mathcal{A}} \by{IP}{m-n}
+				\end{nd}
+			\]
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\section{Exercises}
+\frame{\sectionpage}
+
+\begin{frame}{$\text{LEM} \vdash \text{DNE}$}
+	\pause
+	\[
+		\begin{nd}
+			\hypo {h} {\neg \neg P}
+			\open
+			\hypo {hp} {P}
+			\have {p1} {P} \r{hp}
+			\close
+			\open
+			\hypo {hnp} {\neg P}
+			\have {b} {\bot} \ne{h, hnp}
+			\have {p2} {P} \be{b}
+			\close
+			\have {p} {P} \by{LEM}{hp-p1, hnp-p2}
+		\end{nd}
+	\]
+\end{frame}
+
+\begin{frame}{$\text{DNE} \vdash \text{IP}$}
+	\pause
+	\[
+		\begin{nd}
+			\hypo {h} {\neg P \implies \bot}
+			\open
+			\hypo {hnp} {\neg P}
+			\have {b} {\bot} \ie{h, hnp}
+			\close
+			\have {nnp} {\neg \neg P} \ni{hnp-b}
+			\have {p} {P} \by{DNE}{nnp}
+		\end{nd}
+	\]
+\end{frame}
+
+\begin{frame}{$\text{IP} \vdash \text{LEM}$}
+	\pause
+	\[
+		\begin{nd}
+			\open
+			\hypo {h} {\neg(P \lor \neg P)}
+			\open
+			\hypo {hnp} {\neg P}
+			\have {pnp1} {P \lor \neg P} \oi{hnp}
+			\have {b1} {\bot} \ne{h, pnp1}
+			\close
+			\have {p} {P} \by{IP}{hnp-b1}
+			\have {pnp2} {P \lor \neg P} \oi{p}
+			\have {b2} {\bot} \ne{h, pnp2}
+			\close
+			\have {pnp} {P \lor \neg P} \by{IP}{h-b2}
+		\end{nd}
+	\]
+\end{frame}
+
+\begin{frame}{$\forall x. \neg Mx \lor Ljx, \forall x. Bx \implies Ljx, \forall x. Mx \lor Bx \vdash \forall x. Ljx$}
+	\pause
+	\begin{columns}
+		\begin{column}{.4\textwidth}
+			\[
+				\begin{nd}
+					\hypo {h1} {\forall x. \neg Mx \lor Ljx}
+					\hypo {h2} {\forall x. Bx \implies Ljx}
+					\hypo {h3} {\forall x. Mx \lor Bx}
+					\have {nMALja} {\neg Ma \lor Lja} \Ae{h1}
+					\have {BaLja} {Ba \implies Lja} \Ae{h2}
+					\have {MaBa} {Ma \lor Ba} \Ae{h3}
+					\open
+					\hypo {hLja} {Lja}
+					\have {lja4} {Lja} \r{hLja}
+					\close
+				\end{nd}
+			\]
+		\end{column}
+		\begin{column}{.6\textwidth}
+			\[
+				\begin{nd}
+					\open
+					\hypo[9] {hnMa} {\neg Ma}
+					\open
+					\hypo[10] {hMa} {Ma}
+					\have[11] {b} {\bot} \ne{hnMa, hMa}
+					\have[12] {Lja1} {Lja} \be{b}
+					\close
+					\open
+					\hypo[13] {hBa} {Ba}
+					\have[14] {Lja2} {Lja} \ie{BaLja, hBa}
+					\close
+					\have[15] {Lja3} {Lja} \oe{h3, hMa-Lja1, hBa-Lja2}
+					\close
+					\have[16] {Lja} {Lja} \oe{h1, hnMa-Lja3, hLja-lja4}
+					\have[17] {AxLjx} {\forall x. Ljx} \Ai{Lja}
+				\end{nd}
+			\]
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{}
+	\begin{center}
+		{\color{sigma@mainblue} \LARGE Questions?}
+	\end{center}
+\end{frame}
+
+\begin{frame}
+	\begin{quote}
+		There's this thing which I like to call the \lips ``Holy Trinity'' here of computer science[:] \lips
+		the correspondences between proof theory,
+		which is \lips the theory of logic and proofs;
+		algebra and category theory;
+		and then the subject in the computer science side[, which are] programs, or type theory.
+
+		\vspace{1em}
+		\textnormal{--- Robert Harper (\textcolor{sigma@mainblue}{2012})}
+	\end{quote}
+\end{frame}
+
+% Remove this slide if you came up with all the material yourself
+\begin{frame}{Bibliography}
+	\begin{itemize}
+		\item Open Logic Project. 2023. \emph{forall x: Calgary}. \urlc{https://forallx.openlogicproject.org/}.
+		\item Frank Pfenning. 2023. \emph{Lecture Notes on What is (Constructive) Logic?}. \urlc{https://www.cs.cmu.edu/~fp/courses/15317-s23/lectures/01-whatis.pdf}.
+		\item Samuel Buss. 1998. \emph{An Introduction to Proof Theory}. \urlc{https://mathweb.ucsd.edu/~sbuss/ResearchWeb/handbookI/ChapterI.pdf}.
+		\item Pr$\infty$f Wiki. 2024. \emph{Pr$\infty$f Wiki}. \urlc{https://proofwiki.org/wiki/Definition:Proof_System}.
+	\end{itemize}
+\end{frame}
+
+\end{document}
