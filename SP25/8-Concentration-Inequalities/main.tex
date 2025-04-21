@@ -1,0 +1,333 @@
+% Mirror: https://github.com/SIGma-UIUC/presentation-format
+% --------------------------------------------------------------------
+% This is a simple Beamer document that uses beamerthemesigma.sty
+% Reading the comments should help you create a presentation even if
+% you've never used Beamer before.
+% --------------------------------------------------------------------
+
+% Set our document class to Beamer
+\documentclass[aspectratio=169, handout]{beamer}
+% \documentclass[aspectratio=169, handout]{beamer}
+% Add handout option to ignore pauses
+
+% From Jeff E
+\usepackage{algo}
+% Some more macros
+\usepackage{sigmastyle}
+
+
+% Set a title
+\title{Concentration Inequalities and Applications }
+
+% Set a subtitle if you desire
+\subtitle{Probability Theory}
+
+% Whoever worked on the presentation:
+\author{Dinh, Nhi}
+
+% Date looks ugly, so leave blank
+\date{}
+
+% An institute name, if you're so inclined
+% \institute{University of Illinois Urbana-Champaign}
+
+% Use the SIGma theme for this Beamer presentation
+\usetheme{sigma}
+% --------------------------------------------------------------------
+
+% Begin document
+\begin{document}
+
+% Beamer calls each slide a "frame", defined within the environment:
+% \begin{frame}
+%   <frame content here>
+% \end{frame}
+
+% This frame is just the title.
+\begin{frame}
+\titlepage
+\end{frame}
+
+% A frame with the table of contents.
+% This frame's title is "Outline".
+\begin{frame}{Outline}
+  \tableofcontents
+\end{frame}
+
+
+% Start a section: *sections* (subsections, etc.) are what show up in the TOC.
+\section{Concentration Bound}
+% Section pages can be printed thus:
+\frame{\sectionpage}
+% There's a way to automate this, see:
+% https://tex.stackexchange.com/questions/178800/creating-sections-each-with-title-pages-in-beamers-slides/178803
+
+\begin{frame}{Distribution of Expected Value}
+    The expected value E[X] of a random variable X is not a guarantee that each trials of X will be near that value. \pause
+    \begin{itemize}
+         \item Uniform Distribution Over a Wide Range
+         \item Heavy-Tailed Distributions (such as the Cauchy or certain Pareto distributions) \pause
+    \end{itemize}
+    So, Expected Value is very useless since we don't know what distribution we dealing with oftenly? 
+\end{frame}
+\begin{frame}{Concentration bounds}
+ Concentration bounds quantify how "concentrated" a random variable is around its expected value.\pause
+    \begin{itemize}
+        \item In complex systems, such as networks or large datasets, these inequalities allow us to ensure that the behaviors we observe are not just artifacts of randomness. \pause
+        \item  These bounds are widely used in machine learning, statistics, combinatorics, and computer science to ensure that algorithms and statistical estimates are reliable.
+    \end{itemize}
+
+\end{frame}
+
+\section{Foundational Inequalities}
+\frame{\sectionpage}
+
+\begin{frame}{Foundational Inequalities}
+     \begin{itemize}
+        \item  Markov’s Inequality (linear in the reciprocal of the threshold )\pause
+        \item  Chebyshev’s Inequality (based on variance, leading to a bound that polynominaly decay in the deviation) \pause
+    \end{itemize}
+
+    They are really weak :(
+\end{frame}
+
+\begin{frame}{MCQ Problem}
+   You do an MCQ True/False. 500 questions and I have bad luck with 0.2 right.   
+
+   For \( X \sim \operatorname{Bern}(500,0.2) \), the expected value is given by
+\[
+E[X] = 500 \times 0.2 = 100.
+\]
+   
+   However, passed score is 130. So I need 30 over the expected value. What is the probability that I can pass? 
+\end{frame}
+
+
+
+\begin{frame}{Markov Bound}
+    \[
+    \mathbb{P}(X \ge a) \le \frac{\mathbb{E}[X]}{a}
+    \]  \pause
+    \[
+    \text{If } a = \mathbb{E}[X] + t, \text{ then } \mathbb{P}\bigl(X - \mathbb{E}[X] \ge t\bigr) \le \frac{\mathbb{E}[X]}{t + \mathbb{E}[X]}.
+    \] \pause
+
+    \[
+    \text{ So } \mathbb{P}\bigl(X - 100 \ge 30\bigr) \le \frac{100}{130} = 0.769.
+    \]
+
+     There still 0.769 chances I passes. 
+\end{frame}
+
+
+\section{Concentration Inequalities for Independent Random Variables}
+\frame{\sectionpage}
+
+\begin{frame}{Concentration Inequalities for Independent Random Variables}
+Involving moment-generating functions, to get much stronger results.
+    \begin{itemize}
+        \item  McDiarmid’s Inequality (if satisfy a bounded difference condition,) \pause
+        \item  Chernoff Bounds (if Sums of Bernoulli Variables)
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{MCQ Problem}
+   You do an MCQ True/False. 500 questions and I have bad luck with 0.2 right.   
+
+   For \( X \sim \operatorname{Bern}(500,0.2) \), the expected value is given by
+\[
+E[X] = 500 \times 0.2 = 100.
+\]
+   
+   However, passed score is 130. So I need 30 over the expected value. What is the probability that I can pass? 
+\end{frame}
+\begin{frame}{Chernoff Bound}
+    Let \(X_1, X_2, \dots, X_n\) be \emph{independent Bernoulli random variables} with parameter \(p\)
+      \[
+      \Pr(X_i = 1) = p, \quad \Pr(X_i = 0) = 1-p.
+      \]
+    Define
+      \[
+      X= \sum_{i=1}^{n} X_i\quad 
+      \]
+
+  then 
+  \[
+  \Pr\Bigl(  X \;-\; \mathbb{E}[X] \ge  \delta \mathbb{E} [X]\Bigr) \le \exp\!\left(-\frac{\delta^2 \, \mathbb{E} [X]}{3}\right).
+  \]
+  
+\end{frame}
+
+\begin{frame}{Chernoff Bound}
+
+    Let \(X_1, X_2, \dots, X_n\) be \emph{independent Bernoulli random variables} with parameter \(p\)
+      \[
+      \Pr(X_i = 1) = 0.2, \quad \Pr(X_i = 0) = 0.8.
+      \]
+    Define
+      \[
+      X= \sum_{i=1}^{n} X_i\quad 
+      \]
+
+  then 
+  \[
+  \Pr\Bigl(  X \;-\; 100 \ge  30 \Bigr) \le \exp\!\left(-\frac{0.3^2 \, 100}{3}\right) = 0.0498
+  \]
+
+This seem more right?   
+\end{frame}
+
+\begin{frame}{McDiarmid's inequality}
+(or Hoeffding's)
+
+    Let $T_1,\dots,T_n$ be independent random variables taking values in some set $\mathcal{T}$. 
+    Suppose there is a function $f:\mathcal{T}^n \to \mathbb{R}$:
+    \[
+    \Bigl| f(t_1,\dots,t_n) 
+          \;-\; f(t_1,\dots,t_{i-1},t_i',t_{i+1},\dots,t_n) 
+    \Bigr| \;\le\; c_i 
+    \]
+    for $t_j = t_j'$ for every $j \neq i.$ 
+    
+    
+    \medskip
+    
+    \noindent
+    Consider the random variable
+    \[
+    X \;=\;f(t_1,\dots,t_n)
+    \]
+    Then, for any $t > 0$, McDiarmid's inequality states that
+    \[
+    \Pr\!\bigl(  X \;-\; \mathbb{E}[X] \;\ge\; t \bigr)
+    \,\le\, 
+     \,\exp\!\Bigl(-\,\frac{2\,t^2}{\sum_{i=1}^n c_i^2}\Bigr)\,.
+    \]
+\end{frame}
+
+\begin{frame}{McDiarmid Bound}
+    Let $T_1,\dots,T_n$ be independent random variables taking values in some set $\mathcal{T}$. 
+    Suppose there is a function $f:\mathcal{T}^n \to \mathbb{R}$:
+    \[
+    \Bigl| f(t_1,\dots,t_n) 
+          \;-\; f(t_1,\dots,t_{i-1},t_i',t_{i+1},\dots,t_n) 
+    \Bigr| \;\le\; c_i = 1
+    \]
+    for $t_j = t_j'$ for every $j \neq i.$ 
+    
+    \medskip
+    
+    \noindent
+    Consider the random variable
+    \[
+    X \;=\; T_1 +  \dots + T_n
+    \]
+    Then, for any $t > 0$, McDiarmid's inequality states that
+    \[
+    \Pr\!\bigl( \bigl| X \;-\; 100\bigr| \;\ge\; 30\bigr)
+    \,\le\, 
+    2 \,\exp\!\Bigl(-\,\frac{2\,(30)^2}{\sum_{i=1}^{500} 1^2}\Bigr)\, =  0.0546
+    \]
+    Probably more right
+\end{frame}
+
+\section{High-Dimensional Concentration Inequalities}
+\frame{\sectionpage}
+\begin{frame}{What if they are all exponents? }
+
+    In high-dimensional settings, many functions of independent random variables rarely deviate significantly from a central value. So we need an even better bound.
+   
+\end{frame}
+
+\begin{frame}{Talagrand's Inequality}
+
+    Instead of simply counting individual changes, Talagrand's approach looks for the combined effect of changes across all variables required to shift a sample point X into a specific target set.
+   
+\end{frame}
+\begin{frame}{Talagrand's Inequality }
+(multiple version)
+    Let \( X \) be a non-negative random variable (not identically zero) determined by \( n \) independent trials \( T_1, T_2, \dots, T_n \), and suppose there exist constants \( c, r > 0 \) such that:
+    \begin{enumerate}
+        \item Changing the outcome of any one trial can affect \( X \) by at most \( c \).
+        \item For every \( s \), if \( X \ge s \), then there exists a set of at most \( r s \) trials whose outcomes certify that \( X \ge s \).
+    \end{enumerate}
+Then, for any \( 0 \le t \le \mathbb{E}[X] \),
+
+    \[
+    \Pr\Bigl(\lvert X - \mathbb{E}[X]\rvert > t + 60\,c\,\sqrt{r\,\mathbb{E}[X]}\Bigr)
+      \;\le\;
+    4 \exp\!\Bigl(-\,\frac{t^2}{8\,c^2\,r\,\mathbb{E}[X]}\Bigr).
+    \]
+\end{frame}
+
+\begin{frame}{Talagrand Inequality}
+  \begin{itemize}
+    Talagrand’s inequalities have indeed found significant application in the study of graphs, particularly within the realm of probabilistic combinatorics and random graph theory.  
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Random Subgraph Problem}
+  \begin{itemize}
+    Random subgraphs are a powerful tool in graph theory and related fields because they enable researchers and practitioners to study complex networks and algorithms through probabilistic methods.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Random Subgraph Problem}
+  \begin{itemize}
+    \item Let \(G\) be a graph with \(v\) vertices.
+    \item Construct a random subgraph \(H\) by including each edge independently with probability \(p\).
+    \item Define the random variable \(X\) as the number of vertices that appear as endpoints of at least one edge in \(H\).
+    \item Goal:  show that  \(X\)  is sharply (strongly) concentrated around its expected value. 
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Why cant Chernoff or Hoeffding?}
+  \begin{itemize}
+    \item \textbf{Chernoff Bound:}
+      \begin{itemize}
+        \item Typically applies to sums of independent Bernoulli random variables.
+        \item Here \(X\) is not a direct sum but a derived count (vertices activated by at least one edge).
+      \end{itemize}
+    \item \textbf{Hoeffding's Inequality:}
+      \begin{itemize}
+        \item Relies on the number of trials—here, there are roughly \(O(v^2)\) independent edge decisions.
+        \item \(X\) is bounded by \(v\), so the large number of underlying trials makes the Hoeffding bound too weak.
+      \end{itemize}
+    \[
+    \Pr\!\bigl(  X \;-\; \mathbb{E}[X] \;\ge\; t \bigr)
+    \,\le\, 
+     \,\exp\!\Bigl(-\,\frac{2\,t^2}{4v^2}\Bigr)\,.
+    \]
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Talagrand's Bound}
+  \begin{itemize}
+    \item \textbf{Lipschitz Condition:}
+      \begin{itemize}
+        \item Flipping any one edge change  \(X\) by at most 2 (already includes both vertices or have not included both)
+        \item Thus, c = 2 
+      \end{itemize}
+    \item \textbf{Certifiability (Witness) Condition:}
+      \begin{itemize}
+        \item If \(X \ge s\), then there exist at least \(s\) vertices which are activated.
+        \item For each such vertex, one can select a single incident edge that is present in \(H\).
+        \item These \(s\) edges certify that \(X \ge s\).
+        \item So r = 1 
+      \end{itemize}.
+  \end{itemize}
+  
+\end{frame}
+
+\begin{frame}{Talagrand's Bound}
+
+  Consequently, one obtains a tail bound of the form
+  \[
+    \Pr\Bigl(\lvert X - \mathbb{E}[X] \rvert > t + 60 \cdot 2\,\sqrt{\mathbb{E}[X]}\Bigr)
+    \;\le\; 4\exp\Bigl(-\frac{ t^2}{32\mathbb{E}[X] }\Bigr)
+  \]
+  \noindent This concentration is strong even though there are \(O(v^2)\) independent edge trials, because the structure of \(X\) limits the impact of each individual trial.
+\end{frame}
+\end{document}
