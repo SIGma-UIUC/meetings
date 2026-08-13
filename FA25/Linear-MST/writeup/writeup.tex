@@ -1,0 +1,155 @@
+\documentclass{article}
+
+\usepackage{algo}
+\usepackage{fullpage}
+\usepackage{amsfonts, amsmath}
+\usepackage{parskip}
+
+\newcommand{\norm}[1]{\| #1 \|_{\infty}}
+\newcommand{\abs}[1]{| #1 |}
+
+\title{Expected linear time Minimum Spanning Tree}
+\author{Ian Chen}
+
+% \institute{University of Illinois Urbana-Champaign}
+
+% --------------------------------------------------------------------
+
+% Begin document
+\begin{document}
+
+\maketitle
+
+\section{MST Basics}
+
+We are given a connected undirected graph $G = (V, E)$ with weights $w: E \to \mathbb{R}$.
+The goal is to find a tree $T \subset G$ with $n$ nodes.
+
+We assume that each edge weight is distinct (we may break ties arbitrarily).
+Therefore, we have an \emph{unique} minimum spanning tree.
+
+MST algorithms use the concept of \emph{light} and \emph{heavy} edges respectively.
+An edge is light if it is the shortest edge across a partition $(S, \bar{S})$ of vertices.
+An edge is heavy if it is the heaviest edge on some cycle in $G$.
+
+Observe that an edge cannot be both heavy and light.
+
+% TODO: table of common MST algorithms
+% -> prims: the shortest edge in frontier is light
+% -> kruskal: the shortest edge in graph is light
+% -> boruvka: the shortest edge in neighborhood is light
+% -> Karger: heavy edges in subgraph are still heavy
+% -> how tf does chazelle work
+% -> other algorithms?
+
+\section{Verification}
+
+Here, we discuss how to verify whether a spanning tree $T$ is indeed the minimum.
+
+Denote $w(uv)$ as the weight of an edge $uv \in E$, $\pi^T_{uv}$ the (unique) path between $u$ and $v$ in $T$, and $\norm{\pi}$ the largest weight edge in the path $\pi$.
+Then, $T$ is the spanning tree if and only if for all edges $uv \in E$,
+$$
+    \norm{\pi^T_{uv}} \le w(uv)
+$$
+
+The forward direction simply says that all edges in $\pi^T_{uv}$ are light.
+The backward direction says that no edges inside $\pi^T_{uv}$ are heavy.
+Both are clear.
+
+Now, we just need an efficient data structure to find $\pi^T_{uv}$.
+We do this in two stages:
+\begin{enumerate}
+    \item Convert $T$ into a full-branching tree $B$
+    \item BFS down $B$ and store the maximum weight paths via dynamic programming
+\end{enumerate}
+
+The particular implementation is a bit of a mess.
+Here, I will only verify that we do a linear number of comparisons.
+
+To do stage 1, we run the Boruvka algorithm on the subgraph $T$ and store the contractions into a tree $B$.
+We want to query a set of paths $P \in B$ (with each endpoint in $E$).
+
+To do stage 2, we split each path from the node to its least-common ancestors.
+Let $P_v$ be the set of paths that pass through $v \in B$.
+Whenever we go to a child $u$ of $v$, we update all nodes by comparing $w(uv)$ with all path costs in $P_v$, using binary search.
+Then, we can bound the number of comparisons as
+$$
+    N  \le \sum_{v \in V} \log( \abs{P_v} + 1)
+$$
+
+To bound this sum $\sum_v \abs{P_v}$, we do a sum over the \emph{levels} of $B$.
+Let $L_i$ be the nodeset in the $i$-th level, so that $P_v$ are disjoint for $v$ in different levels.
+Now,
+\begin{align*}
+    N & \le \sum_{i} \sum_{v \in L_i} \log( \abs{P_v} + 1)                                  \\
+      & \le \sum_{i} \abs{L_i} \log( \frac{1}{\abs{L_i}} \sum_{v \in L_i} (\abs{P_v} + 1) ) \\
+      & \le \sum_{i} \abs{L_i} \log \frac{m + \abs{L_i}}{\abs{L_i}}                         \\
+      & \le \sum_{i} \abs{L_i} \log \frac{m + n}{n}                                         \\
+      & \le n \log \frac{m + n}{n}
+\end{align*}
+
+Moreover, using the inequality on logs $\log(1 + x) \le x$, so that $ N \le n \cdot \frac{m}{n} = m $.
+
+\section{Linear MST}
+
+Now, we are ready to describe the algorithm.
+
+At each iteration, we will reduce the nodes by a constant factor using Boruvka steps.
+We will moreover describe a procedure to reduce the edges by a constant factor (or at least in expectation).
+
+% Say, after a linear time step, we obtain $\tilde{m}$ the number of edges.
+% We would have a recurrence
+% $$
+%     T(n, m) = T(n/4, \tilde{m}) + O(n + m)
+% $$
+
+% Now, if $E(\tilde{m}) \le m/2$, and using the inductive hypothesis that $T$ is linear, then
+% $$
+%     E(T(n, m)) = E(T(n/4, \tilde{m})) + O(n+m) = T(n/4, E(\tilde{m})) + O(n+m) = O(n + m)
+% $$
+
+Our strategy is as follows:
+\begin{enumerate}
+    \item Find a subgraph $H \subset G$
+    \item Find a minimum spanning forest $F$ of $H$
+    \item Use $F$ to find and remove heavy edges
+\end{enumerate}
+where we hope that step $3$ will remove a \emph{linear} number of edges in expectation.
+
+In particular, we call an edge $F$-heavy if
+$$
+    w(uv) > \norm{\pi^F_{uv}}
+$$
+where all $F$-heavy edges are heavy.
+Step $3$ attempts to remove all $F$-heavy edges.
+
+To do step $1$, we pick each edge with probability $p = 1/2$.
+To do step $2$, we recurse.
+To do step $3$, we run the verification algorithm described above.
+
+Now, we show that $F$ will detect a linear number of heavy edges.
+Let us label the edges $e_i$ in increasing weight.
+Denote $H_i$ be the subgraph on $H \cap \{e_j \mid j \le i\}$ and $F_i$ the minimum spanning forest of $H_i$.
+
+If $e_i$ is $F$-light, then $e_i = F_i \setminus F_{i-1}$ with probability $1/2$ (i.e. the probability that it is included in $H$).
+Therefore, the number of $F$-light edges is bounded above by a negative binomial with parameters $n$ and $p=1/2$ (at most $n-1$ edges in $F$).
+Hence, this expectation is bounded by $n/p = 2n$.
+
+Finally, we are ready to prove the expected runtime of the algorithm.
+Let $T(n, m)$ be the runtime.
+Then,
+$$
+    T(n, m) = T(n/4, \tilde{m}_1) + T(n/4, \tilde{m}_2) + O(n+m)
+$$
+where $\tilde{m}_1$ is a random variable describing the number of edges in $H$ with $E(\tilde{m}_1) = m/2$ and $\tilde{m}_2$ is a random variable describing how many light edges are left with $E(\tilde{m}_2) = 2n$.
+
+Suppose that $T$ is linear for $n' < n$ and $m' < m$.
+Then,
+\begin{align*}
+    E(T(n, m)) & = E(T(n/4, \tilde{m}_1)) + E(T(n/4, \tilde{m}_2)) + O(n+m) \\
+               & = T(n/4, E(\tilde{m}_1)) + T(n/4, E(\tilde{m}_2)) + O(n+m) \\
+               & = T(n/4, m/2) + T(n/4, n/2) + O(n+m)                       \\
+               & \le T(n/2, m/2) + O(n+m) = O(n+m)
+\end{align*}
+
+\end{document}

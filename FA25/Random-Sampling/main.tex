@@ -1,0 +1,279 @@
+% \documentclass[aspectratio=169]{beamer}
+\documentclass[aspectratio=169, handout]{beamer}
+% Add handout option to ignore pauses
+
+% From Jeff E
+\usepackage{algo}
+\usepackage{sigmastyle}
+
+\setbeamertemplate{blocks}[rounded]
+\setbeamercovered{transparent}
+\usecolortheme{orchid}
+\usetheme{sigma}
+
+\graphicspath{{images/}}
+
+\title{Generating a random sample}
+\subtitle{Introduction to Discrete Probability}
+
+\author{Ian Chen}
+\date{}
+
+% \institute{University of Illinois Urbana-Champaign}
+
+% --------------------------------------------------------------------
+
+% Begin document
+\begin{document}
+
+\begin{frame}
+    \titlepage
+\end{frame}
+
+\section{Introduction}
+
+\begin{frame}{Samples}
+    \only<1>{
+        \begin{itemize}
+            \item Why do we want a random sample?
+            \item What is a random sample?
+            \item How do we generate a random sample?
+        \end{itemize}
+    }
+    \only<2->{
+        \begin{itemize}
+            \item What is a random sample?
+                  \begin{itemize}
+                      \item<3-> Should be \emph{smaller} than the dataset
+                      \item<4-> Each \emph{item} should have equal chances of being in the sample
+                      \item<5-> Each \emph{pair of items} should have equal chances
+                      \item<5-> $\ldots$
+                  \end{itemize}
+        \end{itemize}
+    }
+\end{frame}
+
+\begin{frame}{Streams}
+    \begin{itemize}
+        \item A stream is a sequence of items
+              \begin{itemize}
+                  \item<2-> You don't know how many items you have
+                  \item<3-> You can only read each item once, in order
+              \end{itemize}
+        \item<4-> We want to generate a sample from a stream
+    \end{itemize}
+\end{frame}
+
+
+\section{Permutations}
+\frame{\tableofcontents[currentsection]}
+
+\begin{frame}{Lots}
+    \begin{algo}
+        \textul{\textsc{DrawLots}(array $L$)}: \+
+        \\ $n \gets \abs{L}$
+        \\ for $i$ from $1 \to n$
+        \+ \\ remove a random lot $x$ from $L$ \-
+        \+ \\ $R[i] \gets x$ \-
+        \\ return $R[1 \ldots n]$
+    \end{algo}
+
+    \vspace{\baselineskip}
+
+    \only<2->{
+        \begin{itemize}
+            \item Correctness?
+                  \only<3>{
+                      \begin{itemize}
+                          \item There are $n$ equally likely choices for $R[1]$
+                          \item There are $n-1$ equally likely choics for $R[2]$
+                          \item $\ldots$ There are $n!$ equally likely results for $R$
+                      \end{itemize}
+                  }
+        \end{itemize}
+    }
+\end{frame}
+
+\begin{frame}{Fisher-Yates}
+    \begin{algo}
+        \textul{\textsc{InsertionShuffle}(stream $S$)}: \+
+        \\ Initialize $A$ as empty array
+        \\ while $S$ is not empty
+        \+ \\ Append next item in $S$ to $A$ \-
+        \+ \\ swap $A[\abs{A}] \leftrightarrow A[\textsc{Random}(\abs{A})]$
+    \end{algo}
+
+    \vspace{\baselineskip}
+
+    \only<2->{
+        \begin{itemize}
+            \item Correctness?
+                  \only<3>{
+                      \begin{itemize}
+                          \item There are $1$ equally likely choices for $\textsc{Random}(1)$
+                          \item There are $2$ equally likely choices for $\textsc{Random}(2)$
+                          \item $\ldots$ There are $n!$ equally likely results for the algorithm
+                      \end{itemize}
+                  }
+        \end{itemize}
+    }
+\end{frame}
+
+\section{Samples}
+\frame{\tableofcontents[currentsection]}
+
+\begin{frame}{Permutations to samples}
+    \only<1>{
+        \begin{itemize}
+            \item Interpret the \emph{key} of an item as the position in the permutation
+            \item The sample is created from the $k$ smallest keys
+        \end{itemize}
+    }
+
+    \only<2->{
+        \begin{itemize}
+            \item Normalize keys between $[0, 1]$
+        \end{itemize}
+
+        \begin{algo}
+            \textul{$k$-\textsc{Min-Sample}(stream $S$, int $k$)}: \+
+            \\ Initialize $R \gets \emptyset$ for output
+            \\ while $S$ is not done
+            \+ \\ $x \gets $ next item in $S$ \-
+            \+ \\ $x.key \gets $ random number between $[0, 1]$ \-
+            \+ \\ Update $R$ to contain the $k$ smallest keys \-
+            \\ return $R$
+        \end{algo}
+    }
+
+    \only<3->{
+        \begin{itemize}
+            \item Correctness?
+                  \begin{itemize}
+                      \item<4-> Same as discretized version!
+                  \end{itemize}
+        \end{itemize}
+    }
+\end{frame}
+
+\begin{frame}{Making it faster}
+    \only<1-3>{
+        \begin{itemize}
+            \item Most of the time we do not update the reservoir
+            \item<2-> Could we only generate random numbers when we need to update the reservoir?
+            \item<3-> We need to know how many items to skip between random number calls
+        \end{itemize}
+    }
+
+    \only<4->{
+        \begin{itemize}
+            \item What is the \emph{probability} of skipping $0$ items? $1$? $j$?
+                  \only<5>{
+            \item Geometric! $\textbf{Pr}(\text{skip } j \text{ items}) = p(1-p)^j$
+                  }
+        \end{itemize}
+    }
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Reservoir Sampling}
+    \only<1>{
+        \begin{itemize}
+            \item Generate numbers according to the distribution of skipping $j$ items
+        \end{itemize}
+
+        \begin{algo}
+            \textul{\textsc{Reservoir-Sample}(stream $S$, int $k$)}: \+
+            \\ Initialize $R \gets \emptyset, p \gets 1$
+            \\ while $S$ is not done
+            \+ \\ $x \gets $ next item in $S$ \-
+            \+ \\ $x.key \gets $ random key between $[0, M]$ \-
+            \+ \\ Update $R$ to contain the $k$ smallest keys \-
+            \+ \\ Update $p$ to be largest key in $R$ \-
+            \+ \\ Create $j$ with distribution $p(1-p)^j$ and skip next $j$ items \-
+            \\ return $R$
+        \end{algo}
+    }
+    \only<2->{
+        \begin{itemize}
+            \item<2-> What is the \emph{expected} number of random numbers generated?
+                  \begin{itemize}
+                      \item<3-> Let $n$ be number of elements in stream
+                      \item<3-> Let $I_i$ denote whether we generate a random number for element $i$
+                            \only<4->{
+                      \item<4-> $N$ is the total number of generated numbers, to find $\textbf{Ex}(N)$,
+                            \begin{align*}
+                                \textbf{Ex}(N)
+                                 & \uncover<4->{= \textbf{Ex}( \sum_{i=1}^n I_i )}
+                                \uncover<5->{= \sum_{i=1}^n \textbf{Ex}( I_i )}    \\
+                                 & \uncover<6->{= k + \sum_{i=k+1}^n \frac{k}{i}}  \\
+                                 & \uncover<7->{< k(1 + \ln(n/k)) + 1}
+                            \end{align*}
+                            \vspace{-2\baselineskip}
+                      \item<8-> Much better than $n$
+                            }
+                  \end{itemize}
+        \end{itemize}
+    }
+\end{frame}
+
+
+\section{What's next?}
+\frame{\tableofcontents[currentsection]}
+
+% for some reason, allowframebreaks does't work well with this
+\begin{frame}{Conclusions I}
+    \begin{itemize}
+        \item<1-> Generating geometric random variables
+              \begin{itemize}
+                  \item If $X \sim \text{Geom}(p)$, $U \sim \text{Uniform}(0, 1)$, then
+                        $$
+                            \textbf{Pr}(X < x) = \textbf{Pr}(\floor{\frac{\ln(U)}{\ln(1 - p)}} < x)
+                        $$
+              \end{itemize}
+        \item<2-> Weighted sampling
+              \begin{itemize}
+                  \item If $X_i \overset{indep}{\sim} \text{Exp}(\lambda_i)$, then for $i \ne j$,
+                        $$
+                            \textbf{Pr}(X_i < X_j) = \frac{\lambda_i}{\lambda_i + \lambda_j}
+                        $$
+                        \vspace{-\baselineskip}
+                  \item Generate keys according to exponential distribution
+                  \item The probability of being in the sample is proportional to the weight
+              \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Conclusions II}
+    \begin{itemize}
+        \item<1-> Getting rid of the heap
+              \begin{itemize}
+                  \item The position of the largest key is distributed uniformly in the array
+                  \item Pick an element at random as the max!
+                  \item Simulates the heap
+              \end{itemize}
+        \item<2-> Sketching, or making faster algorithms with random samples
+              \begin{itemize}
+                  \item Median selection
+                  \item Cardinality estimation
+                  \item Linear queries
+              \end{itemize}
+    \end{itemize}
+
+    % \item<3> Online linear queries
+    %       \begin{itemize}
+    %           \item Suppose we wanted to calculate the $\sum_{i} h(i) A[i]$ for online $h$
+    %           \item We can take a sample, (do some small tricks to generate $\hat{h}(i)$, and do
+    %                 $$
+    %                     \sum_{i \in S} \hat{h}(i) A[i]
+    %                 $$
+    % \item If $X_i \overset{indep}{\sim} \text{Exp}(\lambda_i)$,
+    %       $$
+    %           \textbf{min}_i (X_i) \sim \text{Exp}(\sum_i \lambda_i)
+    %       $$
+    %       \vspace{-\baselineskip}
+    % \item Calculate a sample, take the minimum key,
+    % \end{itemize}
+\end{frame}
+
+
+\end{document}
