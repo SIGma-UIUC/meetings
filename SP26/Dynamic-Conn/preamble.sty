@@ -1,0 +1,61 @@
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{derivative}
+\usepackage[super]{nth}
+\usepackage{enumitem}
+\usepackage{siunitx}
+\usepackage{float}
+\usepackage{xcolor}
+\usepackage{framed}
+\usepackage{xspace}
+\usepackage{mathtools}
+
+\usepackage{physics2}
+\providecommand{\cosh}{\mathrm{cosh}}
+\providecommand{\sinh}{\mathrm{sinh}}
+\providecommand{\tanh}{\mathrm{tanh}}
+\providecommand{\sech}{\mathrm{sech}}
+\providecommand{\csch}{\mathrm{csch}}
+\providecommand{\coth}{\mathrm{coth}}
+\providecommand{\log}{\mathrm{log}}
+\providecommand{\ln}{\mathrm{ln}}
+
+\makeatletter
+\newcommand\vb{\@ifstar\boldsymbol\mathbf}
+\newcommand\va[1]{\@ifstar{\vec{#1}}{\vec{\mathrm{#1}}}}
+\newcommand\vu[1]{ \@ifstar{\hat{\boldsymbol{#1}}}{\hat{\mathbf{#1}}}}
+\makeatother
+
+\let\exp\relax
+\let\Pr\relax
+
+\newcommand{\set}[1]{\left\{ #1 \right\}}
+\newcommand{\avg}[1]{\langle #1 \rangle}
+\newcommand{\abs}[1]{\| #1 \|}
+\newcommand{\floor}[1]{\lfloor #1 \rfloor}
+
+\newcommand{\eval}{\bigg\rvert}
+\newcommand{\siid}{\overset{\text{iid}}{\sim}}
+\newcommand{\toD}{\overset{D}{\to}}
+\newcommand{\toP}{\overset{P}{\to}}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\N}{\mathbb{N}}
+
+\DeclareMathOperator{\exp}{\mathop{\mathbf{exp}}}
+\DeclareMathOperator{\Pr}{\mathop{\mathbf{Pr}}}
+\DeclareMathOperator{\NormalD}{Normal}
+\DeclareMathOperator{\PoissonD}{Poisson}
+\DeclareMathOperator{\GammaD}{Gamma}
+\DeclareMathOperator{\BinomialD}{Binom}
+\DeclareMathOperator{\MultinomialD}{Multinom}
+\DeclareMathOperator{\BernoulliD}{Ber}
+\DeclareMathOperator{\UniformD}{Unif}
+\DeclareMathOperator{\ChiSquareD}{\mathcal{X}^2}
+\DeclareMathOperator{\sd}{\mathop{\mathbf{sd}}}
+\DeclareMathOperator{\Cov}{\mathop{\mathbf{Cov}}}
+\DeclareMathOperator{\Cor}{\mathop{\mathbf{Cor}}}
+\DeclareMathOperator{\Ev}{\mathop{\mathbf{Ev}}}
+\DeclareMathOperator{\Var}{\mathop{\mathbf{Var}}}
