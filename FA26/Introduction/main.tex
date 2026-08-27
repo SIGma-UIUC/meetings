@@ -1,0 +1,239 @@
+% Mirror: https://github.com/SIGma-UIUC/presentation-format
+% --------------------------------------------------------------------
+% This is a simple Beamer document. The styles it uses live in sty/,
+% which is a git submodule shared with other presentations -- run
+% `git submodule update --init` after cloning, or sty/ will be empty.
+% Reading the comments should help you create a presentation even if
+% you've never used Beamer before.
+% --------------------------------------------------------------------
+
+% Set our document class to Beamer
+% Add handout option to collapse pauses for printing
+\documentclass[aspectratio=169, handout]{beamer}
+
+% Presentation mechanics, then the SIGma look on top of them
+\usepackage{sty/slides}
+\usepackage{sty/sigma/sigma}
+
+% Maths macros and algorithm environments
+\usepackage{sty/math}
+\usepackage{sty/stat}
+\usepackage{sty/algo}
+\usepackage{sty/code}
+
+\usepackage{tikz}
+\usetikzlibrary{graphs}
+\usetikzlibrary{arrows.meta}
+
+\usepackage{pdfpages}
+
+% Set a title
+\title{SIGma Fall 2026}
+
+% Set a subtitle if you desire
+\subtitle{Welcome (Back)!}
+
+% Whoever worked on the presentation:
+\author{Ian Chen}
+
+% Date looks ugly, so leave blank
+\date{}
+
+% An institute name, if you're so inclined
+% \institute{University of Illinois Urbana-Champaign}
+% --------------------------------------------------------------------
+
+% Begin document
+\begin{document}
+
+% Beamer calls each slide a "frame", defined within the environment:
+% \begin{frame}
+%   <frame content here>
+% \end{frame}
+
+% This frame is just the title.
+\begin{frame}
+    \titlepage
+\end{frame}
+
+% A frame with the table of contents.
+% This frame's title is "Outline".
+\begin{frame}{Outline}
+    \tableofcontents
+\end{frame}
+
+
+\begin{frame}{Housekeeping}
+    \centering\includegraphics[width=0.25\textwidth]{qr-code.png}
+    \begin{itemize}
+        \item Join the Discord!
+    \end{itemize}
+\end{frame}
+
+\section{Admins (in No Particular Order)}
+\frame{\sectionpage}
+
+\begin{frame}{Ian}
+    \begin{itemize}
+        \item Senior in Stats \& CS
+        \item CS 473 course assistant
+        \item General interests: graph algorithms, parallel computing, algorithmic engineering
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Mihir}
+    \begin{itemize}
+        \item
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Franklin}
+    \begin{itemize}
+        \item
+    \end{itemize}
+\end{frame}
+
+\section{Computational Geometry}
+\frame{
+    \sectionpage
+    \blfootnote{\href{https://dblp.org/db/conf/compgeom/index.html}{dblp.org/db/conf/compgeom/index.html}}
+}
+
+\begin{frame}{Applications}
+    \begin{itemize}
+        \item Robotics; TAMP
+        \item Computer graphics
+        \item Geographic information systems (GIS)
+        \item Computer aided $\set{\text{design}, \text{manufacturing}}$ (CAD, CAM)
+    \end{itemize}
+\end{frame}
+
+\includepdf[pages=-]{figs/hull.pdf}
+
+\begin{frame}{Convex hulls}
+    \begin{itemize}
+        \item Input: $n$ points in 2D space
+        \item Output smallest convex bounding polygon
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Convex hulls}
+    \begin{itemize}
+        \item Input: $n$ points in 2D space
+              \begin{itemize}
+                  \item an unordered list of $(x, y)$ pairs
+              \end{itemize}
+        \item Output smallest convex bounding polygon
+              \begin{itemize}
+                  \item an ordered list of $(x, y)$ pairs
+                  \item subset of the input; in CCW order
+              \end{itemize}
+    \end{itemize}
+
+    \begin{pycode}[]
+        Point = namedtuple("Point", ["x", "y"])
+        def upper_hull(points: set[Point]) -> list[Point]:
+            ...
+    \end{pycode}
+\end{frame}
+
+\ifelsehandout{
+    \includepdf[pages=9]{figs/brute}
+}{
+    \includepdf[pages=-]{figs/brute}
+}
+
+\begin{frame}[fragile]{Brute Force}
+    \begin{pycode}
+def upper_hull_1(points: set[Point]) -> list[Point]:
+    lines = []
+    for p1, p2 in combinations(points, 2):
+        p1, p2 = max(p1, p2), min(p1, p2)
+        if all(point_below_line((p1, p2), q)
+               for q in points):
+            lines.append((p1, p2))
+    return sorted(set(flatten(lines)), reverse=True)
+    \end{pycode}
+\end{frame}
+
+\ifelsehandout{
+    \includepdf[pages=3]{figs/quadratic}
+    \includepdf[pages=5]{figs/quadratic}
+}{
+    \includepdf[pages=-]{figs/quadratic}
+}
+
+\begin{frame}[fragile]{A little smarter...}
+    \begin{pycode}
+def upper_hull_2(points: set[Point]) -> list[Point]:
+    lines = []
+    for p1 in points - {min(points)}:
+        p2 = max((q for q in points if q < p1),
+                  key=lambda q: sin_angle(p1, q))
+        if all(point_below_line((p1, p2), q)
+               for q in points):
+            lines.append((p1, p2))
+    return sorted(set(flatten(lines)), reverse=True)
+    \end{pycode}
+\end{frame}
+
+\ifelsehandout{
+    \includepdf[pages=10]{figs/sweepline}
+}{
+    \includepdf[pages=-]{figs/sweepline}
+}
+
+\begin{frame}[fragile]{Sweeping}
+    \begin{pycode}
+def upper_hull_3(points: set[Point]) -> list[Point]:
+    hull = []
+    for point in sorted(points, reverse=True):
+        while len(hull) >= 2 and
+              not point_below_line(
+                (hull[-2], hull[-1]), point):
+            hull.pop()
+        hull.append(point)
+    return hull
+    \end{pycode}
+\end{frame}
+
+\section{CG:SHOP}
+\frame{\sectionpage}
+
+\begin{frame}
+    \begin{itemize}
+        \item For mihir to prepare slides for and present
+    \end{itemize}
+\end{frame}
+
+\section{Meetings}
+\frame{\sectionpage}
+
+\begin{frame}{Standard meetings}
+    \begin{itemize}
+        \item $\approx 30$ minutes for a \emph{lecture}, plus questions
+              \begin{itemize}
+                  \item Present a problem, or approaches, in computational geometry
+                  \item Spreadsheet for presentation signups: TODO
+                  \item Admins are very willing to help with any presenters.
+                  \item Resources: \href{https://jeffe.cs.illinois.edu/teaching/compgeom/resources.html}{jeffe.cs.illinois.edu/teaching/compgeom/resources.html}
+              \end{itemize}
+        \item $\approx 10$ minutes for project updates and discussion
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Project centered meetings}
+    \begin{itemize}
+        \item TODO: what happens during this?
+        \item algorithms focused team, implementation focused team
+        \item but lots of overlap between them
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Project AI Policy}
+    \begin{itemize}
+        \item TODO:
+    \end{itemize}
+\end{frame}
+
+\end{document}

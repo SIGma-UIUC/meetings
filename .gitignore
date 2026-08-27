@@ -5,4 +5,10 @@
 *.snm
 *.toc
 *.nav
+*.fdb_latexmk
+*.synctex.gz
+*.listing
+*.vrb
+*.fls
+_*
 auctex-auto/
