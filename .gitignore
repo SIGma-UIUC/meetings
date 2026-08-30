@@ -10,5 +10,6 @@
 *.listing
 *.vrb
 *.fls
+*.pdf
 _*
 auctex-auto/
