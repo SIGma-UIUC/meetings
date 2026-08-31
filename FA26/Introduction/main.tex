@@ -90,8 +90,9 @@
 \end{frame}
 
 \begin{frame}{Franklin}
-    \centering
-    \textit{Bio coming soon.}
+    \begin{itemize}
+        \item old grad student
+    \end{itemize}
 \end{frame}
 
 \section{Computational Geometry}
@@ -216,17 +217,16 @@ def upper_hull_3(points: set[Point]) -> list[Point]:
 \begin{frame}{Problem Background}
     \begin{itemize}
         \item A \textit{polyomino} is a polygonal region made from grid cells whose boundary is horizontal and vertical.
-        \item Each problem instance gives us a region $R$ (the `field'), a cutter shape $K$, a center point $c \in K$, and a number of cutters $C$, where $R$ and $K$ are polyominoes.
+        \item Each problem instance gives us a region $R$ (the \emph{field}), a cutter shape $K$, a center point $c \in K$, and a number of cutters $C$, where $R$ and $K$ are polyominoes.
         \item Each cutter moves its center along a closed, axis-parallel trajectory (will define later).
         \item Cutters do not block one another and may leave $R$.
+        \item \textit{Problem Statement}: Given a \emph{field} $R$ and $C$ cutters with fixed shape, find a list of trajectories $T_1,T_2,\ldots,T_C$ that cover the entire field, while minimizing the length of the longest trajectory.
     \end{itemize}
 \end{frame}
-
 \begin{frame}{An Example}
     \centering
     \includegraphics[height=0.78\textheight, keepaspectratio]{images/polyomino.png}
 \end{frame}
-
 \begin{frame}{Formal Problem Statement}
     \begin{itemize}
         \item \textbf{Input:} a polyomino region $R$, a cutter shape $K$ with center $c$, and an integer $C$.
