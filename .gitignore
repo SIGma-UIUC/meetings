@@ -13,3 +13,5 @@
 *.pdf
 _*
 auctex-auto/
+*.vscode
+*.latexmkrc

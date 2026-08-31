@@ -34,7 +34,7 @@
 \subtitle{Welcome (Back)!}
 
 % Whoever worked on the presentation:
-\author{Ian Chen}
+\author{Ian Chen, Mihir Tandon, Franklin Zhang}
 
 % Date looks ugly, so leave blank
 \date{}
@@ -64,7 +64,7 @@
 
 
 \begin{frame}{Housekeeping}
-    \centering\includegraphics[width=0.25\textwidth]{qr-code.png}
+    \centering\includegraphics[width=0.25\textwidth]{images/qr-code.png}
     \begin{itemize}
         \item Join the Discord!
     \end{itemize}
@@ -83,14 +83,15 @@
 
 \begin{frame}{Mihir}
     \begin{itemize}
-        \item
+        \item Junior in ECE + Math
+        \item CS 374 course assistant
+        \item General interests: compilers, HPC, algorithms, hardware
     \end{itemize}
 \end{frame}
 
 \begin{frame}{Franklin}
-    \begin{itemize}
-        \item
-    \end{itemize}
+    \centering
+    \textit{Bio coming soon.}
 \end{frame}
 
 \section{Computational Geometry}
@@ -104,7 +105,7 @@
         \item Robotics; TAMP
         \item Computer graphics
         \item Geographic information systems (GIS)
-        \item Computer aided $\set{\text{design}, \text{manufacturing}}$ (CAD, CAM)
+        \item Computer-aided $\set{\text{design}, \text{manufacturing}}$ (CAD/CAM)
     \end{itemize}
 \end{frame}
 
@@ -200,39 +201,112 @@ def upper_hull_3(points: set[Point]) -> list[Point]:
 \section{CG:SHOP}
 \frame{\sectionpage}
 
-\begin{frame}
+\begin{frame}{What is CG:SHOP?}
     \begin{itemize}
-        \item For mihir to prepare slides for and present
+        \item \textbf{CG:SHOP} (Computational Geometry: Solving Hard Optimization Problems) is a computation geometry competition for students and researchers.
+        \item Each year, teams build solvers for a difficult geometric optimization problem.
+        \item The 2027 challenge is \textbf{Multi-Robot Lawn Mowing for Polyominoes}.
+    \end{itemize}
+
+    \vspace{0.3cm}
+    \centering
+    \includegraphics[width=0.42\textwidth]{images/lawn-mower.png}
+\end{frame}
+
+\begin{frame}{Problem Background}
+    \begin{itemize}
+        \item A \textit{polyomino} is a polygonal region made from grid cells whose boundary is horizontal and vertical.
+        \item Each problem instance gives us a region $R$ (the `field'), a cutter shape $K$, a center point $c \in K$, and a number of cutters $C$, where $R$ and $K$ are polyominoes.
+        \item Each cutter moves its center along a closed, axis-parallel trajectory (will define later).
+        \item Cutters do not block one another and may leave $R$.
     \end{itemize}
 \end{frame}
 
+\begin{frame}{An Example}
+    \centering
+    \includegraphics[height=0.78\textheight, keepaspectratio]{images/polyomino.png}
+\end{frame}
+
+\begin{frame}{Formal Problem Statement}
+    \begin{itemize}
+        \item \textbf{Input:} a polyomino region $R$, a cutter shape $K$ with center $c$, and an integer $C$.
+        \item \textbf{Solution:} exactly $C$ closed trajectories $T_1, \dots, T_C$ for the cutter centers.
+        \item A trajectory is a cyclic sequence of points
+              $T_i = (p_{i,0}, \dots, p_{i,m_i - 1})$ with
+              $p_{i,j} \in \mathbb{Z}^2$ and axis-parallel edges.
+        \item Its length is
+              \[
+                  \ell(T_i) =
+                  \sum_{j = 0}^{m_i - 1}
+                  \norm{p_{i,j+1} - p_{i,j}},
+                  \qquad p_{i,m_i} = p_{i,0}.
+              \]
+        \item We require that every cell of $R$ is swept by at least one translated cutter.
+        \item \textbf{Objective:} minimize $\max_i \ell(T_i)$.
+        \item Note: In case you were wondering, this is NP-hard.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{CG:SHOP Logistics}
+    \begin{itemize}
+        \item The competition starts on October 15, 2026.
+        \item Final submissions are due January 31, 2027.
+        \item Example instances and Python utilities are already available.
+        \item Discord for CG:SHOP problems: \href{https://discord.gg/3FXC6xzzWe}{discord.gg/3FXC6xzzWe}.
+        \item We might also have a professor advise us, this is still TBD.
+    \end{itemize}
+
+    \vspace{0.2cm}
+    \centering
+    \includegraphics[width=0.25\textwidth]{images/qr-code-cgshop.png}
+\end{frame}
+
+\begin{frame}{CG:SHOP Logistics}
+    \begin{itemize}
+        \item Please start taking a look at the \href{https://cgshop.ibr.cs.tu-bs.de/competition/cg-shop-2027/}{challenge website}.
+        \begin{itemize}
+            \item There are also many papers out there about similar problems.
+        \end{itemize}
+        \item We will split into \textit{algorithm} and \textit{implementation} teams.
+        \begin{itemize}
+            \item \textit{Algorithm} teams will work on reading/understanding existing literature and generating/doing basic testing of potential algorithms.
+            \item \textit{Implementation} teams will work on implementing the algorithms from the algorithm team as well as modifying existing algorithms.
+            \item Both teams need a strong understanding of current research in this area.
+        \end{itemize}
+        \item Bring questions, observations, or solver ideas to the next meeting.
+    \end{itemize}
+\end{frame}
 \section{Meetings}
 \frame{\sectionpage}
 
-\begin{frame}{Standard meetings}
+\begin{frame}{Standard Meetings}
     \begin{itemize}
         \item $\approx 30$ minutes for a \emph{lecture}, plus questions
               \begin{itemize}
                   \item Present a problem, or approaches, in computational geometry
                   \item Spreadsheet for presentation signups: TODO
-                  \item Admins are very willing to help with any presenters.
+                  \item Admins are very willing to help presenters.
                   \item Resources: \href{https://jeffe.cs.illinois.edu/teaching/compgeom/resources.html}{jeffe.cs.illinois.edu/teaching/compgeom/resources.html}
               \end{itemize}
         \item $\approx 10$ minutes for project updates and discussion
     \end{itemize}
 \end{frame}
 
-\begin{frame}{Project centered meetings}
+\begin{frame}{Project-Centered Meetings}
     \begin{itemize}
-        \item TODO: what happens during this?
-        \item algorithms focused team, implementation focused team
-        \item but lots of overlap between them
+        \item $\approx 10$ minutes for a \emph{standup}, where each team shares recent progress.
+        \item $\approx 30-40$ minutes for focused work time.
+        \item Don't feel like you are siloed into one time, you can move between teams whenever you like.
     \end{itemize}
 \end{frame}
 
 \begin{frame}{Project AI Policy}
     \begin{itemize}
-        \item TODO:
+        \item You are free to use AI for understanding papers, setting up environments, or generating algorithmic ideas, but treat its output with caution.
+        \item We will not be merging any code that we do not understand or is clearly AI-generated.
+              \begin{itemize}
+                  \item We need to understand the code that we write.
+              \end{itemize}
     \end{itemize}
 \end{frame}
 
