@@ -1,15 +1,14 @@
 % Mirror: https://github.com/SIGma-UIUC/presentation-format
 % --------------------------------------------------------------------
 % This is a simple Beamer document. The styles it uses live in sty/,
-% which is a git submodule shared with other presentations -- run
-% `git submodule update --init` after cloning, or sty/ will be empty.
 % Reading the comments should help you create a presentation even if
 % you've never used Beamer before.
 % --------------------------------------------------------------------
 
 % Set our document class to Beamer
+\documentclass[aspectratio=169]{beamer}
 % Add handout option to collapse pauses for printing
-\documentclass[aspectratio=169, handout]{beamer}
+% \documentclass[aspectratio=169, handout]{beamer}
 
 % Presentation mechanics, then the SIGma look on top of them
 \usepackage{sty/slides}
@@ -102,7 +101,7 @@
 }
 
 \begin{frame}{Applications}
-    \begin{itemize}
+    \begin{itemize}[<+->]
         \item Robotics; TAMP
         \item Computer graphics
         \item Geographic information systems (GIS)
@@ -211,47 +210,25 @@ def upper_hull_3(points: set[Point]) -> list[Point]:
 
     \vspace{0.3cm}
     \centering
-    \includegraphics[width=0.42\textwidth]{images/lawn-mower.png}
+    \includegraphics[width=0.35\textwidth]{images/lawn-mower.png}
 \end{frame}
 
-\begin{frame}{Problem Background}
-    \begin{itemize}
-        \item A \textit{polyomino} is a polygonal region made from grid cells whose boundary is horizontal and vertical.
-        \item Each problem instance gives us a region $R$ (the \emph{field}), a cutter shape $K$, a center point $c \in K$, and a number of cutters $C$, where $R$ and $K$ are polyominoes.
-        \item Each cutter moves its center along a closed, axis-parallel trajectory (will define later).
-        \item Cutters do not block one another and may leave $R$.
-        \item \textit{Problem Statement}: Given a \emph{field} $R$ and $C$ cutters with fixed shape, find a list of trajectories $T_1,T_2,\ldots,T_C$ that cover the entire field, while minimizing the length of the longest trajectory.
-    \end{itemize}
-\end{frame}
+\ifelsehandout{
+    \includepdf[pages=5]{figs/lawn}
+}{
+    \includepdf[pages=-]{figs/lawn}
+}
+
 \begin{frame}{An Example}
     \centering
     \includegraphics[height=0.78\textheight, keepaspectratio]{images/polyomino.png}
 \end{frame}
-\begin{frame}{Formal Problem Statement}
-    \begin{itemize}
-        \item \textbf{Input:} a polyomino region $R$, a cutter shape $K$ with center $c$, and an integer $C$.
-        \item \textbf{Solution:} exactly $C$ closed trajectories $T_1, \dots, T_C$ for the cutter centers.
-        \item A trajectory is a cyclic sequence of points
-              $T_i = (p_{i,0}, \dots, p_{i,m_i - 1})$ with
-              $p_{i,j} \in \mathbb{Z}^2$ and axis-parallel edges.
-        \item Its length is
-              \[
-                  \ell(T_i) =
-                  \sum_{j = 0}^{m_i - 1}
-                  \norm{p_{i,j+1} - p_{i,j}},
-                  \qquad p_{i,m_i} = p_{i,0}.
-              \]
-        \item We require that every cell of $R$ is swept by at least one translated cutter.
-        \item \textbf{Objective:} minimize $\max_i \ell(T_i)$.
-        \item Note: In case you were wondering, this is NP-hard.
-    \end{itemize}
-\end{frame}
 
-\begin{frame}{CG:SHOP Logistics}
+\begin{frame}{Timeline}
     \begin{itemize}
+        \item Example instances and Python utilities are already available.
         \item The competition starts on October 15, 2026.
         \item Final submissions are due January 31, 2027.
-        \item Example instances and Python utilities are already available.
         \item Discord for CG:SHOP problems: \href{https://discord.gg/3FXC6xzzWe}{discord.gg/3FXC6xzzWe}.
         \item We might also have a professor advise us, this is still TBD.
     \end{itemize}
@@ -263,19 +240,17 @@ def upper_hull_3(points: set[Point]) -> list[Point]:
 
 \begin{frame}{CG:SHOP Logistics}
     \begin{itemize}
-        \item Please start taking a look at the \href{https://cgshop.ibr.cs.tu-bs.de/competition/cg-shop-2027/}{challenge website}.
-        \begin{itemize}
-            \item There are also many papers out there about similar problems.
-        \end{itemize}
-        \item We will split into \textit{algorithm} and \textit{implementation} teams.
-        \begin{itemize}
-            \item \textit{Algorithm} teams will work on reading/understanding existing literature and generating/doing basic testing of potential algorithms.
-            \item \textit{Implementation} teams will work on implementing the algorithms from the algorithm team as well as modifying existing algorithms.
-            \item Both teams need a strong understanding of current research in this area.
-        \end{itemize}
-        \item Bring questions, observations, or solver ideas to the next meeting.
+        \item \href{https://cgshop.ibr.cs.tu-bs.de/competition/cg-shop-2027/}{challenge website}.
+        \item (Soft) Pre-requisites: data-structures and algorithms at the CS 225 level.
+        \item Roughly split into \textit{algorithm} and \textit{implementation} teams.
+              \begin{itemize}
+                  \item \textit{Algorithm} teams focus on literature review, understanding proofs, and proposing algorithms.
+                  \item \textit{Implementation} teams focus on implementing algorithms, and proposing algorithms.
+                  \item Both teams need a strong understanding of current research in this area.
+              \end{itemize}
     \end{itemize}
 \end{frame}
+
 \section{Meetings}
 \frame{\sectionpage}
 
@@ -302,12 +277,18 @@ def upper_hull_3(points: set[Point]) -> list[Point]:
 
 \begin{frame}{Project AI Policy}
     \begin{itemize}
-        \item You are free to use AI for understanding papers, setting up environments, or generating algorithmic ideas, but treat its output with caution.
-        \item We will not be merging any code that we do not understand or is clearly AI-generated.
+        \item You must be able to present and justify every decision you make; communicate your ideas!
               \begin{itemize}
-                  \item We need to understand the code that we write.
+                  \item This is a learning project!
+                  \item Have fun with learning about cool geometric algorithms.
+                  \item We will not be merging any code that you can not explain.
               \end{itemize}
+        \item You are free to use AI for understanding papers, setting up environments, or generating algorithmic ideas, but treat its output with caution.
     \end{itemize}
 \end{frame}
+
+\begin{frame}{Goals for next meeting? (09/14)}
+\end{frame}
+
 
 \end{document}
