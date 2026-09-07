@@ -15,3 +15,7 @@ _*
 auctex-auto/
 *.vscode
 *.latexmkrc
+
+# Generated output for the CG:SHOP overview presentation.
+/FA26/cgshop_overview/build/
+/FA26/cgshop_overview/compile-output.txt
