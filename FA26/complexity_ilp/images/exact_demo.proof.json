@@ -1,0 +1,18 @@
+{
+  "instance_uid": "exact-donut-demo",
+  "method": "exhaustive integer closed-walk coverage bound",
+  "grid_bounds": [
+    0,
+    0,
+    3,
+    3
+  ],
+  "field_cells": 12,
+  "cutters": 2,
+  "maximum_tested_length": 6,
+  "max_cells_per_closed_walk": 4,
+  "states_checked": 6536,
+  "global_lower_bound": 8,
+  "validated_upper_bound": 8,
+  "global_optimum": 8
+}

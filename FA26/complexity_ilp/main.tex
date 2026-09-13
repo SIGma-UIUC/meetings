@@ -1,0 +1,416 @@
+% !TeX root = main.tex
+% SIGma Fall 2026. Shared theme from the two preceding presentations.
+\documentclass[aspectratio=169]{beamer}
+\usepackage{../sty/slides}
+\usepackage{../sty/sigma/sigma}
+\usepackage{../sty/math}
+\usepackage{../sty/stat}
+\usepackage{../sty/algo}
+\usepackage{../sty/code}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta}
+\title{Complexity and Integer Linear Programming}
+\subtitle{9/14/26}
+\author{Mihir Tandon}
+\date{}
+\begin{document}
+\begin{frame}\titlepage\end{frame}
+
+\section{Big O Notation}
+\begin{frame}{How much work does an algorithm do?}
+Let $n$ be the input size, and let $T(n)$ count the operations an algorithm performs.
+\par\pause
+\vspace{0.4cm}
+\begin{itemize}[<+->]
+\item Scanning $n$ values takes about $n$ steps.
+\item Checking every pair takes about $n^2$ steps.
+\end{itemize}
+\par\pause
+We compare how this work grows as the input gets larger.
+\end{frame}
+
+\begin{frame}{Big O notation}
+We write $T(n)=O(g(n))$ if constants $c>0$ and $n_0$ exist such that
+\[0\leq T(n)\leq c\,g(n)\qquad\text{for all }n\geq n_0.\]
+\par\pause
+The constant $c$ allows a fixed multiplicative difference. The threshold $n_0$ lets us ignore small inputs.
+\par\pause
+\vspace{0.3cm}
+For example, $3n+7\leq4n$ whenever $n\geq7$. Therefore, $3n+7=O(n)$.
+\par\pause
+\vspace{0.3cm}
+Big O gives an upper bound. A linear runtime is also $O(n^2)$, although that bound is less informative.
+\end{frame}
+
+\begin{frame}[fragile]{Counting loops}
+\begin{pycode}
+for p in points:             # n iterations
+    inspect(p)              # assume O(1) work
+
+for i in range(n):
+    for j in range(i):
+        inspect_pair(i, j)  # assume O(1) work
+\end{pycode}
+\[\text{First loop: }\Theta(n)\qquad
+\text{Second loop: }\sum_{i=0}^{n-1}i=\frac{n(n-1)}2=\Theta(n^2).\]
+$\Theta(g(n))$ means matching upper and lower bounds up to constants.
+\end{frame}
+
+\begin{frame}{Simplifying a runtime}
+\begin{itemize}[<+->]
+\item Consecutive phases add their work. For example, $n^2+5n+20=\Theta(n^2)$.
+\item Nested loops multiply their work when each inner loop has the same cost. Doing $\Theta(n)$ work $n$ times takes $\Theta(n^2)$ time.
+\item Repeatedly halving the input takes $\Theta(\log n)$ steps because $n/2^k\leq1$ once $k\geq\log_2 n$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Why growth rates matter}
+\centering
+\begin{tabular}{lrr}
+Growth function & $n=10$ & $n=100$\\\hline
+$n$ & 10 & 100\\
+$n\log_2 n$ & $\approx33$ & $\approx664$\\
+$n^2$ & 100 & 10,000\\
+$n^3$ & 1,000 & 1,000,000\\
+$2^n$ & 1,024 & $\approx1.27\times10^{30}$
+\end{tabular}
+\vspace{0.4cm}
+\begin{itemize}[<+->]
+\item These are function values, not measured running times.
+\item Constants still matter on real inputs, but exponential growth catches up quickly.
+\end{itemize}
+\end{frame}
+
+\section{Why ILP?}
+\frame{\sectionpage}
+\begin{frame}{Hard optimization problems}
+A polynomial-time algorithm uses $O(n^k)$ time for a fixed constant $k$.
+\par\pause
+\vspace{0.35cm}
+Even $m$ binary decisions give $2^m$ possible assignments. Trying them all becomes expensive quickly.
+\par\pause
+\vspace{0.35cm}
+Many optimization problems have no known polynomial-time exact algorithm. We can still solve useful instances with heuristics and general-purpose optimizers.
+\end{frame}
+
+\begin{frame}{What is an ILP?}
+An \textbf{integer linear program (ILP)} chooses values for variables to maximize or minimize an objective while satisfying constraints.
+\par\pause
+\vspace{0.35cm}
+\textbf{Integer} means the variables take whole-number values. A count might be $0,1,2,\ldots$, and a yes-or-no choice uses $0$ or $1$.
+\par\pause
+\vspace{0.35cm}
+\textbf{Linear} means the objective and constraints use sums of variables multiplied by constants, such as $3x+2y$ or $2x+y\leq7$.
+\par\pause
+\vspace{0.35cm}
+\textbf{Programming} here means mathematical optimization. We describe the choices, restrictions, and goal, then ask a solver to find the best valid solution.
+\end{frame}
+
+\begin{frame}{Writing an ILP model}
+\begin{itemize}[<+->]
+\item Describe \emph{what makes a solution valid} using variables and linear constraints.
+\item Describe \emph{what makes it good} using a linear objective.
+\item Require integer variables when choices are discrete.
+\end{itemize}
+\[\min\;c^T x\qquad\text{subject to }Ax\leq b,\quad x\in\mathbb Z^m.\]
+\par\pause
+The solver searches for a best feasible assignment. General ILP is NP-hard too. This changes how we tackle the search, not its worst-case difficulty.
+\end{frame}
+
+\section{A System of Inequalities}
+\frame{\sectionpage}
+\begin{frame}{A small production problem}
+A workshop makes tables and chairs. It has 7 planks of wood and enough time to assemble 5 items.
+\par\pause
+\begin{center}
+\begin{tabular}{lcc}
+ & Table & Chair\\\hline
+Wood required & 2 planks & 1 plank\\
+Profit & 3 dollars & 2 dollars
+\end{tabular}
+\end{center}
+\par\pause
+Let $x$ count tables and $y$ count chairs. We want to solve
+\[\begin{aligned}
+\max\quad &3x+2y\\
+\text{subject to}\quad &2x+y\leq7,\qquad x+y\leq5,\\
+&x,y\in\mathbb Z_{\geq0}.
+\end{aligned}\]
+\end{frame}
+
+\begin{frame}{Feasible solutions}
+\begin{columns}
+\begin{column}{0.48\textwidth}
+\begin{tikzpicture}[scale=0.65]
+\fill[blue!10] (0,0)--(3.5,0)--(2,3)--(0,5)--cycle;
+\draw[->] (0,0)--(4.5,0) node[right] {$x$};
+\draw[->] (0,0)--(0,6) node[above] {$y$};
+\draw[blue] (0,5)--(2,3)--(3.5,0);
+\foreach \x in {0,...,3} {
+\foreach \y in {0,...,5} {
+\pgfmathtruncatemacro{\ok}{(2*\x+\y<=7)&&(\x+\y<=5)}
+\ifnum\ok=1 \fill (\x,\y) circle (2pt);\fi
+}}
+\fill[red] (2,3) circle (3pt);
+\node[right] at (2,3.3) {$(2,3)$};
+\foreach \x in {1,...,4} \node[below] at (\x,0) {\small\x};
+\foreach \y in {1,...,5} \node[left] at (0,\y) {\small\y};
+\end{tikzpicture}
+\end{column}
+\begin{column}{0.50\textwidth}
+Each inequality defines a half-plane. Their intersection is the shaded feasible region.
+\par\pause
+\vspace{0.3cm}
+The dots are the integer solutions. Making 2 tables and 3 chairs earns 12 dollars.
+\par\pause
+\vspace{0.3cm}
+This is optimal because
+\[3x+2y=(2x+y)+(x+y)\leq12.\]
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Why require integers?}
+Suppose we maximize $x+y$ subject to $2x+2y\leq3$ and $x,y\geq0$.
+\par\pause
+\begin{itemize}[<+->]
+\item The linear program allows fractions. The solution $(1.5,0)$ has value $1.5$.
+\item The integer program has optimum $1$. Both $(1,0)$ and $(0,1)$ attain it.
+\item Rounding up to $(2,0)$ violates the constraint, so rounding an LP solution does not always work.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{How the solver searches}
+For a minimization problem:
+\begin{enumerate}[<+->]
+\item Relax integrality and solve an LP to get a lower bound.
+\item Find an integer feasible solution to get an upper bound.
+\item If an LP variable is $2.4$, branch into $x\leq2$ and $x\geq3$.
+\item Discard infeasible branches and branches whose bounds cannot improve the best solution.
+\end{enumerate}
+\par\pause
+Solvers also use presolve, cutting planes, and heuristics. A time limit may leave a feasible solution without proving optimality.
+\end{frame}
+
+\section{CG:SHOP as an ILP}
+\frame{\sectionpage}
+\begin{frame}{Multi-robot lawn mowing}
+We are given a field $R$, a cutter shape $K$ with center $c$, and $C$ identical cutters.
+\par\pause
+\vspace{0.3cm}
+Each cutter follows a closed, axis-parallel route with integer vertices. The cutter keeps its orientation as it moves.
+\par\pause
+\vspace{0.3cm}
+Together, the cutters must sweep the entire field. They may overlap and travel outside the field.
+\par\pause
+\[\text{Our objective is to minimize }\max_{1\leq i\leq C}\ell(T_i).\]
+\blfootnote{\href{https://cgshop.ibr.cs.tu-bs.de/competition/cg-shop-2027/}{CG:SHOP 2027}.}
+\end{frame}
+
+
+\begin{frame}{A finite grid that contains an optimum}
+Let $Q$ be the field cells and let $D$ be the cutter cells relative to its center.
+\par\pause
+\vspace{0.3cm}
+A cutter at integer position $v$ covers cell $q$ exactly when $q-v\in D$. Thus every useful position has the form $q-d$.
+\par\pause
+\vspace{0.3cm}
+We keep every integer position in the rectangle containing $Q-D$, and join horizontal and vertical neighbors by unit edges.
+\par\pause
+\vspace{0.3cm}
+Positions inside holes and outside the field remain available for travel.
+\end{frame}
+
+\begin{frame}{Why this rectangle is enough}
+Along a unit grid step, a unit cutter cell sweeps exactly the union of its two endpoint placements. This remains true for a cutter made of many cells.
+\par\pause
+\vspace{0.3cm}
+Clamp every route position to the rectangle. Every position that covers a field cell stays fixed. Every unit step becomes a unit step or a stationary step.
+\par\pause
+\vspace{0.3cm}
+The route stays closed, preserves field coverage, and cannot get longer. Therefore, some global optimum lies in this finite grid.
+\end{frame}
+
+\begin{frame}{Choosing movements directly}
+For cutter $i$ and grid edge $e$, let $x_{ie}$ count how many times the cutter traverses that edge in either direction.
+\par\pause
+\vspace{0.3cm}
+A closed walk gives a connected multigraph in which every vertex has even degree. Conversely, an Euler circuit traverses every edge of such a graph.
+\par\pause
+\vspace{0.3cm}
+We can require $x_{ie}\in\{0,1,2\}$. If an edge occurs at least three times, removing two copies preserves its support, connectivity, coverage, and even degrees.
+\end{frame}
+
+\begin{frame}{Visited vertices and coverage}
+Let $z_{iv}\in\{0,1\}$ indicate that cutter $i$ visits position $v$.
+\[
+\sum_i\sum_{v:\ q-v\in D}z_{iv}\geq1
+\qquad\text{for every field cell }q.
+\]
+\par\pause
+Every field cell must be covered by at least one visited cutter position.
+\par\pause
+\vspace{0.3cm}
+Unlike the earlier route pool, these variables allow the solver to construct its own trajectories throughout the complete grid.
+\end{frame}
+
+\begin{frame}{Even degrees and stationary cutters}
+Each cutter chooses one root using $r_{iv}\in\{0,1\}$, with
+\[\sum_v r_{iv}=1,\qquad r_{iv}\leq z_{iv}.\]
+\par\pause
+Let $d_{iv}$ be a nonnegative integer. We impose
+\[
+\sum_{e\ni v}x_{ie}=2d_{iv},\qquad
+z_{iv}-r_{iv}\leq d_{iv}\leq\deg_G(v)z_{iv}.
+\]
+\par\pause
+Every visited nonroot has positive even degree. Unvisited vertices have degree zero. A root with no edges represents a stationary cutter.
+\end{frame}
+
+\begin{frame}{Why even degrees are not enough}
+Two disconnected cycles have even degree everywhere, but one cutter cannot follow both without traveling between them.
+\par\pause
+\vspace{0.3cm}
+We add artificial flow from the chosen root. Every visited vertex consumes one unit, and flow may travel only along selected edges.
+\par\pause
+\vspace{0.3cm}
+A component disconnected from the root cannot receive its required flow. This forces one connected trajectory per cutter.
+\end{frame}
+
+\begin{frame}{Connectivity constraints}
+Let $N=|V|$. For each cutter, $s_{iv}$ is flow supplied at $v$, and $f_{iuv}$ is directed flow along grid edge $\{u,v\}$.
+\[
+\begin{aligned}
+0\leq s_{iv}&\leq Nr_{iv},\\
+0\leq f_{iuv}&\leq Nx_{i\{u,v\}},\\
+s_{iv}+\sum_u f_{iuv}-\sum_w f_{ivw}&=z_{iv}.
+\end{aligned}
+\]
+\par\pause
+Only the root supplies flow. A spanning tree can distribute one integer unit to each visited vertex using these capacities, so no connected route is excluded.
+\end{frame}
+
+\begin{frame}{The objective and the exactness guarantee}
+Every grid edge has length one, so we minimize $L$ subject to
+\[\sum_e x_{ie}\leq L\qquad\text{for every cutter }i.\]
+\par\pause
+Every original solution can be represented in this model without increasing its length. Every feasible model solution gives valid closed routes with the modeled lengths.
+\par\pause
+\vspace{0.3cm}
+Therefore, the model optimum equals the global mowing optimum. This conclusion depends on keeping the full proved grid.
+\end{frame}
+
+\begin{frame}{Exactness and running time}
+The implementation has $C(3|E|+4|V|)+1$ integer variables, including the connectivity variables.
+\par\pause
+\vspace{0.3cm}
+The large \texttt{isoa} instance requires about 16.8 million variables. A complete model can be too expensive to solve even when its formulation is correct.
+\par\pause
+\vspace{0.3cm}
+A time limit may leave an incumbent and a lower bound. We report global optimality only after the solver proves optimal status, subject to its numerical tolerances.
+\end{frame}
+
+\section{Implementation}
+\frame{\sectionpage}
+
+\begin{frame}{An exact solution with two cutters}
+\begin{columns}
+\begin{column}{0.58\textwidth}
+\includegraphics[width=\textwidth,height=0.70\textheight,keepaspectratio]{images/exact_demo.png}
+\end{column}
+\begin{column}{0.40\textwidth}
+The field is a $4\times4$ square with a $2\times2$ hole. Two unit-square cutters cover the twelve remaining cells.
+\par\pause
+\vspace{0.3cm}
+The exact solver proves that the minimum possible longest route is 8. The official validator reports zero errors.
+\par\pause
+\vspace{0.3cm}
+The GIF shows the corresponding closed walks.
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{An independent optimality proof}
+Every closed walk on the unit grid has even length. A solution better than 8 would therefore give each cutter a route of length at most 6.
+\par\pause
+\vspace{0.3cm}
+An exhaustive integer check of all such closed walks shows that each covers at most 4 of the field's cells.
+\par\pause
+\vspace{0.3cm}
+Two cutters could cover at most 8 cells, but the field has 12. Thus the longest route must be at least 8, and our validated solution attains 8.
+\par\pause
+\vspace{0.2cm}
+The check is reproducible with \texttt{src/prove\_demo.py} and does not use an optimizer.
+\end{frame}
+
+\begin{frame}{The implementation}
+\begin{enumerate}[<+->]
+\item Build the complete finite grid and its coverage constraints.
+\item Solve the integer program, then extract an Euler circuit for each cutter.
+\item Check the integer assignment and validate the resulting geometric solution before writing JSON or generating a plot.
+\end{enumerate}
+\par\pause
+\vspace{0.3cm}
+The formulation is in \texttt{src/utils/exact\_ilp.py}. Its completeness proof is in \texttt{EXACT\_ILP.md}.
+\end{frame}
+
+\begin{frame}[fragile]{Code: parity and coverage}
+These excerpts use the sparse row builder from \texttt{exact\_ilp.py}.
+\begin{pycode}
+rows.add([(x[e], 1) for e, _, _ in adjacent[v]]
+         + [(d[v], -2)], 0, 0)
+
+for qx, qy in validator.region.cells():
+    covering = [vertex[(qx-kx, qy-ky)]
+                for kx, ky in offsets]
+    rows.add([(b["z"][v], 1)
+              for b in blocks for v in covering], lower=1)
+\end{pycode}
+\end{frame}
+
+\begin{frame}[fragile]{Code: connectivity flow}
+For one cutter and vertex $v$, construct its flow balance row.
+\begin{pycode}
+rows.add([(s[v], 1), (r[v], -n)], upper=0)
+balance = [(s[v], 1), (z[v], -1)]
+for e, _, direction in adjacent[v]:
+    outgoing = f[2*e + direction]
+    incoming = f[2*e + 1-direction]
+    balance.extend([(incoming, 1), (outgoing, -1)])
+    rows.add([(outgoing, 1), (x[e], -n)], upper=0)
+rows.add(balance, 0, 0)
+\end{pycode}
+The flow is a connectivity certificate. It does not represent cutter motion or contribute to the objective.
+\end{frame}
+
+\begin{frame}[fragile]{Code: solve the complete model}
+\begin{pycode}
+model = build_model(instance)
+result = milp(
+    c=model.objective,
+    integrality=model.integrality,
+    bounds=model.bounds,
+    constraints=model.constraints,
+    options={"mip_rel_gap": 0.0})
+\end{pycode}
+\par\pause
+The default has no time limit. An explicit allocation guard stops oversized models before building them, without substituting a restricted model.
+\blfootnote{\href{https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.milp.html}{SciPy milp documentation}. The backend is HiGHS.}
+\end{frame}
+
+\begin{frame}[fragile]{Code: extract and check the answer}
+The public entry point wraps optimization, Euler extraction, and validation.
+\begin{pycode}
+from cgshop2027_pyutils.io import read_instance
+from exact_ilp import solve_exact
+
+instance = read_instance("exact_demo.instance.json")
+solution = solve_exact(instance)
+print("Longest route:", solution.max_tour_length)
+print("Global optimum:", solution.meta["global_optimal"])
+# Longest route: 8
+# Global optimum: True
+\end{pycode}
+With a time limit, always inspect the status and lower bound. A feasible result alone does not prove optimality.
+\end{frame}
+\end{document}

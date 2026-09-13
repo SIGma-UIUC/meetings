@@ -1,0 +1,1 @@
+{"content_type": "CGSHOP2027_Instance", "instance_uid": "ilp-slide-demo", "region_to_cover": {"outer_boundary": {"x": [0, 12, 12, 0], "y": [0, 0, 8, 8]}, "inner_boundaries": []}, "cutter": {"x": [0, 2, 2, 0], "y": [0, 0, 2, 2]}, "cutter_center": [1, 1], "number_of_cutters": 2}
