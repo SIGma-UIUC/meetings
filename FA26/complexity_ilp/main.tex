@@ -11,11 +11,18 @@
 \usetikzlibrary{arrows.meta,positioning}
 \newtcblisting{smallpycode}{codebox = codePy, minted language = python,
   minted options = {fontsize=\footnotesize}}
-\title{Complexity and Linear Programming}
+\title{Complexity and Integer Linear Programming}
 \subtitle{9/14/26}
 \author{Mihir Tandon}
 \begin{document}
 \begin{frame}\titlepage\end{frame}
+
+\begin{frame}{Announcements}
+\begin{itemize}
+  \item We are finalizing exact projects for the algorithm/development teams, these will be github issues
+  \item Please see the SIGma CG:SHOP repo for further details
+\end{itemize}
+\end{frame}
 
 \section{Big O Notation}
 \begin{frame}[fragile]{How many computations does this do?}
@@ -194,6 +201,23 @@ Profit & 3 dollars & 2 dollars
 \end{itemize}
 \end{column}
 \end{columns}
+\end{frame}
+
+\begin{frame}{The pieces of a two-dimensional LP}
+\begin{itemize}[<+->]
+\item A \textbf{half-plane constraint} has the form
+\[
+ax+by\leq r.
+\]
+Its boundary is the line $ax+by=r$, and the inequality keeps one side of that line.
+\item The intersection of all half-planes is the \textbf{feasible region}. These are the points that satisfy every constraint.
+\item An \textbf{objective vector} $c=(c_x,c_y)$ assigns a score
+\[
+c\mathbin{\cdot}(x,y)=c_xx+c_yy.
+\]
+For example, maximizing $3x+2y$ uses objective vector $(3,2)$.
+\item A linear program chooses a feasible point with the largest or smallest score.
+\end{itemize}
 \end{frame}
 
 \begin{frame}{Input and output of Seidel's LP algorithm}
