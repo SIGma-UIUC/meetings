@@ -8,59 +8,92 @@
 \usepackage{../sty/algo}
 \usepackage{../sty/code}
 \usepackage{tikz}
-\usetikzlibrary{arrows.meta}
-\title{Complexity and Integer Linear Programming}
+\usetikzlibrary{arrows.meta,positioning}
+\title{Complexity and Linear Programming}
 \subtitle{9/14/26}
 \author{Mihir Tandon}
-\date{}
 \begin{document}
 \begin{frame}\titlepage\end{frame}
 
 \section{Big O Notation}
-\begin{frame}{How much work does an algorithm do?}
-Let $n$ be the input size, and let $T(n)$ count the operations an algorithm performs.
-\par\pause
-\vspace{0.4cm}
-\begin{itemize}[<+->]
-\item Scanning $n$ values takes about $n$ steps.
-\item Checking every pair takes about $n^2$ steps.
+\begin{frame}[fragile]{How many computations does this do?}
+\begin{pycode}
+Algorithm Sum(A, n):
+    total = 0
+    for i = 1 to n
+        total = total + A[i]
+    return total
+\end{pycode}
+\begin{itemize}
+\item How many additions does this algorithm perform on an array of $n$ values?
+\pause
+\item \textbf{Answer:} Exactly $n$ additions. Doubling the input doubles this count.
 \end{itemize}
-\par\pause
-We compare how this work grows as the input gets larger.
+\end{frame}
+
+\begin{frame}[fragile]{What changes with two loops?}
+\begin{pycode}
+Algorithm ComparePairs(A, n):
+    for i = 1 to n
+        for j = i + 1 to n
+            compare(A[i], A[j])
+\end{pycode}
+\begin{itemize}
+\item How many comparisons does this algorithm perform?
+\pause
+\item \textbf{Answer:} $(n-1)+(n-2)+\cdots+1=\frac{n(n-1)}{2}$ comparisons.
+\pause
+\item For large $n$, doubling the input roughly quadruples this count.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{What if the input keeps shrinking?}
+\begin{pycode}
+Algorithm Halve(n):
+    while n > 1
+        n = floor(n / 2)
+\end{pycode}
+\begin{itemize}
+\item For an integer $n\geq1$, how many times does the loop divide by two?
+\pause
+\item \textbf{Answer:} $\lfloor\log_2 n\rfloor$ times. For $n=16$, the values are $16,8,4,2,1$, so there are four divisions.
+\pause
+\item Let $T(n)$ count the number of operations. Big O describes how that count grows with the input size.
+\end{itemize}
 \end{frame}
 
 \begin{frame}{Big O notation}
-We write $T(n)=O(g(n))$ if constants $c>0$ and $n_0$ exist such that
+\begin{itemize}
+\item We write $T(n)=O(g(n))$ if constants $c>0$ and $n_0$ exist such that
 \[0\leq T(n)\leq c\,g(n)\qquad\text{for all }n\geq n_0.\]
-\par\pause
-The constant $c$ allows a fixed multiplicative difference. The threshold $n_0$ lets us ignore small inputs.
-\par\pause
-\vspace{0.3cm}
-For example, $3n+7\leq4n$ whenever $n\geq7$. Therefore, $3n+7=O(n)$.
-\par\pause
-\vspace{0.3cm}
-Big O gives an upper bound. A linear runtime is also $O(n^2)$, although that bound is less informative.
+\pause
+\item The constant $c$ allows a fixed multiplicative difference. The threshold $n_0$ lets us ignore small inputs.
+\pause
+\item For example, $3n+7\leq4n$ whenever $n\geq7$. Therefore, $3n+7=O(n)$.
+\pause
+\item Big O gives an upper bound. A linear runtime is also $O(n^2)$, although that bound is less useful.
+\end{itemize}
 \end{frame}
 
-\begin{frame}[fragile]{Counting loops}
+\begin{frame}[fragile]{A convex hull recurrence}
+\begin{itemize}
+\item Consider a divide-and-conquer convex hull algorithm on $n$ points sorted by $x$-coordinate.
+\end{itemize}
+\pause
 \begin{pycode}
-for p in points:             # n iterations
-    inspect(p)              # assume O(1) work
-
-for i in range(n):
-    for j in range(i):
-        inspect_pair(i, j)  # assume O(1) work
+Hull(P):
+    if |P| <= 3: return the hull of P
+    split P into left and right halves
+    H_left  = Hull(left)
+    H_right = Hull(right)
+    return MergeHulls(H_left, H_right)
 \end{pycode}
-\[\text{First loop: }\Theta(n)\qquad
-\text{Second loop: }\sum_{i=0}^{n-1}i=\frac{n(n-1)}2=\Theta(n^2).\]
-$\Theta(g(n))$ means matching upper and lower bounds up to constants.
-\end{frame}
-
-\begin{frame}{Simplifying a runtime}
+\pause
 \begin{itemize}[<+->]
-\item Consecutive phases add their work. For example, $n^2+5n+20=\Theta(n^2)$.
-\item Nested loops multiply their work when each inner loop has the same cost. Doing $\Theta(n)$ work $n$ times takes $\Theta(n^2)$ time.
-\item Repeatedly halving the input takes $\Theta(\log n)$ steps because $n/2^k\leq1$ once $k\geq\log_2 n$.
+\item The recursive calls solve two subproblems of size $n/2$. The merge finds the upper and lower tangents in $O(n)$ time.
+\item This gives the recurrence $T(n)=2T(n/2)+O(n)$.
+\item The recursion has $O(\log n)$ levels, and each level performs $O(n)$ total merge work.
+\item Therefore $T(n)=O(n\log n)$.
 \end{itemize}
 \end{frame}
 
@@ -75,53 +108,36 @@ $n^3$ & 1,000 & 1,000,000\\
 $2^n$ & 1,024 & $\approx1.27\times10^{30}$
 \end{tabular}
 \vspace{0.4cm}
-\begin{itemize}[<+->]
-\item These are function values, not measured running times.
-\item Constants still matter on real inputs, but exponential growth catches up quickly.
+\end{frame}
+
+\section{Linear Programming}
+\frame{\sectionpage}
+\begin{frame}{Linear programming}
+\begin{itemize}
+\item A \textbf{linear program (LP)} optimizes a linear objective subject to linear inequalities.
+\pause
+\[
+\begin{aligned}
+\min\quad &c_1x_1+\cdots+c_dx_d\\
+\text{subject to}\quad &a_{i1}x_1+\cdots+a_{id}x_d\leq b_i
+\quad (i=1,\ldots,n),\\
+&x_1,\ldots,x_d\in\mathbb R.
+\end{aligned}
+\]
+\pause
+\item The vector $c=(c_1,\ldots,c_d)$ is the \textbf{objective vector}. It assigns a cost to each variable, and $c^Tx$ is the total cost we minimize.
+\pause
+\item Each row vector $a_i=(a_{i1},\ldots,a_{id})$ gives an inequality $a_i^Tx\leq b_i$, which defines a \textbf{halfspace}. Their intersection is the feasible region.
+\pause
+\item We can also maximize. Here, programming means mathematical optimization.
 \end{itemize}
 \end{frame}
 
-\section{Why ILP?}
-\frame{\sectionpage}
-\begin{frame}{Hard optimization problems}
-A polynomial-time algorithm uses $O(n^k)$ time for a fixed constant $k$.
-\par\pause
-\vspace{0.35cm}
-Even $m$ binary decisions give $2^m$ possible assignments. Trying them all becomes expensive quickly.
-\par\pause
-\vspace{0.35cm}
-Many optimization problems have no known polynomial-time exact algorithm. We can still solve useful instances with heuristics and general-purpose optimizers.
-\end{frame}
-
-\begin{frame}{What is an ILP?}
-An \textbf{integer linear program (ILP)} chooses values for variables to maximize or minimize an objective while satisfying constraints.
-\par\pause
-\vspace{0.35cm}
-\textbf{Integer} means the variables take whole-number values. A count might be $0,1,2,\ldots$, and a yes-or-no choice uses $0$ or $1$.
-\par\pause
-\vspace{0.35cm}
-\textbf{Linear} means the objective and constraints use sums of variables multiplied by constants, such as $3x+2y$ or $2x+y\leq7$.
-\par\pause
-\vspace{0.35cm}
-\textbf{Programming} here means mathematical optimization. We describe the choices, restrictions, and goal, then ask a solver to find the best valid solution.
-\end{frame}
-
-\begin{frame}{Writing an ILP model}
-\begin{itemize}[<+->]
-\item Describe \emph{what makes a solution valid} using variables and linear constraints.
-\item Describe \emph{what makes it good} using a linear objective.
-\item Require integer variables when choices are discrete.
+\begin{frame}{A production problem}
+\begin{itemize}
+\item A workshop makes tables and chairs. It has 7 planks of wood and enough time to assemble 5 items.
+\pause
 \end{itemize}
-\[\min\;c^T x\qquad\text{subject to }Ax\leq b,\quad x\in\mathbb Z^m.\]
-\par\pause
-The solver searches for a best feasible assignment. General ILP is NP-hard too. This changes how we tackle the search, not its worst-case difficulty.
-\end{frame}
-
-\section{A System of Inequalities}
-\frame{\sectionpage}
-\begin{frame}{A small production problem}
-A workshop makes tables and chairs. It has 7 planks of wood and enough time to assemble 5 items.
-\par\pause
 \begin{center}
 \begin{tabular}{lcc}
  & Table & Chair\\\hline
@@ -129,288 +145,205 @@ Wood required & 2 planks & 1 plank\\
 Profit & 3 dollars & 2 dollars
 \end{tabular}
 \end{center}
-\par\pause
-Let $x$ count tables and $y$ count chairs. We want to solve
-\[\begin{aligned}
+\pause
+\begin{itemize}
+\item Let $x$ count tables and $y$ count chairs. Ignoring whole-number restrictions for now, the LP is
+\[
+\begin{aligned}
 \max\quad &3x+2y\\
 \text{subject to}\quad &2x+y\leq7,\qquad x+y\leq5,\\
-&x,y\in\mathbb Z_{\geq0}.
-\end{aligned}\]
+&x,y\in\mathbb R_{\geq0}.
+\end{aligned}
+\]
+\end{itemize}
 \end{frame}
 
-\begin{frame}{Feasible solutions}
+\begin{frame}{The geometry of the production LP}
 \begin{columns}
-\begin{column}{0.48\textwidth}
+\begin{column}{0.45\textwidth}
 \begin{tikzpicture}[scale=0.65]
 \fill[blue!10] (0,0)--(3.5,0)--(2,3)--(0,5)--cycle;
 \draw[->] (0,0)--(4.5,0) node[right] {$x$};
 \draw[->] (0,0)--(0,6) node[above] {$y$};
-\draw[blue] (0,5)--(2,3)--(3.5,0);
-\foreach \x in {0,...,3} {
-\foreach \y in {0,...,5} {
-\pgfmathtruncatemacro{\ok}{(2*\x+\y<=7)&&(\x+\y<=5)}
-\ifnum\ok=1 \fill (\x,\y) circle (2pt);\fi
-}}
+\draw[blue,thick] (0,5)--(2,3)--(3.5,0);
+\node[blue, font=\scriptsize, above right] at (0.55,4.45) {$x+y\leq5$};
+\node[blue, font=\scriptsize, below right] at (2.45,1.85) {$2x+y\leq7$};
+\node[font=\scriptsize, below right] at (0,0) {$x,y\geq0$};
+\draw[red,dashed] (0,3)--(2,0);
+\draw[red,thick] (0,6)--(4,0);
+\draw[->,red,thick] (1,1.5)--(2,3);
 \fill[red] (2,3) circle (3pt);
-\node[right] at (2,3.3) {$(2,3)$};
-\foreach \x in {1,...,4} \node[below] at (\x,0) {\small\x};
-\foreach \y in {1,...,5} \node[left] at (0,\y) {\small\y};
+\node[right] at (2,3.2) {$(2,3)$};
 \end{tikzpicture}
 \end{column}
-\begin{column}{0.50\textwidth}
-Each inequality defines a half-plane. Their intersection is the shaded feasible region.
-\par\pause
-\vspace{0.3cm}
-The dots are the integer solutions. Making 2 tables and 3 chairs earns 12 dollars.
-\par\pause
-\vspace{0.3cm}
-This is optimal because
-\[3x+2y=(2x+y)+(x+y)\leq12.\]
+\begin{column}{0.53\textwidth}
+\begin{itemize}
+\item Each inequality defines a half-plane in two dimensions, or a halfspace in $d$ dimensions. Their intersection is the \textbf{feasible region}.
+\pause
+\item Here, $x,y\geq0$, $2x+y\leq7$, and $x+y\leq5$ define the shaded region.
+\pause
+\item To maximize $3x+2y$, move the line $3x+2y=t$ toward larger $t$. The last contact occurs at $(2,3)$, with value $12$.
+\end{itemize}
 \end{column}
 \end{columns}
 \end{frame}
 
-\begin{frame}{Why require integers?}
-Suppose we maximize $x+y$ subject to $2x+2y\leq3$ and $x,y\geq0$.
-\par\pause
+\begin{frame}{Seidel's LP algorithm}
 \begin{itemize}[<+->]
-\item The linear program allows fractions. The solution $(1.5,0)$ has value $1.5$.
-\item The integer program has optimum $1$. Both $(1,0)$ and $(0,1)$ attain it.
-\item Rounding up to $(2,0)$ violates the constraint, so rounding an LP solution does not always work.
+\item Let $H=\{h_1,\ldots,h_n\}$ be halfspace constraints in $\mathbb R^d$, and let $c$ be an objective vector. We maximize $c^Tx$ over their intersection.
+\item Seidel adds the constraints in random order while maintaining the optimum for those seen so far.
 \end{itemize}
 \end{frame}
 
-\begin{frame}{How the solver searches}
-For a minimization problem:
-\begin{enumerate}[<+->]
-\item Relax integrality and solve an LP to get a lower bound.
-\item Find an integer feasible solution to get an upper bound.
-\item If an LP variable is $2.4$, branch into $x\leq2$ and $x\geq3$.
-\item Discard infeasible branches and branches whose bounds cannot improve the best solution.
-\end{enumerate}
-\par\pause
-Solvers also use presolve, cutting planes, and heuristics. A time limit may leave a feasible solution without proving optimality.
+\begin{frame}[fragile]{Seidel pseudocode}
+\begin{pycode}
+SeidelLP(H, c, d):
+    randomly order the constraints in H
+    x = solve a constant size base case
+    for i = 1 to number of constraints:
+        if x violates constraint h_i:
+            B = boundary of h_i
+            x = SeidelLP(earlier constraints on B, c, d-1)
+    return x
+\end{pycode}
+\pause
+\begin{itemize}
+\item The recursive call only uses earlier constraints and searches on the boundary of the violated constraint.
+\end{itemize}
 \end{frame}
 
-\section{CG:SHOP as an ILP}
+\begin{frame}{A two-dimensional linear program}
+\centering
+\includegraphics[width=0.72\textwidth,height=0.76\textheight,keepaspectratio]{images/seidel_lp_overview.png}
+\blfootnote{Figure adapted from 15-451/651 Lecture 14, October 21, 2015.}
+\end{frame}
+
+\begin{frame}{Seidel Example: adding one constraint}
+\begin{itemize}[<+->]
+\item Suppose we know the optimum for the first $m-1$ constraints, then add $a_m^Tx\leq b_m$.
+\item If the old optimum satisfies it, nothing changes.
+\item Otherwise, the new optimum lies on the boundary $a_m^Tx=b_m$. Restricting to this boundary reduces the problem from $d$ dimensions to $d-1$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Adding one constraint}
+\centering
+\includegraphics[width=0.62\textwidth,height=0.76\textheight,keepaspectratio]{images/seidel_lp_insert.png}
+\blfootnote{Figure adapted from 15-451/651 Lecture 14, October 21, 2015.}
+\end{frame}
+
+\begin{frame}{Seidel's expected-time recurrence}
+\begin{itemize}[<+->]
+\item Let $T(d,n)$ be the expected time for $n$ constraints in dimension $d$. At step $i$, the algorithm first tests the new constraint in $O(d)$ time.
+\item At the best point, at most $d$ constraints are needed to fix its position. Because the order is random, constraint $i$ has probability at most $d/i$ of changing that point and starting a recursive call.
+\item A recursive call solves an LP with $i-1$ earlier constraints in dimension $d-1$:
+\[
+T(d,i)\leq T(d,i-1)+O(d)+\frac{d}{i}T(d-1,i-1).
+\]
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Deriving $O(d!\,n)$}
+\begin{itemize}[<+->]
+\item Sum the one-step recurrence over $i=1,\ldots,n$:
+\[
+T(d,n)\leq\sum_{i=1}^n\left(O(d)+\frac{d}{i}T(d-1,i-1)\right).
+\]
+\item Induct on $d$. Assume $T(d-1,i-1)\leq K(d-1)!(i-1)$ for every $i$.
+\[
+\frac{d}{i}T(d-1,i-1)
+\leq\frac{d}{i}K(d-1)!(i-1)
+\leq Kd!.
+\]  
+\item Every one of the $n$ steps therefore has expected cost $O(d!)$. Thus $T(d,n)=O(d!\,n)$. The base case $d=1$ is a linear scan.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Why fixed-dimensional LP is useful}
+\begin{itemize}[<+->]
+\item In a fixed dimension $d$, Seidel's randomized incremental algorithm takes expected $O(d!\,n)$ time. 
+\pause
+\item The method is practical when the dimension stays small.
+\end{itemize}
+\end{frame}
+
+\section{Integer Linear Programming}
 \frame{\sectionpage}
-\begin{frame}{Multi-robot lawn mowing}
-We are given a field $R$, a cutter shape $K$ with center $c$, and $C$ identical cutters.
-\par\pause
-\vspace{0.3cm}
-Each cutter follows a closed, axis-parallel route with integer vertices. The cutter keeps its orientation as it moves.
-\par\pause
-\vspace{0.3cm}
-Together, the cutters must sweep the entire field. They may overlap and travel outside the field.
-\par\pause
-\[\text{Our objective is to minimize }\max_{1\leq i\leq C}\ell(T_i).\]
-\blfootnote{\href{https://cgshop.ibr.cs.tu-bs.de/competition/cg-shop-2027/}{CG:SHOP 2027}.}
-\end{frame}
-
-
-\begin{frame}{A finite grid that contains an optimum}
-Let $Q$ be the field cells and let $D$ be the cutter cells relative to its center.
-\par\pause
-\vspace{0.3cm}
-A cutter at integer position $v$ covers cell $q$ exactly when $q-v\in D$. Thus every useful position has the form $q-d$.
-\par\pause
-\vspace{0.3cm}
-We keep every integer position in the rectangle containing $Q-D$, and join horizontal and vertical neighbors by unit edges.
-\par\pause
-\vspace{0.3cm}
-Positions inside holes and outside the field remain available for travel.
-\end{frame}
-
-\begin{frame}{Why this rectangle is enough}
-Along a unit grid step, a unit cutter cell sweeps exactly the union of its two endpoint placements. This remains true for a cutter made of many cells.
-\par\pause
-\vspace{0.3cm}
-Clamp every route position to the rectangle. Every position that covers a field cell stays fixed. Every unit step becomes a unit step or a stationary step.
-\par\pause
-\vspace{0.3cm}
-The route stays closed, preserves field coverage, and cannot get longer. Therefore, some global optimum lies in this finite grid.
-\end{frame}
-
-\begin{frame}{Choosing movements directly}
-For cutter $i$ and grid edge $e$, let $x_{ie}$ count how many times the cutter traverses that edge in either direction.
-\par\pause
-\vspace{0.3cm}
-A closed walk gives a connected multigraph in which every vertex has even degree. Conversely, an Euler circuit traverses every edge of such a graph.
-\par\pause
-\vspace{0.3cm}
-We can require $x_{ie}\in\{0,1,2\}$. If an edge occurs at least three times, removing two copies preserves its support, connectivity, coverage, and even degrees.
-\end{frame}
-
-\begin{frame}{Visited vertices and coverage}
-Let $z_{iv}\in\{0,1\}$ indicate that cutter $i$ visits position $v$.
+\begin{frame}{From LP to integer linear programming}
+\begin{itemize}
+\item An \textbf{Integer Linear Program (ILP)} adds integer restrictions to an LP. Counts must be whole numbers, and yes-or-no decisions use $0$ or $1$.
+\pause
 \[
-\sum_i\sum_{v:\ q-v\in D}z_{iv}\geq1
-\qquad\text{for every field cell }q.
+\begin{array}{ll}
+\text{LP:} & \min c^Tx\quad\text{subject to }Ax\leq b,\quad x\in\mathbb R^d,\\[0.25cm]
+\text{ILP:} & \min c^Tx\quad\text{subject to }Ax\leq b,\quad x\in\mathbb Z^d.
+\end{array}
 \]
-\par\pause
-Every field cell must be covered by at least one visited cutter position.
-\par\pause
-\vspace{0.3cm}
-Unlike the earlier route pool, these variables allow the solver to construct its own trajectories throughout the complete grid.
+\pause
+\item The inequalities still define the same region. The ILP only allows its integer points.
+\pause
+\item LP has polynomial-time algorithms, but general ILP is NP-hard.
+\end{itemize}
 \end{frame}
-
-\begin{frame}{Even degrees and stationary cutters}
-Each cutter chooses one root using $r_{iv}\in\{0,1\}$, with
-\[\sum_v r_{iv}=1,\qquad r_{iv}\leq z_{iv}.\]
-\par\pause
-Let $d_{iv}$ be a nonnegative integer. We impose
-\[
-\sum_{e\ni v}x_{ie}=2d_{iv},\qquad
-z_{iv}-r_{iv}\leq d_{iv}\leq\deg_G(v)z_{iv}.
-\]
-\par\pause
-Every visited nonroot has positive even degree. Unvisited vertices have degree zero. A root with no edges represents a stationary cutter.
-\end{frame}
-
-\begin{frame}{Why even degrees are not enough}
-Two disconnected cycles have even degree everywhere, but one cutter cannot follow both without traveling between them.
-\par\pause
-\vspace{0.3cm}
-We add artificial flow from the chosen root. Every visited vertex consumes one unit, and flow may travel only along selected edges.
-\par\pause
-\vspace{0.3cm}
-A component disconnected from the root cannot receive its required flow. This forces one connected trajectory per cutter.
-\end{frame}
-
-\begin{frame}{Connectivity constraints}
-Let $N=|V|$. For each cutter, $s_{iv}$ is flow supplied at $v$, and $f_{iuv}$ is directed flow along grid edge $\{u,v\}$.
+\begin{frame}{An ILP example}
+\begin{itemize}[<+->]
+\item A workshop makes tables ($x$) and chairs ($y$). It has four units of each of two resources. A table uses $(2,1)$ units and a chair uses $(1,2)$ units.
+\item The integer linear program is
 \[
 \begin{aligned}
-0\leq s_{iv}&\leq Nr_{iv},\\
-0\leq f_{iuv}&\leq Nx_{i\{u,v\}},\\
-s_{iv}+\sum_u f_{iuv}-\sum_w f_{ivw}&=z_{iv}.
+\max\quad &3x+2y\\
+\text{subject to}\quad &2x+y\leq4,\\
+&x+2y\leq4,\\
+&x,y\in\mathbb Z_{\geq0}.
 \end{aligned}
 \]
-\par\pause
-Only the root supplies flow. A spanning tree can distribute one integer unit to each visited vertex using these capacities, so no connected route is excluded.
+\item The LP \textit{relaxation} (ignoring integer constraints) has $x=y=\frac43$ and value $\frac{20}{3}$. The ILP optimum is $(x,y)=(2,0)$ with value $6$.
+\end{itemize}
 \end{frame}
 
-\begin{frame}{The objective and the exactness guarantee}
-Every grid edge has length one, so we minimize $L$ subject to
-\[\sum_e x_{ie}\leq L\qquad\text{for every cutter }i.\]
-\par\pause
-Every original solution can be represented in this model without increasing its length. Every feasible model solution gives valid closed routes with the modeled lengths.
-\par\pause
-\vspace{0.3cm}
-Therefore, the model optimum equals the global mowing optimum. This conclusion depends on keeping the full proved grid.
+\begin{frame}{How branch and bound works}
+\begin{itemize}[<+->]
+\item First ignore the integer restrictions and solve the LP relaxation. Its objective value bounds every integer solution in that branch.
+\item If the LP solution is fractional, choose one fractional variable and split the search into two cases, such as $x\leq\lfloor x^*\rfloor$ and $x\geq\lceil x^*\rceil$.
+\item Whenever the solver finds a valid integer solution, it stores its value as the incumbent.
+\item Prune a branch when it is infeasible, already integer, or its LP bound cannot improve the incumbent.
+\item Once every branch is solved or pruned, the incumbent is an optimal ILP solution.
+\end{itemize}
 \end{frame}
 
-\begin{frame}{Exactness and running time}
-The implementation has $C(3|E|+4|V|)+1$ integer variables, including the connectivity variables.
-\par\pause
-\vspace{0.3cm}
-The large \texttt{isoa} instance requires about 16.8 million variables. A complete model can be too expensive to solve even when its formulation is correct.
-\par\pause
-\vspace{0.3cm}
-A time limit may leave an incumbent and a lower bound. We report global optimality only after the solver proves optimal status, subject to its numerical tolerances.
+\begin{frame}{Branch and bound: search and prune}
+\begin{itemize}[<+->]\small
+\item The LP relaxation has upper bound $\frac{20}{3}$ and fractional value $x=\frac43$.
+\item Branch into $x\leq1$ and $x\geq2$.
+\item The $x\geq2$ branch gives $(2,0)$ with value $6$. It becomes the incumbent.
+\item The $x\leq1$ branch has LP upper bound $6$, so it cannot improve the incumbent and is pruned.
+\end{itemize}
+\centering
+\begin{tikzpicture}[>=stealth, every node/.style={font=\small, align=center},
+  box/.style={draw, rounded corners, fill=blue!8, minimum width=3.3cm, minimum height=0.7cm},
+  prune/.style={draw, rounded corners, fill=gray!20, minimum width=3.3cm, minimum height=0.7cm}]
+  \node[box] (root) {LP relaxation\\$(\frac43,\frac43)$, upper bound $\frac{20}{3}$};
+  \node[box, below left=0.85cm and 1.0cm of root] (left) {$x\geq2$\\integer solution $(2,0)$, value $6$};
+  \node[prune, below right=0.85cm and 1.0cm of root] (right) {$x\leq1$\\LP upper bound $6$};
+  \draw[->] (root) -- node[above left] {$x\geq2$} (left);
+  \draw[->] (root) -- node[above right] {$x\leq1$} (right);
+  \node[below=0.22cm of left, text=green!50!black] {incumbent value $6$};
+  \node[below=0.22cm of right, text=red!70!black] {prune};
+\end{tikzpicture}
 \end{frame}
 
-\section{Implementation}
-\frame{\sectionpage}
-
-\begin{frame}{An exact solution with two cutters}
-\begin{columns}
-\begin{column}{0.58\textwidth}
-\includegraphics[width=\textwidth,height=0.70\textheight,keepaspectratio]{images/exact_demo.png}
-\end{column}
-\begin{column}{0.40\textwidth}
-The field is a $4\times4$ square with a $2\times2$ hole. Two unit-square cutters cover the twelve remaining cells.
-\par\pause
-\vspace{0.3cm}
-The exact solver proves that the minimum possible longest route is 8. The official validator reports zero errors.
-\par\pause
-\vspace{0.3cm}
-The GIF shows the corresponding closed walks.
-\end{column}
-\end{columns}
+\begin{frame}{ILP solvers in Python}
+\begin{itemize}[<+->]
+\item In python, we just have to describe variables, linear constraints, and an objective. A solver performs the search.
+\item \texttt{scipy.optimize.milp} provides a direct interface to the HiGHS mixed-integer solver. Modeling tools such as PuLP and Pyomo can target several solvers.
+\item General ILP solvers combine presolve, LP relaxations, cutting planes, heuristics, and branch-and-bound.
+\item When the solver reports optimal status, it has proved that no better feasible integer solution exists, subject to numerical tolerances.
+\end{itemize}
 \end{frame}
 
-\begin{frame}{An independent optimality proof}
-Every closed walk on the unit grid has even length. A solution better than 8 would therefore give each cutter a route of length at most 6.
-\par\pause
-\vspace{0.3cm}
-An exhaustive integer check of all such closed walks shows that each covers at most 4 of the field's cells.
-\par\pause
-\vspace{0.3cm}
-Two cutters could cover at most 8 cells, but the field has 12. Thus the longest route must be at least 8, and our validated solution attains 8.
-\par\pause
-\vspace{0.2cm}
-The check is reproducible with \texttt{src/prove\_demo.py} and does not use an optimizer.
+
+
+\begin{frame}{Questions?}
 \end{frame}
 
-\begin{frame}{The implementation}
-\begin{enumerate}[<+->]
-\item Build the complete finite grid and its coverage constraints.
-\item Solve the integer program, then extract an Euler circuit for each cutter.
-\item Check the integer assignment and validate the resulting geometric solution before writing JSON or generating a plot.
-\end{enumerate}
-\par\pause
-\vspace{0.3cm}
-The formulation is in \texttt{src/utils/exact\_ilp.py}. Its completeness proof is in \texttt{EXACT\_ILP.md}.
-\end{frame}
-
-\begin{frame}[fragile]{Code: parity and coverage}
-These excerpts use the sparse row builder from \texttt{exact\_ilp.py}.
-\begin{pycode}
-rows.add([(x[e], 1) for e, _, _ in adjacent[v]]
-         + [(d[v], -2)], 0, 0)
-
-for qx, qy in validator.region.cells():
-    covering = [vertex[(qx-kx, qy-ky)]
-                for kx, ky in offsets]
-    rows.add([(b["z"][v], 1)
-              for b in blocks for v in covering], lower=1)
-\end{pycode}
-\end{frame}
-
-\begin{frame}[fragile]{Code: connectivity flow}
-For one cutter and vertex $v$, construct its flow balance row.
-\begin{pycode}
-rows.add([(s[v], 1), (r[v], -n)], upper=0)
-balance = [(s[v], 1), (z[v], -1)]
-for e, _, direction in adjacent[v]:
-    outgoing = f[2*e + direction]
-    incoming = f[2*e + 1-direction]
-    balance.extend([(incoming, 1), (outgoing, -1)])
-    rows.add([(outgoing, 1), (x[e], -n)], upper=0)
-rows.add(balance, 0, 0)
-\end{pycode}
-The flow is a connectivity certificate. It does not represent cutter motion or contribute to the objective.
-\end{frame}
-
-\begin{frame}[fragile]{Code: solve the complete model}
-\begin{pycode}
-model = build_model(instance)
-result = milp(
-    c=model.objective,
-    integrality=model.integrality,
-    bounds=model.bounds,
-    constraints=model.constraints,
-    options={"mip_rel_gap": 0.0})
-\end{pycode}
-\par\pause
-The default has no time limit. An explicit allocation guard stops oversized models before building them, without substituting a restricted model.
-\blfootnote{\href{https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.milp.html}{SciPy milp documentation}. The backend is HiGHS.}
-\end{frame}
-
-\begin{frame}[fragile]{Code: extract and check the answer}
-The public entry point wraps optimization, Euler extraction, and validation.
-\begin{pycode}
-from cgshop2027_pyutils.io import read_instance
-from exact_ilp import solve_exact
-
-instance = read_instance("exact_demo.instance.json")
-solution = solve_exact(instance)
-print("Longest route:", solution.max_tour_length)
-print("Global optimum:", solution.meta["global_optimal"])
-# Longest route: 8
-# Global optimum: True
-\end{pycode}
-With a time limit, always inspect the status and lower bound. A feasible result alone does not prove optimality.
-\end{frame}
 \end{document}
