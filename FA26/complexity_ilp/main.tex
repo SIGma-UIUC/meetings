@@ -19,12 +19,18 @@
 
 \begin{frame}{Announcements}
 \begin{itemize}
-  \item We are finalizing exact projects for the algorithm/development teams, these will be github issues
-  \item Please see the SIGma CG:SHOP repo for further details
+  \item We are finalizing exact projects for the algorithm/development teams, these will be github issues in the SIGma repo.
+  \item Please see the SIGma CG:SHOP repo for further details, and make sure you filled out the spreadsheet in the discord if you are interested!
+  \item We have a solution checker implemented now!
 \end{itemize}
 \end{frame}
 
+\begin{frame}{Outline}
+\tableofcontents
+\end{frame}
+
 \section{Big O Notation}
+\frame{\sectionpage}
 \begin{frame}[fragile]{How many computations does this do?}
 \begin{pycode}
 Algorithm Sum(A, n):
@@ -89,13 +95,13 @@ Algorithm Halve(n):
 \begin{tikzpicture}[x=0.70cm,y=0.019cm,>=stealth]
   \draw[->] (0,0)--(13.2,0) node[right] {$n$};
   \draw[->] (0,0)--(0,280) node[above] {work};
-  \draw[blue,thick,domain=0:12,samples=100] plot (\x,{10*\x});
+  \draw[blue,thick,domain=0:12,samples=100] plot (\x,{5*\x});
   \draw[teal!70!black,thick,domain=1.05:12,samples=100] plot (\x,{2*\x*ln(\x)/ln(2)});
   \draw[orange!90!black,thick,domain=0:12,samples=100] plot (\x,{0.2*\x*\x});
   \draw[purple,thick,domain=0:12,samples=100] plot (\x,{0.02*\x*\x*\x});
   \draw[red,thick,domain=0:12,samples=100] plot (\x,{2^(\x-4)});
   \node[anchor=north west,align=left,font=\small,fill=white,fill opacity=0.9,text opacity=1] at (0.45,270) {
-    \textcolor{blue}{$10n$}\quad
+    \textcolor{blue}{$5n$}\quad
     \textcolor{teal!70!black}{$2n\log_2 n$}\quad
     \textcolor{orange!90!black}{$0.2n^2$}\\
     \textcolor{purple}{$0.02n^3$}\quad
@@ -222,10 +228,10 @@ For example, maximizing $3x+2y$ uses objective vector $(3,2)$.
 
 \begin{frame}{Input and output of Seidel's LP algorithm}
 \begin{itemize}[<+->]
+\item \textbf{Seidel's algorithm [1992]} solves a bounded two-dimensional LP by adding constraints one at a time in random order.
 \item \textbf{Input:} half-plane constraints $H=\{h_1,\ldots,h_n\}$, an objective direction $c$, and a bounding box $B$ containing the feasible region. Each constraint keeps one side of a line (a two-dimensional halfspace).
 \item \textbf{Goal:} find an allowed point $(x,y)$ that maximizes a linear score such as $3x+2y$.
 \item \textbf{Output:} the best point, or a report that no allowed point exists.
-\item Seidel adds the constraints in random order while maintaining the best point for those seen so far.
 \end{itemize}
 \end{frame}
 
@@ -301,7 +307,7 @@ The old point violates it because $10+2>8$.
 \[
 \boxed{(x,y)=(6,2)}.
 \]
-\item $C_3$ finds the line by rechecking $C_1$ and $C_2$ (this is an example of a recursive call).
+\item $C_3$ finds the line by rechecking $C_1$ and $C_2$.
 \end{itemize}
 \end{frame}
 
@@ -325,7 +331,7 @@ The old point violates it because $10+2>8$.
 \frame{\sectionpage}
 \begin{frame}{From LP to integer linear programming}
 \begin{itemize}
-\item An \textbf{Integer Linear Program (ILP)} adds integer restrictions to an LP. Counts must be whole numbers, and yes-or-no decisions use $0$ or $1$.
+\item An \textbf{Integer Linear Program (ILP)} adds integer restrictions to an LP.
 \pause
 \[
 \begin{array}{ll}
@@ -357,11 +363,11 @@ The old point violates it because $10+2>8$.
 
 \begin{frame}{How branch and bound works}
 \begin{itemize}[<+->]
+\item \textbf{Branch and bound [1960]} is an exact ILP algorithm. It explores integer cases while using LP bounds to skip cases that cannot win.
 \item First ignore the integer restrictions and solve the LP relaxation. Its objective value bounds every integer solution in that branch.
 \item If the LP solution is fractional, choose one fractional variable and split the search into two cases, such as $x\leq\lfloor x^*\rfloor$ and $x\geq\lceil x^*\rceil$.
 \item Whenever the solver finds a valid integer solution, it stores its value as the incumbent.
-\item Prune a branch when it is infeasible, already integer, or its LP bound cannot improve the incumbent.
-\item Once every branch is solved or pruned, the incumbent is an optimal ILP solution.
+\item Prune a branch when it is infeasible, already integer, or its LP bound cannot improve the incumbent. Once every branch is done or pruned, the incumbent is optimal.
 \end{itemize}
 \end{frame}
 
