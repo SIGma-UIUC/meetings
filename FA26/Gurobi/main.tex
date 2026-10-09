@@ -1,6 +1,7 @@
 \PassOptionsToPackage{hyphens}{url}
-\documentclass[aspectratio=169]{beamer}
-% \documentclass[aspectratio=169, handout]{beamer}
+
+% \documentclass[aspectratio=169]{beamer}
+\documentclass[aspectratio=169, handout]{beamer}
 
 \usepackage{sty/slides}
 \usepackage{sty/sigma/sigma}
@@ -57,6 +58,12 @@
     \tableofcontents
 \end{frame}
 
+\begin{frame}{Jupyter Notebook!}
+    \centering
+    \includegraphics[width=0.5\textwidth]{figs/colab_qrcode.jpeg}
+    \url{https://colab.research.google.com/github/SIGma-UIUC/meetings/blob/main/FA26/Gurobi/notebook.ipynb}
+\end{frame}
+
 \section{Traffic engineering}
 \frame{\tableofcontents[currentsection]}
 
@@ -72,19 +79,27 @@
         \item Servers $\ll$ racks $\ll$ aggregation node $\ll$ $\ldots$
     \end{itemize}
 
-    \centering
-    \includegraphics[width=0.75\textwidth]{figs/niranjan2009portland-1.png}
+    \pause
 
-    \begin{itemize}
-        \item How should flows be routed from nodes $i$ to $j$...
+    \uncover<2->{
 
-              \begin{itemize}
-                  \item to minimize latency
-                  \item to maximize bandwidth
-                  \item to be maximally robust to failures
-              \end{itemize}
+        \centering
+        \includegraphics[width=0.75\textwidth]{figs/niranjan2009portland-1.png}
 
-    \end{itemize}
+        \pause
+
+        \begin{itemize}
+            \item How should flows be routed from nodes $i$ to $j$...
+                  \pause
+                  \begin{itemize}
+                      \item to minimize latency
+                      \item to maximize bandwidth
+                      \item to be maximally robust to failures
+                  \end{itemize}
+
+        \end{itemize}
+
+    }
 
     \blfootcite{niranjan2009portland}
 \end{frame}
@@ -95,7 +110,6 @@
         \item input: a bundle of parallel links between blocks
         \item input: predicted traffic matrix between blocks
         \item constraint: flows must reach destination within $2$ hops (latency)
-        \item output: ???
     \end{itemize}
 
     \blfootcite{poutievski2022jupiter}
@@ -110,7 +124,7 @@
 }
 
 \begin{frame}{Jupiter traffic engineering (cont.)}
-    \begin{itemize}
+    \begin{itemize}[<+->]
         \item def: a commodity $(s, t, d)$ is a demand $d$ between blocks $s$ and $t$
         \item input: a network $G = (V, E)$, capacities $c_e$, commodities $(s_k, t_k, d_k)$
         \item decision variables: for every $p: s_k \rightsquigarrow t_k$
@@ -125,10 +139,10 @@
 
 \begin{frame}{Jupiter traffic engineering (cont.)}
     \begin{align*}
-        \min_{x, U} \qquad & U                                                                  \\
-        \text{s.t.} \qquad & \sum_{p \in P_k} x^k_p = d_k   \qquad \forall k                    \\
-                           & \sum_k \sum_{p \in P_k : e \in p} x^k_p \le U c_e \qquad \forall e \\
-                           & x^k_p \ge 0                    \qquad \forall p \in P_k
+        \min_{x, U} \qquad & U                                                                                \\
+        \text{s.t.} \qquad & \uncover<2->{\sum_{p \in P_k} x^k_p = d_k   \qquad \forall k}                    \\
+                           & \uncover<3->{\sum_k \sum_{p \in P_k : e \in p} x^k_p \le U c_e \qquad \forall e} \\
+                           & \uncover<4->{x^k_p \ge 0                    \qquad \forall p \in P_k}
     \end{align*}
 
     \blfootcite{poutievski2022jupiter}
@@ -165,12 +179,6 @@
     \blfootcite{poutievski2022jupiter}
 \end{frame}
 
-\begin{frame}{Your turn!}
-    \centering
-    \includegraphics[width=0.5\textwidth]{figs/colab_qrcode.jpeg}
-    \url{https://colab.research.google.com/github/SIGma-UIUC/meetings/blob/main/FA26/Gurobi/notebook.ipynb}
-\end{frame}
-
 \section{Integer linear programs}
 \frame{\tableofcontents[currentsection]}
 
@@ -178,6 +186,8 @@
     \begin{itemize}
         \item Given a bipartite graph $G = (L \cup R, E)$, find a maximum \emph{matching}.
     \end{itemize}
+
+    \pause
 
     \begin{align*}
         \max_{x} \qquad    & \sum_{e \in E} x_e                                           \\
@@ -197,6 +207,8 @@
                            & \textcolor{orange}{0 \le x_{uv} \le 1}
     \end{align*}
 
+    \pause
+
     \begin{itemize}
         \item Theorem: best fractional LP solution equals the best integer optimum
     \end{itemize}
@@ -206,6 +218,8 @@
     \begin{itemize}
         \item Given a graph $G = (V, E)$, find the smallest \emph{vertex cover}
     \end{itemize}
+
+    \pause
 
     \begin{align*}
         \min_{x} \qquad    & \sum_{v \in V} x_v                      \\
@@ -225,13 +239,15 @@
                            & \textcolor{orange}{0 \le x_v \le 1}
     \end{align*}
 
+    \pause
+
     \begin{itemize}
         \item So... how does this help us?
     \end{itemize}
 \end{frame}
 
 \begin{frame}{vertex cover (cont.)}
-    \begin{itemize}
+    \begin{itemize}[<+->]
         \item Rounding a solution $x^*$ to the LP
         \item Let $\bar{x}_v = I(x^*_v \ge 1/2) \in \set{0, 1}$
         \item Satisfies $\bar{x}_v + \bar{x}_u \ge 1$ for each $uv \in E$
@@ -244,6 +260,8 @@
         \item Given a graph $G = (V, E)$, find the largest \emph{independent set}
     \end{itemize}
 
+    \pause
+
     \begin{align*}
         \max_{x} \qquad    & \sum_{v \in V} x_v                      \\
         \text{s.t.} \qquad & x_u + x_v \le 1 \qquad \forall uv \in E \\
@@ -264,7 +282,7 @@
 \end{frame}
 
 \begin{frame}{independent set (cont.)}
-    \begin{itemize}
+    \begin{itemize}[<+->]
         \item Suppose $G = K_n$, then maximum independent set has $1$ vertex
         \item obs: LP solution is at least $n/2$
         \item proof: let $x_v = 1/2$ for all vertices
@@ -282,11 +300,13 @@
                            & x_i \in \Z
     \end{align*}
 
+    \pause
+
     \vspace{-\baselineskip}
     $$
         \Downarrow
     $$
-    \vspace{-\baselineskip}
+    \vspace{-2\baselineskip}
 
     \begin{align*}
         \min \qquad        & \vb{c}^T \vb{x}                       \\
@@ -303,6 +323,8 @@
                 \item Find the best out of all feasible solutions
             \end{itemize}
 
+            \pause
+
             \begin{align*}
                 \min \qquad        & {-6x_1} - 2x_2 - 5x_3 - 2x_4   \\
                 \text{s.t.} \qquad & 3x_1 + 2x_2 + 2x_3 + x_4 \le 4 \\
@@ -310,6 +332,7 @@
             \end{align*}
         \end{column}
         \begin{column}{0.5\textwidth}
+            \pause
             \begin{tikzpicture}[
                     every node/.style={font=\scriptsize},
                     dot/.style={circle, fill, inner sep=1.5pt},
@@ -335,12 +358,23 @@
     \end{columns}
 \end{frame}
 
-\begin{frame}{Lower bounding and upper bounding solutions (min. problem)}
-    \begin{itemize}
+\begin{frame}{Lower bounding and upper bounding solutions}
+    For a minimization problem:
+
+    \begin{itemize}[<+->]
         \item LP relaxations lower bounds the true opt.
         \item Any found integral solution upper bounds the true solution
         \item Prune if a branch cannot beat the current best upper.
     \end{itemize}
+\end{frame}
+
+\begin{frame}{Branch-and-bound: pruning paths (example)}
+
+    \begin{align*}
+        \min \qquad        & {-6x_1} - 2x_2 - 5x_3 - 2x_4   \\
+        \text{s.t.} \qquad & 3x_1 + 2x_2 + 2x_3 + x_4 \le 4 \\
+                           & x_i \in \set{0, 1}
+    \end{align*}
 \end{frame}
 
 \begin{frame}{Branch-and-bound: pruning paths (example)}
@@ -451,7 +485,7 @@
 \frame{\tableofcontents[currentsection]}
 
 \begin{frame}{modeling}
-    \begin{itemize}
+    \begin{itemize}[<+->]
         \item given a weighted digraph $G = (V, E, w)$, find the shortest tour visiting all nodes exactly once
         \item decision variables: $x_e \in \set{0, 1}$
         \item constraints: degree
@@ -468,16 +502,16 @@
                             x_{u \to v} = 1 \implies y_v \ge y_u + 1
                         $$
                   \item representing as a linear constraint \footnotemark
-                        \footnotetext{Gurobi has special ordered sets for this pattern; here we do it by hand}
+                        \footnotetext{Gurobi has special implication variables for pattern; here we do it by hand}
                         $$
-                            y_v - y_u - 1 \ge - n (1 - x_{uv})
+                            y_v - y_u - 1 \ge - n (1 - x_{u \to v})
                         $$
               \end{itemize}
     \end{itemize}
 \end{frame}
 
 \begin{frame}{formulation strength}
-    \begin{itemize}
+    \begin{itemize}[<+->]
         \item large integrality gap: very small relaxed solutions means weak bounds
         \item enforce stronger topological constraints on the tour:
               \begin{itemize}

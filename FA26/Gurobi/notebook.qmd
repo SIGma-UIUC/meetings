@@ -13,6 +13,7 @@ format:
       - sty/quarto/typst-adapter.lua
 jupyter: python3
 execute:
+  enabled: false
   cache: true
   error: true
   warning: false
@@ -207,24 +208,18 @@ def traffic_engineer_1(ell: int, C: np.ndarray, D: np.ndarray) -> dict[path, flo
   along paths of at most two hops, minimizing the max-utilization.
   Returns the flow along every path.
   """
-  paths = all_paths(ell)
-
   m = gp.Model("te1")
   m.Params.OutputFlag = 0
-  x = {p: m.addVar() for p in paths}
-  U = m.addVar()
+  paths = all_paths(ell)
 
-  for i, j in itertools.permutations(range(ell), 2):
-    P_ij = [p for p in paths if p[0] == i and p[-1] == j]
-    m.addConstr(gp.quicksum(x[p] for p in P_ij) == D[i, j])
+  # add the variables to optimize for
 
-  for u, v in itertools.permutations(range(ell), 2):
-    through = [p for p in paths if (u, v) in itertools.pairwise(p)]
-    m.addConstr(gp.quicksum(x[p] for p in through) <= U * C[u, v])
+  # add all constraints
 
-  m.setObjective(U, GRB.MINIMIZE)
-  m.optimize()
-  return {p: x[p].X for p in paths}
+  # set the objective function and optimize
+
+  # return the flow for each path
+  raise NotImplementedError
 ```
 
 Let's evaluate it on some simulated data.
@@ -334,29 +329,18 @@ def traffic_engineer_2(ell: int, S: float, C: np.ndarray, D: np.ndarray) -> dict
   where the shares are proportional to each path's smallest link capacity.
   Returns the flow along every path.
   """
-  paths = all_paths(ell)
-
   m = gp.Model("te2")
   m.Params.OutputFlag = 0
-  x = {p: m.addVar() for p in paths}
-  U = m.addVar()
+  paths = all_paths(ell)
 
-  for i, j in itertools.permutations(range(ell), 2):
-    P_ij = [p for p in paths if p[0] == i and p[-1] == j]
-    m.addConstr(gp.quicksum(x[p] for p in P_ij) == D[i, j])
+  # add the objective variables
 
-    total = sum(min_capacity(C, q) for q in P_ij)
-    for p in P_ij:
-      share = min_capacity(C, p) / total
-      m.addConstr(x[p] <= D[i, j] * share / S)
+  # add the constraints
 
-  for u, v in itertools.permutations(range(ell), 2):
-    through = [p for p in paths if (u, v) in itertools.pairwise(p)]
-    m.addConstr(gp.quicksum(x[p] for p in through) <= U * C[u, v])
+  # set the objective and optimize
 
-  m.setObjective(U, GRB.MINIMIZE)
-  m.optimize()
-  return {p: x[p].X for p in paths}
+  # return the flow for each path
+  raise NotImplementedError
 ```
 
 ```{python}
@@ -410,30 +394,17 @@ def branch_and_bound(
   Given model m, relaxed variables x, L/U lower/upper bounds, and the incumbent solution best.
   Update U and best if this branch has a better integer solution.
   """
-  if L >= U:
-    return U, best
 
-  m.optimize()
-  if m.Status != GRB.OPTIMAL:
-    return U, best
+  # prune this branch based on L and U
 
-  z = m.ObjVal
-  L = max(L, z)
-  if L >= U:
-    return U, best
+  # solve the LP relaxation
 
-  values = [v.X for v in x]
-  fractional = [j for j, value in enumerate(values) if not is_integral(value)]
-  if not fractional:
-    return z, values
+  # update the lower bound for the subtree
 
-  j = fractional[0]
-  lb, ub = x[j].LB, x[j].UB
-  for value in (0, 1):
-    enforce_value(x[j], value)
-    U, best = branch_and_bound(m, x, L, U, best)
-  x[j].LB, x[j].UB = lb, ub
-  return U, best
+  # stop if solution is integral
+
+  # otherwise branch on a fractional variable
+  raise NotImplementedError
 
 def solve(m: gp.Model) -> tuple[float, list[float]] | None:
   """
@@ -491,7 +462,6 @@ nx.draw(G, pos, ax=ax2, with_labels=True, node_color=colors)
 plt.show()
 ```
 
-
 ## Traveling Salesman
 
 ### MTZ formulation
@@ -520,6 +490,21 @@ V = range(n)              # cities 0,...,n-1
 c = np.linalg.norm(coordinates[:, None] - coordinates[None, :], axis=2)
 ```
 
+Now, we will model the TSP problem, using decision variables for each edge.
+We have two types of constrants: degree and subtour elimination:
+
+$$
+    \begin{align}
+        \min_{\vb{x}, \vb{y}} \qquad & \sum_{e \in E} w_e x_e                                               \\
+        \text{s.t.} \qquad           & \sum_{u \in N^-(v)} x_{u \to v} = 1                                  \\
+                                     & \sum_{u \in N^+(v)} x_{v \to u} = 1                                  \\
+                                     & y_v - y_u - 1 \ge - n (1 - x_{u \to v}) \qquad \forall u \to v \in E
+    \end{align}
+$$
+
+where for MTZ subtour elimination, when $x_{u \to v} = 1$ then we require $y_v - y_u \ge 1$.
+Otherwise if $x_{u \to v} = 0$, then the the constraint will never be active.
+
 ```{python}
 m = gp.Model("TSP_MTZ")
 m.Params.OutputFlag = 0
@@ -527,22 +512,62 @@ x = m.addVars(V, V, vtype=gp.GRB.BINARY, name="x")
 u = m.addVars(V, lb=1, ub=n, name="u")
 
 # Objective
-m.setObjective(gp.quicksum(c[i,j] * x[i,j] for i, j in itertools.permutations(V, 2)), gp.GRB.MINIMIZE)
+## TODO
 
 # Degree constraints
-for i in V:
-  m.addConstr(gp.quicksum(x[i,j] for j in V if j != i) == 1)
-  m.addConstr(gp.quicksum(x[j,i] for j in V if j != i) == 1)
+## TODO
 
-# MTZ subtour elimination
-for i in range(1, n):
-  for j in range(1, n):
-    if i != j: m.addConstr(u[j] >= u[i] + 1 - n * (1 - x[i,j]))
+# MTZ subtour elimination constraints
+## TODO
 
 m.optimize()
 ```
 
+For the US capitals graph $V$ with costs $c$, this takes quite a bit of time, though it is indeed an achievement it completes at all!
+Let's see how we can do better.
+
 ### Lazy constraints
+
+The issue with the previous approach is that the LP relaxations have a large integrality gap.
+That is, during branch-and-bound, the LP typically produces a value much smaller than any integer tour can have, so low that almost nothing can be pruned and it amounts to performing a brute-force search.
+Thus, what we need is to constrain the LP further (in a way that does not change integer solutions).
+
+The DFJ approach does not use the monotone increasing ordering variables.
+Instead, it checks whether there is a connected component of size $< n$.
+In particular, whether there exists a subset $S \subsetneq V$ that is separarated from the rest of the graph (i.e. no connecting edges).
+Adding such *subtour elimination* constraints, then
+
+- any tour is still feasible
+- any tour with subtours are eliminated
+- some fractional solutions become invalid
+
+where the first two are necessary for correctness, and the third for a performance bound.
+This general technique is known as strengthening the formulation.
+Note however that solving the LP will more constraints typically takes longer, and thus a balance is needed.
+
+In principle, the LP relaxation we will thus solve is
+
+$$
+    \begin{align}
+        \min_{\vb{x}} \qquad & \sum_{e \in E} w_e x_e                                                                                \\
+        \text{s.t.} \qquad   & \sum_{u \in N^-(v)} x_{u \to v} = 1                                                                   \\
+                             & \sum_{u \in N^+(v)} x_{v \to u} = 1                                                                   \\
+                             & \sum_{u \in S} \sum_{v \notin S} x_{u \to v} \ge 1 \qquad \forall \emptyset \subsetneq S \subsetneq V \\
+                             & 0 \le x_e \le 1
+    \end{align}
+$$
+
+Indeed, in this case, there are an exponential number of constraints to be added!
+Clearly we cannot even build the model in a reasonable amount of time.
+
+Gurobi `cbLazy` is the tool towards this, standing for a lazy *callback*.
+Start with a subset of constraints.
+Whenever the Gurobi solver proposes a candidate integral solution, such a callback is called.
+Only then do we make sure that any constraints that should apply, actually do apply.
+
+In this case, to check whether there exists a subtour, we can simply check for a non-trivial connected components!
+If so, then we prevent the model from accepting the tour, and instead add constraints to the model.
+Gurobi will then continue its branch-and-bound loop.
 
 ```{python}
 def find_subtours(n, xsol):
@@ -561,25 +586,26 @@ def find_subtours(n, xsol):
   return [S for S in components if len(S) < n]
 ```
 
+Hints: the `cbGetSolution` and `cbLazy` functions will be useful. Remember to check for `MIPSOL`.
+
 ```{python}
 def callback(model, where):
-  if where == GRB.Callback.MIPSOL:
+  if where == GRB.Callback.MIPSOL: # Only for integer solutions
     x = model._x
     n = model._n
 
     # 1. Read the integer solution
-    xsol = model.cbGetSolution(x)
+    ## TODO
 
     # 2. Find subtours
-    subtours = find_subtours(n, xsol)
+    ## TODO
 
     # 3. For each subtour, add a lazy constraint
-    for S in subtours:
-      complement = set(range(n)) - S
-      model.cbLazy(
-        gp.quicksum(x[i,j] for i in S for j in complement) >= 1
-      )
+    ## TODO
 ```
+
+Then, once this callback is created, it is passed into the `optimize` function.
+Notice that the model parameters must set `LazyConstraints = 1`.
 
 ```{python}
 m = gp.Model("TSP_lazy_only")
@@ -588,10 +614,12 @@ x = m.addVars(V, V, vtype=GRB.BINARY, name="x")
 for i in V:
   x[i,i].ub = 0   # no self-loops
 
+# Objective
 m.setObjective(
   gp.quicksum(c[i,j]*x[i,j] for i, j in itertools.permutations(V, 2)),
   GRB.MINIMIZE)
 
+# Degree constraints
 for i in V:
   m.addConstr(gp.quicksum(x[i,j] for j in V if j != i) == 1)
   m.addConstr(gp.quicksum(x[j,i] for j in V if j != i) == 1)
@@ -603,7 +631,10 @@ m._n = n
 m.optimize(callback)
 ```
 
-### Branch-and-cut
+The second part of the DFJ formulation is to apply this to the fractional solutions too.
+Indeed, now we need to be able to detect violations of our constraint given a fractional tour.
+Observe that we simply need to consider the subset that is the most isolated, i.e. with the minimum cut.
+The following code does this using the `iGraph` library (as `networkx` does not have a function for this).
 
 ```{python}
 def mincut_separate_dfj(n, xstar):
@@ -628,30 +659,24 @@ def mincut_separate_dfj(n, xstar):
   return None, None
 ```
 
+Finally, back to the call-back, we (optionally, for performance) will extend the callback to also run on fractional solutions.
+
 ```{python}
 def callback(model, where):
   x, n = model._x, model._n
 
   # (A) CORRECTNESS: reject integer solutions with subtours
   if where == GRB.Callback.MIPSOL:
-    xsol = model.cbGetSolution(x)
-    subtours = find_subtours(n, xsol)
-    for S in subtours:
-      complement = set(range(n)) - S
-      model.cbLazy(
-        gp.quicksum(x[i,j] for i in S for j in complement) >= 1)
+    ## TODO
+    raise NotImplementedError
 
   # (B) PERFORMANCE: tighten LP relaxation with DFJ cuts
   if where == GRB.Callback.MIPNODE:
-    if model.cbGet(GRB.Callback.MIPNODE_STATUS) != GRB.OPTIMAL: return
-    if model.cbGet(GRB.Callback.MIPNODE_NODCNT) != 0: return
-    xstar = model.cbGetNodeRel(x)
-    S, val = mincut_separate_dfj(n, xstar)
-    if S is not None:
-      comp = set(range(n)) - S
-      model.cbCut(
-        gp.quicksum(x[i,j] for i in S for j in comp) >= 1)
+    ## TODO
+    raise NotImplementedError
 ```
+
+Putting this back into the solver, we get the branch-and-cut algorithm applied to the TSP.
 
 ```{python}
 m2 = gp.Model("TSP_branch_and_cut")
@@ -660,10 +685,12 @@ x = m2.addVars(V, V, vtype=GRB.BINARY, name="x")
 for i in V:
   x[i,i].ub = 0   # no self-loops
 
+# Objective
 m2.setObjective(
   gp.quicksum(c[i,j]*x[i,j] for i, j in itertools.permutations(V, 2)),
   GRB.MINIMIZE)
 
+# Degree constraints
 for i in V:
   m2.addConstr(gp.quicksum(x[i,j] for j in V if j != i) == 1)
   m2.addConstr(gp.quicksum(x[j,i] for j in V if j != i) == 1)
